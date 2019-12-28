@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>N26 Transaction Explorer</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="open-file-screen">
+      <h1>Drop CSV file here</h1>
+      <p>-or-</p>
+      <input type="file">
+      <button id="open-file-button">Choose CSV file...</button>
+    </div>
+    <svg id="timeline" viewBox="0 0 100 20" preserveAspectRatio="none">
+      <path id="timeline-balance">
+    </svg>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr class="field-names"></tr>
+          <tr class="filters"></tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+          <tr class="totals">
+        </tfoot>
+      </table>
+    </div>
+  </body>
+  <script src="main.js"></script>
+</html>

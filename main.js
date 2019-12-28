@@ -1,0 +1,195 @@
+const openFileScreen = document.getElementById('open-file-screen');
+openFileScreen.ondrop = async event => {
+  event.preventDefault();
+  const items = event.dataTransfer.items;
+  if (items && items.length === 1 && items[0].kind === 'file') {
+    const text = await items[0].getAsFile().text();
+    loadCsv(text);
+    openFileScreen.remove();
+  }
+}
+openFileScreen.ondragover = event => event.preventDefault();
+document.getElementById('open-file-button').onclick = () => {
+  openFileScreen.querySelector('input[type="file"]').click();
+}
+openFileScreen.querySelector('input[type="file"]').onchange = async event => {
+  const files = event.target.files;
+  if (files.length === 1) {
+    const text = await files[0].text();
+    loadCsv(text);
+    openFileScreen.remove();
+  }
+}
+
+function loadCsv(csv) {
+  const lines = csv.split('\n');
+  lines.splice(-1, 1); // Delete last line, which is empty
+  const csvJson = JSON.parse('[' + lines.map(line => '[' + line + ']').join(',') + ']');
+
+  const fieldNames = csvJson.splice(0, 1)[0];
+
+  const fields = fieldNames.map(fieldName => {
+    const meta = {
+      'Date':                      {type: 'date'},
+      'Payee':                     {type: 'string'},
+      'Account number':            {type: 'account-number'},
+      'Transaction type':          {type: 'string'},
+      'Payment reference':         {type: 'string'},
+      'Category':                  {type: 'string'},
+      'Amount (EUR)':              {type: 'euro'},
+      'Amount (Foreign Currency)': {type: 'currency'},
+      'Type Foreign Currency':     {type: 'currency-code'},
+      'Exchange Rate':             {type: 'decimal'},
+    }
+    return {...meta[fieldName], name: fieldName};
+  });
+
+  const transactions = csvJson.map(line => {
+    return line.map((value, index) => {
+      switch (fields[index].type) {
+        case 'euro':
+        case 'currency':
+        case 'number':
+          return parseFloat(value);
+      }
+      return value;
+    });
+  });
+
+  generateTimeline(transactions, fields);
+  generateTable(transactions, fields);
+}
+
+function generateTimeline(transactions, fields) {
+  let balance = 0;
+  const balances = transactions.map(transaction => balance += transaction[6]);
+  const maxBalance = Math.max(...balances);
+  const minBalance = Math.min(...balances);
+
+  const timestamps = transactions.map(transaction => new Date(...transaction[0].split('-')).getTime());
+  const minTimestamp = Math.min(...timestamps);
+  const maxTimestamp = Math.max(...timestamps);
+
+  const pathString = 'M 0,20 L ' + transactions.map((transaction, index) => {
+    balance += transaction[6];
+    return `${((timestamps[index] - minTimestamp) / (maxTimestamp - minTimestamp)) * 100} ${(1 - (balance / (maxBalance - minBalance))) * 20} `;
+  }).join('');
+  document.querySelector('#timeline-balance').setAttribute('d', pathString);
+}
+
+function generateTable(transactions, fields) {
+  const fieldNameTrElements = fields.map(field => {
+    const element = document.createElement('th');
+    element.classList.add(field.type);
+    element.textContent = field.name;
+    return element;
+  });
+  document.querySelector('tr.field-names').append(...fieldNameTrElements);
+
+  document.querySelector('tr.filters').innerHTML = fields.map(field => {
+    return `<th class="${field.type}"><input><button></button></th>`;
+  }).join('');
+
+  document.querySelector('tr.totals').innerHTML = fields.map(field => {
+    return `<th class="${field.type}"></th>`;
+  }).join('');
+
+  const trElements = transactions.map(transaction => {
+    const trElement = document.createElement('tr');
+    const tdElements = transaction.map((value, index) => {
+      const tdElement = document.createElement('td');
+      tdElement.classList.add(fields[index].type);
+      if (fields[index].type === 'euro' || fields[index].type === 'currency') {
+        if (isNaN(value)) {
+          tdElement.textContent = '';
+        } else {
+          tdElement.textContent = value.toFixed(2);
+          if (value > 0) {
+            tdElement.classList.add('positive-number');
+          }
+        }
+      } else {
+        tdElement.textContent = value;
+      }
+      return tdElement;
+    });
+    trElement.append(...tdElements);
+    return trElement;
+  });
+  trElements.reverse();
+  document.querySelector('tbody').append(...trElements);
+
+  const filters = fields.map(() => '');
+
+  function appyFilters() {
+    const trElements    = [...document.querySelector('tbody').children];
+    const totalElements = [...document.querySelector('tr.totals').children];
+
+    let firstTransaction = null;
+    let lastTransaction  = null;
+    const totals = fields.map(() => 0);
+
+    for (const [transactionIndex, transaction] of transactions.entries()) {
+      const shouldShow = filters.every((filter, fieldIndex) => {
+        return !filter || transaction[fieldIndex].toLowerCase().includes(filter);
+      });
+      trElements[(transactions.length-1) - transactionIndex].style.display = shouldShow ? 'table-row' : 'none';
+      if (shouldShow) {
+        if (firstTransaction === null) {
+          firstTransaction = transaction;
+        }
+        lastTransaction = transaction;
+        for (const [fieldIndex, field] of fields.entries()) {
+          if (field.type === 'euro' || field.type === 'currency') {
+            const number = parseFloat(transaction[fieldIndex]);
+            if (!isNaN(number)) {
+              totals[fieldIndex] += number;
+            }
+          }
+        }
+      }
+    }
+    for (const [fieldIndex, field] of fields.entries()) {
+      if (field.type === 'euro' || field.type === 'currency') {
+        totalElements[fieldIndex].textContent = totals[fieldIndex].toFixed(2);
+      } else if (field.type === 'date') {
+        if (firstTransaction !== null && lastTransaction !== null && firstTransaction !== lastTransaction) {
+          const firstTimestampMs = new Date(...firstTransaction[fieldIndex].split('-')).getTime();
+          const lastTimestampMs  = new Date(...lastTransaction[fieldIndex].split('-')).getTime();
+          const durationMs = lastTimestampMs - firstTimestampMs;
+          const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
+          const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
+          const years  = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30 * 12));
+          totalElements[fieldIndex].textContent = `${years}Y ${months}M ${days}D`;
+        }
+      }
+    }
+  }
+  appyFilters();
+
+  document.querySelector('tr.filters').oninput = event => {
+    const input = event.target;
+    const thElement = input.closest('th');
+    const fieldIndex = [...document.querySelector('tr.filters').children].indexOf(thElement);
+    filters[fieldIndex] = input.value.toLowerCase();
+    appyFilters();
+  }
+
+  document.querySelector('tr.filters').onkeydown = event => {
+    if (event.key === 'Escape' && event.target.tagName === 'INPUT') {
+      const input = event.target;
+      input.value = '';
+      const thElement = input.closest('th');
+      const fieldIndex = [...document.querySelector('tr.filters').children].indexOf(thElement);
+      filters[fieldIndex] = input.value.toLowerCase();
+      appyFilters();
+    }
+  }
+
+  document.querySelector('tbody').onclick = event => {
+    const trElement = event.target.closest('tr');
+    if (trElement) {
+      trElement.classList.toggle('selected');
+    }
+  }
+}
