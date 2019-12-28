@@ -48,10 +48,19 @@ button {
   padding: 5px;
   box-sizing: border-box;
 }
+#timeline-months {
+  fill: rgba(176, 199, 255, 0.5);
+  stroke: none;
+}
+#timeline-years {
+  fill: #d2e7ff;
+  stroke: black;
+  stroke-width: 1px;
+}
 #timeline-balance {
   fill: none;
   stroke: black;
-  stroke-width: 0.2px;
+  stroke-width: 1px;
 }
 
 .table-container {

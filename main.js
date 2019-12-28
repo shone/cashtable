@@ -61,20 +61,35 @@ function loadCsv(csv) {
 }
 
 function generateTimeline(transactions, fields) {
+  const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
+
   let balance = 0;
   const balances = transactions.map(transaction => balance += transaction[6]);
   const maxBalance = Math.max(...balances);
-  const minBalance = Math.min(...balances);
 
-  const timestamps = transactions.map(transaction => new Date(...transaction[0].split('-')).getTime());
-  const minTimestamp = Math.min(...timestamps);
-  const maxTimestamp = Math.max(...timestamps);
+  const timestamps = transactions.map(transaction => new Date(...transaction[dateFieldIndex].split('-')).getTime());
+  const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
 
-  const pathString = 'M 0,20 L ' + transactions.map((transaction, index) => {
-    balance += transaction[6];
-    return `${((timestamps[index] - minTimestamp) / (maxTimestamp - minTimestamp)) * 100} ${(1 - (balance / (maxBalance - minBalance))) * 20} `;
+  const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
+
+  let yearsPath = '';
+  const yearDurationMs = 1000 * 60 * 60 * 24 * 365.25;
+  for (let timestamp = (new Date(firstYear, 0, 1)).getTime(); timestamp<timestamps[timestamps.length-1]; timestamp += yearDurationMs*2) {
+    yearsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -10 h ${yearDurationMs / totalDuration} v 40 h -${yearDurationMs / totalDuration} Z `;
+  }
+  document.querySelector('#timeline-years').setAttribute('d', yearsPath);
+
+  let monthsPath = '';
+  const monthDurationMs = 1000 * 60 * 60 * 24 * 30.44;
+  for (let timestamp = (new Date(firstYear, 0, 1)).getTime(); timestamp<timestamps[timestamps.length-1]; timestamp += monthDurationMs*2) {
+    monthsPath += `M ${(timestamp - timestamps[0]) / totalDuration} 0 h ${monthDurationMs / totalDuration} v 20 h -${monthDurationMs / totalDuration} Z `;
+  }
+  document.querySelector('#timeline-months').setAttribute('d', monthsPath);
+
+  const balancePath = 'M 0,20 L ' + balances.map((balance, index) => {
+    return `${(timestamps[index] - timestamps[0]) / totalDuration} ${1 - (balance / maxBalance)} `;
   }).join('');
-  document.querySelector('#timeline-balance').setAttribute('d', pathString);
+  document.querySelector('#timeline-balance').setAttribute('d', balancePath);
 }
 
 function generateTable(transactions, fields) {
