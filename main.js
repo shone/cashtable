@@ -60,6 +60,11 @@ function loadCsv(csv) {
   generateTable(transactions, fields);
 }
 
+function dateStringToTimestampMs(string) {
+  const [year, month, day] = string.split('-');
+  return new Date(year, month-1, day).getTime();
+}
+
 function generateTimeline(transactions, fields) {
   const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
 
@@ -67,7 +72,7 @@ function generateTimeline(transactions, fields) {
   const balances = transactions.map(transaction => balance += transaction[6]);
   const maxBalance = Math.max(...balances);
 
-  const timestamps = transactions.map(transaction => new Date(...transaction[dateFieldIndex].split('-')).getTime());
+  const timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
   const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
 
   const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
@@ -169,8 +174,8 @@ function generateTable(transactions, fields) {
         totalElements[fieldIndex].textContent = totals[fieldIndex].toFixed(2);
       } else if (field.type === 'date') {
         if (firstTransaction !== null && lastTransaction !== null && firstTransaction !== lastTransaction) {
-          const firstTimestampMs = new Date(...firstTransaction[fieldIndex].split('-')).getTime();
-          const lastTimestampMs  = new Date(...lastTransaction[fieldIndex].split('-')).getTime();
+          const firstTimestampMs = dateStringToTimestampMs(firstTransaction[fieldIndex]);
+          const lastTimestampMs  = dateStringToTimestampMs(lastTransaction[fieldIndex]);
           const durationMs = lastTimestampMs - firstTimestampMs;
           const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
           const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
