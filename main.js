@@ -43,8 +43,13 @@ function loadCsv(csv) {
     }
     return {...meta[fieldName], name: fieldName};
   });
+  fields.push({name: 'Balance', type: 'euro'});
 
+  const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
+
+  let balance = 0;
   const transactions = csvJson.map(line => {
+    balance += parseFloat(line[amountFieldIndex]);
     return line.map((value, index) => {
       switch (fields[index].type) {
         case 'euro':
@@ -53,7 +58,7 @@ function loadCsv(csv) {
           return parseFloat(value);
       }
       return value;
-    });
+    }).concat(balance);
   });
 
   const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
@@ -71,8 +76,9 @@ function dateStringToTimestampMs(string) {
 
 function generateTimeline(transactions, fields, timestamps) {
 
-  let balance = 0;
-  const balances = transactions.map(transaction => balance += transaction[6]);
+  const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
+
+  const balances = transactions.map(transaction => transaction[balanceFieldIndex]);
   const maxBalance = Math.max(...balances);
 
   const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
@@ -117,22 +123,26 @@ function generateTable(transactions, fields, timestamps) {
     return `<th class="${field.type}"></th>`;
   }).join('');
 
+  function formatValueForTable(value, fieldIndex) {
+    if (fields[fieldIndex].type === 'euro' || fields[fieldIndex].type === 'currency') {
+      if (isNaN(value)) {
+        return '';
+      } else {
+        return value.toFixed(2);
+      }
+    } else {
+      return value;
+    }
+  }
+
   const trElements = transactions.map(transaction => {
     const trElement = document.createElement('tr');
-    const tdElements = transaction.map((value, index) => {
+    const tdElements = transaction.map((value, fieldIndex) => {
       const tdElement = document.createElement('td');
-      tdElement.classList.add(fields[index].type);
-      if (fields[index].type === 'euro' || fields[index].type === 'currency') {
-        if (isNaN(value)) {
-          tdElement.textContent = '';
-        } else {
-          tdElement.textContent = value.toFixed(2);
-          if (value > 0) {
-            tdElement.classList.add('positive-number');
-          }
-        }
-      } else {
-        tdElement.textContent = value;
+      tdElement.classList.add(fields[fieldIndex].type);
+      tdElement.textContent = formatValueForTable(value, fieldIndex);
+      if ((typeof value) === 'number' && value > 0) {
+        tdElement.classList.add('positive-number');
       }
       return tdElement;
     });
@@ -144,7 +154,7 @@ function generateTable(transactions, fields, timestamps) {
 
   const filters = fields.map(() => '');
 
-  function appyFilters() {
+  function applyFilters() {
     const trElements    = [...document.querySelector('tbody').children];
     const totalElements = [...document.querySelector('tr.totals').children];
 
@@ -158,7 +168,11 @@ function generateTable(transactions, fields, timestamps) {
 
     for (const [transactionIndex, transaction] of transactions.entries()) {
       const shouldShow = filters.every((filter, fieldIndex) => {
-        return !filter || transaction[fieldIndex].toLowerCase().includes(filter);
+        if (!filter) {
+          return true;
+        }
+        const formattedValue = formatValueForTable(transaction[fieldIndex], fieldIndex);
+        return formattedValue.toLowerCase().includes(filter);
       });
       trElements[(transactions.length-1) - transactionIndex].style.display = shouldShow ? 'table-row' : 'none';
       if (shouldShow) {
@@ -201,14 +215,14 @@ function generateTable(transactions, fields, timestamps) {
       document.getElementById('filtered-transaction-markers').setAttribute('d', '');
     }
   }
-  appyFilters();
+  applyFilters();
 
   document.querySelector('tr.filters').oninput = event => {
     const input = event.target;
     const thElement = input.closest('th');
     const fieldIndex = [...document.querySelector('tr.filters').children].indexOf(thElement);
     filters[fieldIndex] = input.value.toLowerCase();
-    appyFilters();
+    applyFilters();
   }
 
   document.querySelector('tr.filters').onkeydown = event => {
@@ -218,7 +232,7 @@ function generateTable(transactions, fields, timestamps) {
       const thElement = input.closest('th');
       const fieldIndex = [...document.querySelector('tr.filters').children].indexOf(thElement);
       filters[fieldIndex] = input.value.toLowerCase();
-      appyFilters();
+      applyFilters();
     }
   }
 
