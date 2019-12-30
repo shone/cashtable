@@ -56,8 +56,12 @@ function loadCsv(csv) {
     });
   });
 
-  generateTimeline(transactions, fields);
-  generateTable(transactions, fields);
+  const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
+
+  const timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
+
+  generateTimeline(transactions, fields, timestamps);
+  generateTable(transactions, fields, timestamps);
 }
 
 function dateStringToTimestampMs(string) {
@@ -65,29 +69,28 @@ function dateStringToTimestampMs(string) {
   return new Date(year, month-1, day).getTime();
 }
 
-function generateTimeline(transactions, fields) {
-  const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
+function generateTimeline(transactions, fields, timestamps) {
 
   let balance = 0;
   const balances = transactions.map(transaction => balance += transaction[6]);
   const maxBalance = Math.max(...balances);
 
-  const timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
   const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
 
+  const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
   const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
 
   let yearsPath = '';
   const yearDurationMs = 1000 * 60 * 60 * 24 * 365.25;
   for (let timestamp = (new Date(firstYear, 0, 1)).getTime(); timestamp<timestamps[timestamps.length-1]; timestamp += yearDurationMs*2) {
-    yearsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -10 h ${yearDurationMs / totalDuration} v 40 h -${yearDurationMs / totalDuration} Z `;
+    yearsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${yearDurationMs / totalDuration} v 1.2 h -${yearDurationMs / totalDuration} Z `;
   }
   document.querySelector('#timeline-years').setAttribute('d', yearsPath);
 
   let monthsPath = '';
   const monthDurationMs = 1000 * 60 * 60 * 24 * 30.44;
   for (let timestamp = (new Date(firstYear, 0, 1)).getTime(); timestamp<timestamps[timestamps.length-1]; timestamp += monthDurationMs*2) {
-    monthsPath += `M ${(timestamp - timestamps[0]) / totalDuration} 0 h ${monthDurationMs / totalDuration} v 20 h -${monthDurationMs / totalDuration} Z `;
+    monthsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${monthDurationMs / totalDuration} v 1.2 h -${monthDurationMs / totalDuration} Z `;
   }
   document.querySelector('#timeline-months').setAttribute('d', monthsPath);
 
@@ -97,7 +100,7 @@ function generateTimeline(transactions, fields) {
   document.querySelector('#timeline-balance').setAttribute('d', balancePath);
 }
 
-function generateTable(transactions, fields) {
+function generateTable(transactions, fields, timestamps) {
   const fieldNameTrElements = fields.map(field => {
     const element = document.createElement('th');
     element.classList.add(field.type);
@@ -149,6 +152,10 @@ function generateTable(transactions, fields) {
     let lastTransaction  = null;
     const totals = fields.map(() => 0);
 
+    let timelineMarkersPath = '';
+
+    const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
+
     for (const [transactionIndex, transaction] of transactions.entries()) {
       const shouldShow = filters.every((filter, fieldIndex) => {
         return !filter || transaction[fieldIndex].toLowerCase().includes(filter);
@@ -159,6 +166,9 @@ function generateTable(transactions, fields) {
           firstTransaction = transaction;
         }
         lastTransaction = transaction;
+
+        timelineMarkersPath += `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},0 v 1 `;
+
         for (const [fieldIndex, field] of fields.entries()) {
           if (field.type === 'euro' || field.type === 'currency') {
             const number = parseFloat(transaction[fieldIndex]);
@@ -183,6 +193,12 @@ function generateTable(transactions, fields) {
           totalElements[fieldIndex].textContent = `${years}Y ${months}M ${days}D`;
         }
       }
+    }
+
+    if (!filters.every(filter => !filter)) {
+      document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
+    } else {
+      document.getElementById('filtered-transaction-markers').setAttribute('d', '');
     }
   }
   appyFilters();
@@ -210,6 +226,25 @@ function generateTable(transactions, fields) {
     const trElement = event.target.closest('tr');
     if (trElement) {
       trElement.classList.toggle('selected');
+    }
+  }
+
+  document.querySelector('tbody').onmouseover = event => {
+    const trElement = event.target.closest('tr');
+    if (trElement) {
+      const transactionIndex = (transactions.length-1) - [...document.querySelector('tbody').children].indexOf(trElement);
+      const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
+      const x = (timestamps[transactionIndex] - timestamps[0]) / (timestamps[timestamps.length-1] - timestamps[0]);
+      timelineMarker.setAttribute('x1', x);
+      timelineMarker.setAttribute('x2', x);
+    }
+  }
+  document.querySelector('tbody').onmouseout = event => {
+    const trElement = event.target.closest('tr');
+    if (trElement) {
+      const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
+      timelineMarker.setAttribute('x1', -1);
+      timelineMarker.setAttribute('x2', -1);
     }
   }
 }

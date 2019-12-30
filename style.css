@@ -62,6 +62,16 @@ button {
   stroke: black;
   stroke-width: 1px;
 }
+#filtered-transaction-markers {
+  fill: none;
+  stroke: red;
+  stroke-width: 1px;
+}
+#timeline-hovered-transaction-marker {
+  fill: none;
+  stroke: #009a27;
+  stroke-width: 2px;
+}
 
 .table-container {
   overflow: auto;
