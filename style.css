@@ -65,6 +65,7 @@ button {
   fill: none;
   stroke: black;
   stroke-width: 1px;
+  transform: scaleY(-1) translateY(-1px);
 }
 #filtered-transaction-markers {
   fill: none;
@@ -74,7 +75,8 @@ button {
 #timeline-hovered-transaction-marker {
   fill: none;
   stroke: #009a27;
-  stroke-width: 2px;
+  stroke-width: 1px;
+  transform: scaleY(-1) translateY(-1px);
 }
 
 .table-container {

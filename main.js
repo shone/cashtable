@@ -65,7 +65,11 @@ function loadCsv(csv) {
   const timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
   const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
 
-  const data = {transactions, fields, timestamps, totalDuration};
+  const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
+  const balances = transactions.map(transaction => transaction[balanceFieldIndex]);
+  const maxBalance = Math.max(...balances);
+
+  const data = {transactions, fields, timestamps, totalDuration, balances, maxBalance};
 
   generateTimeline(data);
   generateTable(data);
@@ -76,13 +80,9 @@ function dateStringToTimestampMs(string) {
   return new Date(year, month-1, day).getTime();
 }
 
-function generateTimeline({transactions, fields, timestamps, totalDuration}) {
+function generateTimeline({transactions, fields, timestamps, totalDuration, balances, maxBalance}) {
 
-  const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
   const amountFieldIndex  = fields.findIndex(field => field.name === 'Amount (EUR)');
-
-  const balances = transactions.map(transaction => transaction[balanceFieldIndex]);
-  const maxBalance = Math.max(...balances);
 
   const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
   const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
@@ -103,7 +103,7 @@ function generateTimeline({transactions, fields, timestamps, totalDuration}) {
   document.getElementById('timeline-months').setAttribute('d', monthsPath);
 
   const balancePath = 'M 0,20 ' + balances.map((balance, index) =>
-    `L ${(timestamps[index] - timestamps[0]) / totalDuration} ${1 - ((balance - transactions[index][amountFieldIndex]) / maxBalance)} v ${-transactions[index][amountFieldIndex] / maxBalance}`
+    `L ${(timestamps[index] - timestamps[0]) / totalDuration} ${(balance - transactions[index][amountFieldIndex]) / maxBalance} v ${transactions[index][amountFieldIndex] / maxBalance}`
   ).join('');
   document.getElementById('timeline-balance').setAttribute('d', balancePath);
 
@@ -158,7 +158,7 @@ function generateTimeline({transactions, fields, timestamps, totalDuration}) {
   }
 }
 
-function generateTable({transactions, fields, timestamps, totalDuration}) {
+function generateTable({transactions, fields, timestamps, totalDuration, balances, maxBalance}) {
   const fieldNameTrElements = fields.map(field => {
     const element = document.createElement('th');
     element.classList.add(field.type);
@@ -299,15 +299,14 @@ function generateTable({transactions, fields, timestamps, totalDuration}) {
     if (trElement) {
       const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
       const x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
-      timelineMarker.setAttribute('x1', x);
-      timelineMarker.setAttribute('x2', x);
+      const y = balances[transactionIndex] / maxBalance;
+      timelineMarker.setAttribute('d', `M ${x},0 v 1 M 0,${y} h 1`);
     }
   }
   document.querySelector('tbody').onmouseout = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
-      timelineMarker.setAttribute('x1', -1);
-      timelineMarker.setAttribute('x2', -1);
+      timelineMarker.setAttribute('d', '');
     }
   }
 }
