@@ -247,7 +247,7 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
       }
     }
     for (const [fieldIndex, field] of fields.entries()) {
-      if (field.type === 'euro' || field.type === 'currency') {
+      if ((field.type === 'euro' || field.type === 'currency') && field.name !== 'Balance') {
         totalElements[fieldIndex].textContent = totals[fieldIndex].toFixed(2);
       } else if (field.type === 'date') {
         if (firstTransaction !== null && lastTransaction !== null && firstTransaction !== lastTransaction) {
