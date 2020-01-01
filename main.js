@@ -62,7 +62,28 @@ function loadCsv(csv) {
   });
 
   const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
-  const timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
+
+  const timestamps = [];
+  let previousDateString = null;
+  let sameDayIndices = [];
+  function fixupSameDayTransactions() {
+    for (const [sameDayIndex, transactionIndex] of sameDayIndices.entries()) {
+      timestamps[transactionIndex] += 1000 * 60 * 60 * 24 * (sameDayIndex / sameDayIndices.length);
+    }
+  }
+  for (const [transactionIndex, transaction] of transactions.entries()) {
+    const dateString = transaction[dateFieldIndex];
+    timestamps.push(dateStringToTimestampMs(dateString));
+    if (dateString === previousDateString) {
+      sameDayIndices.push(transactionIndex);
+    } else {
+      fixupSameDayTransactions();
+      sameDayIndices = [transactionIndex];
+    }
+    previousDateString = dateString;
+  }
+  fixupSameDayTransactions();
+
   const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
 
   const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
@@ -79,6 +100,8 @@ function dateStringToTimestampMs(string) {
   const [year, month, day] = string.split('-');
   return new Date(year, month-1, day).getTime();
 }
+
+const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
 
 function generateTimeline({transactions, fields, timestamps, totalDuration, balances, maxBalance}) {
 
@@ -130,11 +153,14 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
     );
   }
 
+  let isDraggingTimeline = false;
+
   timelineElement.onmousedown = event => {
     event.preventDefault();
     let lastTimelineDragX = event.pageX;
     function handleMousemove(event) {
       if (event.buttons === 1) {
+        isDraggingTimeline = true;
         timelineElement.style.cursor = 'grab';
         const deltaXRatio = (lastTimelineDragX - event.pageX) / timelineElement.getBoundingClientRect().width;
         let deltaXMs = (timelineRangeEnd - timelineRangeStart) * deltaXRatio;
@@ -151,10 +177,66 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
       }
     }
     window.addEventListener('mousemove', handleMousemove);
-    window.addEventListener('mouseup', () => {
+    window.addEventListener('mouseup', event => {
+      event.preventDefault();
       window.removeEventListener('mousemove', handleMousemove);
+      isDraggingTimeline = false;
       timelineElement.style.cursor = '';
     }, {once: true});
+  }
+
+  function getTransactionIndexAtTimelinePixelsX(x) {
+    const timestamp = timelineRangeStart + ((timelineRangeEnd - timelineRangeStart) * x / timelineElement.getBoundingClientRect().width);
+    let transactionIndex = Math.round(transactions.length * ((timestamp - timestamps[0]) / totalDuration));
+    if (transactionIndex < 0) transactionIndex = 0;
+    if (transactionIndex >= transactions.length) transactionIndex = transactions.length - 1;
+    while (true) {
+      const delta = Math.abs(timestamp - timestamps[transactionIndex]);
+      if (transactionIndex < (transactions.length-1) && (Math.abs(timestamp - timestamps[transactionIndex+1]) < delta)) {
+        transactionIndex++;
+      } else if (transactionIndex > 0 && (Math.abs(timestamp - timestamps[transactionIndex-1]) < delta)) {
+        transactionIndex--;
+      } else {
+        return transactionIndex;
+      }
+    }
+  }
+
+  timelineElement.onmouseup = event => {
+    if (isDraggingTimeline) {
+      return;
+    }
+    const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
+    const trElement = document.querySelector('tbody').children[(transactions.length-1) - transactionIndex];
+    const tableContainerElement = document.querySelector('.table-container');
+    let targetScrollTop = null;
+    if (trElement.offsetTop < (tableContainerElement.scrollTop + 100)) {
+      targetScrollTop = trElement.offsetTop - 100;
+    } else if (trElement.offsetTop > (tableContainerElement.scrollTop + tableContainerElement.offsetHeight - 100)) {
+      targetScrollTop = (trElement.offsetTop - tableContainerElement.offsetHeight) + 100;
+    }
+    if (targetScrollTop !== null) {
+      const scrollDelta = targetScrollTop - tableContainerElement.scrollTop;
+      tableContainerElement.scrollTo({top: targetScrollTop, behavior: Math.abs(scrollDelta) < 2000 ? 'smooth' : 'auto'});
+    }
+  }
+
+  timelineElement.onmousemove = event => {
+    const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
+
+    const x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
+    const y = balances[transactionIndex] / maxBalance;
+    timelineMarker.setAttribute('d', `M ${x},0 v 1 M 0,${y} h 1`);
+
+    const previouslyHoveredElement = document.querySelector('tbody tr.hover');
+    if (previouslyHoveredElement) {
+      previouslyHoveredElement.classList.remove('hover');
+    }
+    document.querySelector('tbody').children[(transactions.length-1) - transactionIndex].classList.add('hover');
+  }
+
+  timelineElement.onmouseout = () => {
+    timelineMarker.setAttribute('d', '');
   }
 }
 
@@ -291,8 +373,6 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
       trElement.classList.toggle('selected');
     }
   }
-
-  const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
 
   document.querySelector('tbody').onmouseover = event => {
     const trElement = event.target.closest('tr');

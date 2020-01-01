@@ -104,7 +104,8 @@ tr.field-names th {
 }
 
 tbody tr          { background: #ddd; }
-tbody tr:hover    { background: #bbb; color: white; }
+tbody tr:hover,
+tbody tr.hover    { background: #bbb; color: white; }
 tbody tr.selected { background: #acd0ff; }
 
 td {
