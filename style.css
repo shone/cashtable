@@ -47,6 +47,10 @@ button {
   flex-shrink: 0;
   padding: 5px;
   box-sizing: border-box;
+  cursor: hand;
+}
+#timeline-group {
+  pointer-events: none;
 }
 #timeline-months {
   fill: rgba(176, 199, 255, 0.5);

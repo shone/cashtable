@@ -79,6 +79,7 @@ function dateStringToTimestampMs(string) {
 function generateTimeline({transactions, fields, timestamps, totalDuration}) {
 
   const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
+  const amountFieldIndex  = fields.findIndex(field => field.name === 'Amount (EUR)');
 
   const balances = transactions.map(transaction => transaction[balanceFieldIndex]);
   const maxBalance = Math.max(...balances);
@@ -92,19 +93,69 @@ function generateTimeline({transactions, fields, timestamps, totalDuration}) {
   for (let timestamp = firstYearTimestampMs; timestamp < timestamps[timestamps.length-1]; timestamp += yearDurationMs*2) {
     yearsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${yearDurationMs / totalDuration} v 1.2 h -${yearDurationMs / totalDuration} Z `;
   }
-  document.querySelector('#timeline-years').setAttribute('d', yearsPath);
+  document.getElementById('timeline-years').setAttribute('d', yearsPath);
 
   let monthsPath = '';
   const monthDurationMs = 1000 * 60 * 60 * 24 * 30.44;
   for (let timestamp = firstYearTimestampMs; timestamp < timestamps[timestamps.length-1]; timestamp += monthDurationMs*2) {
     monthsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${monthDurationMs / totalDuration} v 1.2 h -${monthDurationMs / totalDuration} Z `;
   }
-  document.querySelector('#timeline-months').setAttribute('d', monthsPath);
+  document.getElementById('timeline-months').setAttribute('d', monthsPath);
 
-  const balancePath = 'M 0,20 L ' + balances.map((balance, index) =>
-    `${(timestamps[index] - timestamps[0]) / totalDuration} ${1 - (balance / maxBalance)} `
+  const balancePath = 'M 0,20 ' + balances.map((balance, index) =>
+    `L ${(timestamps[index] - timestamps[0]) / totalDuration} ${1 - ((balance - transactions[index][amountFieldIndex]) / maxBalance)} v ${-transactions[index][amountFieldIndex] / maxBalance}`
   ).join('');
-  document.querySelector('#timeline-balance').setAttribute('d', balancePath);
+  document.getElementById('timeline-balance').setAttribute('d', balancePath);
+
+  const timelineGroupElement = document.getElementById('timeline-group');
+
+  let timelineRangeStart = timestamps[0];
+  let timelineRangeEnd   = timestamps[timestamps.length-1];
+
+  function setTimeRange(startTimestampMs, endTimestampMs) {
+    timelineRangeStart = startTimestampMs;
+    timelineRangeEnd = endTimestampMs;
+    const rangeDuration = timelineRangeEnd - timelineRangeStart;
+    timelineGroupElement.style.transform = `scaleX(${totalDuration / rangeDuration}) translateX(${-(timelineRangeStart - timestamps[0]) / totalDuration}px)`;
+  }
+
+  const timelineElement = document.getElementById('timeline');
+
+  timelineElement.onwheel = event => {
+    const zoomAmount = (timelineRangeEnd - timelineRangeStart) * ((event.deltaY < 0) ? 0.1 : -0.1);
+    const cursorXRatio = event.offsetX / timelineElement.getBoundingClientRect().width;
+    setTimeRange(
+      Math.max(timelineRangeStart + (zoomAmount * cursorXRatio),     timestamps[0]),
+      Math.min(timelineRangeEnd   - (zoomAmount * (1-cursorXRatio)), timestamps[timestamps.length-1])
+    );
+  }
+
+  timelineElement.onmousedown = event => {
+    event.preventDefault();
+    let lastTimelineDragX = event.pageX;
+    function handleMousemove(event) {
+      if (event.buttons === 1) {
+        timelineElement.style.cursor = 'grab';
+        const deltaXRatio = (lastTimelineDragX - event.pageX) / timelineElement.getBoundingClientRect().width;
+        let deltaXMs = (timelineRangeEnd - timelineRangeStart) * deltaXRatio;
+        if ((timelineRangeEnd + deltaXMs) > timestamps[timestamps.length-1]) {
+          deltaXMs = timestamps[timestamps.length-1] - timelineRangeEnd;
+        } else if ((timelineRangeStart + deltaXMs) < timestamps[0]) {
+          deltaXMs = timestamps[0] - timelineRangeStart;
+        }
+        setTimeRange(
+          timelineRangeStart + deltaXMs,
+          timelineRangeEnd   + deltaXMs
+        );
+        lastTimelineDragX = event.pageX;
+      }
+    }
+    window.addEventListener('mousemove', handleMousemove);
+    window.addEventListener('mouseup', () => {
+      window.removeEventListener('mousemove', handleMousemove);
+      timelineElement.style.cursor = '';
+    }, {once: true});
+  }
 }
 
 function generateTable({transactions, fields, timestamps, totalDuration}) {
