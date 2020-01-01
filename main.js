@@ -29,7 +29,7 @@ function loadCsv(csv) {
   const fieldNames = csvJson.splice(0, 1)[0];
 
   const fields = fieldNames.map(fieldName => {
-    const meta = {
+    const fieldInfo = {
       'Date':                      {type: 'date'},
       'Payee':                     {type: 'string'},
       'Account number':            {type: 'account-number'},
@@ -41,7 +41,7 @@ function loadCsv(csv) {
       'Type Foreign Currency':     {type: 'currency-code'},
       'Exchange Rate':             {type: 'decimal'},
     }
-    return {...meta[fieldName], name: fieldName};
+    return {...fieldInfo[fieldName], name: fieldName};
   });
   fields.push({name: 'Balance', type: 'euro'});
 
@@ -62,11 +62,13 @@ function loadCsv(csv) {
   });
 
   const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
-
   const timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
+  const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
 
-  generateTimeline(transactions, fields, timestamps);
-  generateTable(transactions, fields, timestamps);
+  const data = {transactions, fields, timestamps, totalDuration};
+
+  generateTimeline(data);
+  generateTable(data);
 }
 
 function dateStringToTimestampMs(string) {
@@ -74,39 +76,38 @@ function dateStringToTimestampMs(string) {
   return new Date(year, month-1, day).getTime();
 }
 
-function generateTimeline(transactions, fields, timestamps) {
+function generateTimeline({transactions, fields, timestamps, totalDuration}) {
 
   const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
 
   const balances = transactions.map(transaction => transaction[balanceFieldIndex]);
   const maxBalance = Math.max(...balances);
 
-  const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
-
   const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
   const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
+  const firstYearTimestampMs = (new Date(firstYear, 0, 1)).getTime();
 
   let yearsPath = '';
   const yearDurationMs = 1000 * 60 * 60 * 24 * 365.25;
-  for (let timestamp = (new Date(firstYear, 0, 1)).getTime(); timestamp<timestamps[timestamps.length-1]; timestamp += yearDurationMs*2) {
+  for (let timestamp = firstYearTimestampMs; timestamp < timestamps[timestamps.length-1]; timestamp += yearDurationMs*2) {
     yearsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${yearDurationMs / totalDuration} v 1.2 h -${yearDurationMs / totalDuration} Z `;
   }
   document.querySelector('#timeline-years').setAttribute('d', yearsPath);
 
   let monthsPath = '';
   const monthDurationMs = 1000 * 60 * 60 * 24 * 30.44;
-  for (let timestamp = (new Date(firstYear, 0, 1)).getTime(); timestamp<timestamps[timestamps.length-1]; timestamp += monthDurationMs*2) {
+  for (let timestamp = firstYearTimestampMs; timestamp < timestamps[timestamps.length-1]; timestamp += monthDurationMs*2) {
     monthsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${monthDurationMs / totalDuration} v 1.2 h -${monthDurationMs / totalDuration} Z `;
   }
   document.querySelector('#timeline-months').setAttribute('d', monthsPath);
 
-  const balancePath = 'M 0,20 L ' + balances.map((balance, index) => {
-    return `${(timestamps[index] - timestamps[0]) / totalDuration} ${1 - (balance / maxBalance)} `;
-  }).join('');
+  const balancePath = 'M 0,20 L ' + balances.map((balance, index) =>
+    `${(timestamps[index] - timestamps[0]) / totalDuration} ${1 - (balance / maxBalance)} `
+  ).join('');
   document.querySelector('#timeline-balance').setAttribute('d', balancePath);
 }
 
-function generateTable(transactions, fields, timestamps) {
+function generateTable({transactions, fields, timestamps, totalDuration}) {
   const fieldNameTrElements = fields.map(field => {
     const element = document.createElement('th');
     element.classList.add(field.type);
@@ -115,13 +116,13 @@ function generateTable(transactions, fields, timestamps) {
   });
   document.querySelector('tr.field-names').append(...fieldNameTrElements);
 
-  document.querySelector('tr.filters').innerHTML = fields.map(field => {
-    return `<th class="${field.type}"><input><button></button></th>`;
-  }).join('');
+  document.querySelector('tr.filters').innerHTML = fields.map(field =>
+    `<th class="${field.type}"><input><button></button></th>`
+  ).join('');
 
-  document.querySelector('tr.totals').innerHTML = fields.map(field => {
-    return `<th class="${field.type}"></th>`;
-  }).join('');
+  document.querySelector('tr.totals').innerHTML = fields.map(field =>
+    `<th class="${field.type}"></th>`
+  ).join('');
 
   function formatValueForTable(value, fieldIndex) {
     if (fields[fieldIndex].type === 'euro' || fields[fieldIndex].type === 'currency') {
@@ -154,20 +155,19 @@ function generateTable(transactions, fields, timestamps) {
 
   const filters = fields.map(() => '');
 
-  function applyFilters() {
-    const trElements    = [...document.querySelector('tbody').children];
-    const totalElements = [...document.querySelector('tr.totals').children];
+  const totalElements = [...document.querySelector('tr.totals').children];
 
+  function applyFilters() {
     let firstTransaction = null;
     let lastTransaction  = null;
     const totals = fields.map(() => 0);
 
     let timelineMarkersPath = '';
 
-    const totalDuration = timestamps[timestamps.length-1] - timestamps[0];
+    const allFiltersEmpty = filters.every(filter => !filter);
 
     for (const [transactionIndex, transaction] of transactions.entries()) {
-      const shouldShow = filters.every((filter, fieldIndex) => {
+      const shouldShow = allFiltersEmpty || filters.every((filter, fieldIndex) => {
         if (!filter) {
           return true;
         }
@@ -181,7 +181,9 @@ function generateTable(transactions, fields, timestamps) {
         }
         lastTransaction = transaction;
 
-        timelineMarkersPath += `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},0 v 1 `;
+        if (!allFiltersEmpty) {
+          timelineMarkersPath += `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},0 v 1 `;
+        }
 
         for (const [fieldIndex, field] of fields.entries()) {
           if (field.type === 'euro' || field.type === 'currency') {
@@ -209,11 +211,7 @@ function generateTable(transactions, fields, timestamps) {
       }
     }
 
-    if (!filters.every(filter => !filter)) {
-      document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
-    } else {
-      document.getElementById('filtered-transaction-markers').setAttribute('d', '');
-    }
+    document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
   }
   applyFilters();
 
@@ -243,12 +241,13 @@ function generateTable(transactions, fields, timestamps) {
     }
   }
 
+  const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
+
   document.querySelector('tbody').onmouseover = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
-      const transactionIndex = (transactions.length-1) - [...document.querySelector('tbody').children].indexOf(trElement);
-      const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
-      const x = (timestamps[transactionIndex] - timestamps[0]) / (timestamps[timestamps.length-1] - timestamps[0]);
+      const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
+      const x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
       timelineMarker.setAttribute('x1', x);
       timelineMarker.setAttribute('x2', x);
     }
@@ -256,7 +255,6 @@ function generateTable(transactions, fields, timestamps) {
   document.querySelector('tbody').onmouseout = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
-      const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
       timelineMarker.setAttribute('x1', -1);
       timelineMarker.setAttribute('x2', -1);
     }
