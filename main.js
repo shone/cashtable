@@ -261,7 +261,8 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
       if (isNaN(value)) {
         return '';
       } else {
-        return value.toFixed(2);
+        const sign = (fields[fieldIndex].name !== 'Balance' && value > 0) ? '+' : '';
+        return `${sign}${value.toFixed(2)}`;
       }
     } else {
       return value;
