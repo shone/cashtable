@@ -45,9 +45,6 @@ button {
   height: 200px;
   width: 100%;
   flex-shrink: 0;
-  padding: 5px;
-  box-sizing: border-box;
-  cursor: hand;
 }
 #timeline-group {
   pointer-events: none;

@@ -186,19 +186,18 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
   }
 
   function getTransactionIndexAtTimelinePixelsX(x) {
-    const timestamp = timelineRangeStart + ((timelineRangeEnd - timelineRangeStart) * x / timelineElement.getBoundingClientRect().width);
+    const timelineRangeDuration = timelineRangeEnd - timelineRangeStart;
+    const timestamp = timelineRangeStart + (timelineRangeDuration * (x / timelineElement.getBoundingClientRect().width));
     let transactionIndex = Math.round(transactions.length * ((timestamp - timestamps[0]) / totalDuration));
     if (transactionIndex < 0) transactionIndex = 0;
     if (transactionIndex >= transactions.length) transactionIndex = transactions.length - 1;
     while (true) {
-      const delta = Math.abs(timestamp - timestamps[transactionIndex]);
-      if (transactionIndex < (transactions.length-1) && (Math.abs(timestamp - timestamps[transactionIndex+1]) < delta)) {
-        transactionIndex++;
-      } else if (transactionIndex > 0 && (Math.abs(timestamp - timestamps[transactionIndex-1]) < delta)) {
-        transactionIndex--;
-      } else {
-        return transactionIndex;
-      }
+      const delta     = Math.abs(timestamp - timestamps[transactionIndex  ]);
+      const deltaNext = Math.abs(timestamp - timestamps[transactionIndex+1]);
+      const deltaPrev = Math.abs(timestamp - timestamps[transactionIndex-1]);
+      if (!isNaN(deltaNext) && (deltaNext < delta) && (deltaNext <= deltaPrev)) { transactionIndex++; continue; }
+      if (!isNaN(deltaPrev) && (deltaPrev < delta) && (deltaPrev <  deltaNext)) { transactionIndex--; continue; }
+      return transactionIndex;
     }
   }
 
