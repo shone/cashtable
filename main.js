@@ -28,21 +28,20 @@ function loadCsv(csv) {
 
   const fieldNames = csvJson.splice(0, 1)[0];
 
-  const fields = fieldNames.map(fieldName => {
-    const fieldInfo = {
-      'Date':                      {type: 'date'},
-      'Payee':                     {type: 'string'},
-      'Account number':            {type: 'account-number'},
-      'Transaction type':          {type: 'string'},
-      'Payment reference':         {type: 'string'},
-      'Category':                  {type: 'string'},
-      'Amount (EUR)':              {type: 'euro'},
-      'Amount (Foreign Currency)': {type: 'currency'},
-      'Type Foreign Currency':     {type: 'currency-code'},
-      'Exchange Rate':             {type: 'decimal'},
-    }
-    return {...fieldInfo[fieldName], name: fieldName};
-  });
+  const fieldInfo = {
+    'Date':                      {type: 'date'},
+    'Payee':                     {type: 'string'},
+    'Account number':            {type: 'account-number'},
+    'Transaction type':          {type: 'string'},
+    'Payment reference':         {type: 'string'},
+    'Category':                  {type: 'string'},
+    'Amount (EUR)':              {type: 'euro'},
+    'Amount (Foreign Currency)': {type: 'currency'},
+    'Type Foreign Currency':     {type: 'currency-code'},
+    'Exchange Rate':             {type: 'decimal'},
+  }
+
+  const fields = fieldNames.map(fieldName => ({...fieldInfo[fieldName], name: fieldName}));
   fields.push({name: 'Balance', type: 'euro'});
 
   const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
@@ -132,25 +131,36 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
 
   const timelineGroupElement = document.getElementById('timeline-group');
 
-  let timelineRangeStart = timestamps[0];
-  let timelineRangeEnd   = timestamps[timestamps.length-1];
+  let timestampRangeStart = timestamps[0];
+  let timestampRangeEnd   = timestamps[timestamps.length-1];
+  let balanceRangeStart   = 0;
+  let balanceRangeEnd     = maxBalance;
 
-  function setTimeRange(startTimestampMs, endTimestampMs) {
-    timelineRangeStart = startTimestampMs;
-    timelineRangeEnd = endTimestampMs;
-    const rangeDuration = timelineRangeEnd - timelineRangeStart;
-    timelineGroupElement.style.transform = `scaleX(${totalDuration / rangeDuration}) translateX(${-(timelineRangeStart - timestamps[0]) / totalDuration}px)`;
+  function updateRange() {
+    const rangeDuration = timestampRangeEnd - timestampRangeStart;
+    const rangeBalance  = balanceRangeEnd   - balanceRangeStart;
+    const scaleX = totalDuration / rangeDuration;
+    const scaleY = maxBalance    / rangeBalance;
+    const translateX = -(timestampRangeStart - timestamps[0]) / totalDuration;
+    const translateY = -balanceRangeStart / maxBalance;
+    timelineGroupElement.style.transform = `scale(${scaleX},${scaleY}) translate(${translateX}px,${translateY}px)`;
   }
 
   const timelineElement = document.getElementById('timeline');
 
   timelineElement.onwheel = event => {
-    const zoomAmount = (timelineRangeEnd - timelineRangeStart) * ((event.deltaY < 0) ? 0.1 : -0.1);
-    const cursorXRatio = event.offsetX / timelineElement.getBoundingClientRect().width;
-    setTimeRange(
-      Math.max(timelineRangeStart + (zoomAmount * cursorXRatio),     timestamps[0]),
-      Math.min(timelineRangeEnd   - (zoomAmount * (1-cursorXRatio)), timestamps[timestamps.length-1])
-    );
+    let timestampZoomAmount = (timestampRangeEnd - timestampRangeStart) * ((event.deltaY < 0) ? 0.1 : -0.1);
+    let balanceZoomAmount   = (balanceRangeEnd   - balanceRangeStart  ) * ((event.deltaY < 0) ? 0.1 : -0.1);
+    if (event.altKey)   timestampZoomAmount = 0;
+    if (event.shiftKey) balanceZoomAmount   = 0;
+    const boundingRect = timelineElement.getBoundingClientRect();
+    const cursorXRatio = event.offsetX / boundingRect.width;
+    const cursorYRatio = event.offsetY / boundingRect.height;
+    timestampRangeStart = Math.max(timestampRangeStart + (timestampZoomAmount * cursorXRatio),     timestamps[0]);
+    timestampRangeEnd   = Math.min(timestampRangeEnd   - (timestampZoomAmount * (1-cursorXRatio)), timestamps[timestamps.length-1]);
+    balanceRangeStart   = Math.max(balanceRangeStart + (balanceZoomAmount * cursorXRatio), 0);
+    balanceRangeEnd     = Math.min(balanceRangeEnd   - (balanceZoomAmount * (1-cursorYRatio)), maxBalance);
+    updateRange();
   }
 
   let isDraggingTimeline = false;
@@ -158,22 +168,33 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
   timelineElement.onmousedown = event => {
     event.preventDefault();
     let lastTimelineDragX = event.pageX;
+    let lastTimelineDragY = event.pageY;
     function handleMousemove(event) {
       if (event.buttons === 1) {
+        const boundingRect = timelineElement.getBoundingClientRect();
         isDraggingTimeline = true;
         timelineElement.style.cursor = 'grab';
-        const deltaXRatio = (lastTimelineDragX - event.pageX) / timelineElement.getBoundingClientRect().width;
-        let deltaXMs = (timelineRangeEnd - timelineRangeStart) * deltaXRatio;
-        if ((timelineRangeEnd + deltaXMs) > timestamps[timestamps.length-1]) {
-          deltaXMs = timestamps[timestamps.length-1] - timelineRangeEnd;
-        } else if ((timelineRangeStart + deltaXMs) < timestamps[0]) {
-          deltaXMs = timestamps[0] - timelineRangeStart;
+        const deltaXRatio = (lastTimelineDragX - event.pageX) / boundingRect.width;
+        const deltaYRatio = (lastTimelineDragY - event.pageY) / boundingRect.height;
+        let deltaX = (timestampRangeEnd - timestampRangeStart) * deltaXRatio;
+        let deltaY = (balanceRangeEnd   - balanceRangeStart  ) * deltaYRatio;
+        if ((timestampRangeEnd + deltaX) > timestamps[timestamps.length-1]) {
+          deltaX = timestamps[timestamps.length-1] - timestampRangeEnd;
+        } else if ((timestampRangeStart + deltaX) < timestamps[0]) {
+          deltaX = timestamps[0] - timestampRangeStart;
         }
-        setTimeRange(
-          timelineRangeStart + deltaXMs,
-          timelineRangeEnd   + deltaXMs
-        );
+        if ((balanceRangeEnd + deltaY) > maxBalance) {
+          deltaY = maxBalance - balanceRangeEnd;
+        } else if ((balanceRangeStart + deltaY) < 0) {
+          deltaY = -balanceRangeStart;
+        }
+        timestampRangeStart += deltaX,
+        timestampRangeEnd   += deltaX
+        balanceRangeStart   += deltaY;
+        balanceRangeEnd     += deltaY;
+        updateRange();
         lastTimelineDragX = event.pageX;
+        lastTimelineDragY = event.pageY;
       }
     }
     window.addEventListener('mousemove', handleMousemove);
@@ -186,8 +207,8 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
   }
 
   function getTransactionIndexAtTimelinePixelsX(x) {
-    const timelineRangeDuration = timelineRangeEnd - timelineRangeStart;
-    const timestamp = timelineRangeStart + (timelineRangeDuration * (x / timelineElement.getBoundingClientRect().width));
+    const timelineRangeDuration = timestampRangeEnd - timestampRangeStart;
+    const timestamp = timestampRangeStart + (timelineRangeDuration * (x / timelineElement.getBoundingClientRect().width));
     let transactionIndex = Math.round(transactions.length * ((timestamp - timestamps[0]) / totalDuration));
     if (transactionIndex < 0) transactionIndex = 0;
     if (transactionIndex >= transactions.length) transactionIndex = transactions.length - 1;
