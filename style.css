@@ -19,6 +19,7 @@ button {
   top:    0;
   right:  0;
   bottom: 0;
+  z-index: 1;
   background: white;
   display: flex;
   flex-direction: column;
@@ -41,10 +42,15 @@ button {
   display: none;
 }
 
-#timeline {
-  height: 200px;
+#timeline-container {
   width: 100%;
+  height: 250px;
   flex-shrink: 0;
+  position: relative;
+}
+#timeline {
+  width:  100%;
+  height: calc(100% - 40px);
 }
 #timeline-group {
   pointer-events: none;
@@ -74,6 +80,25 @@ button {
   stroke: #009a27;
   stroke-width: 1px;
   transform: scaleY(-1) translateY(-1px);
+}
+.timeline-labels {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  overflow: hidden;
+}
+#timeline-month-labels { bottom: 20px; }
+#timeline-year-labels  { bottom:  0;   }
+.timeline-labels span {
+  position: absolute;
+  top:    0;
+  bottom: 0;
+  background: black;
+  color: white;
+  text-align: center;
+  border-left:  1px solid white;
+  border-right: 1px solid white;
 }
 
 .table-container {

@@ -11,15 +11,19 @@
       <input type="file">
       <button id="open-file-button">Choose CSV file...</button>
     </div>
-    <svg id="timeline" viewBox="0 0 1 1" preserveAspectRatio="none">
-      <g id="timeline-group">
-        <path id="timeline-years"   vector-effect="non-scaling-stroke"/>
-        <path id="timeline-months"  vector-effect="non-scaling-stroke"/>
-        <path id="timeline-balance" vector-effect="non-scaling-stroke"/>
-        <path id="filtered-transaction-markers"        vector-effect="non-scaling-stroke"/>
-        <path id="timeline-hovered-transaction-marker" vector-effect="non-scaling-stroke"/>
-      </g>
-    </svg>
+    <div id="timeline-container">
+      <svg id="timeline" viewBox="0 0 1 1" preserveAspectRatio="none">
+        <g id="timeline-group">
+          <path id="timeline-years"   vector-effect="non-scaling-stroke"/>
+          <path id="timeline-months"  vector-effect="non-scaling-stroke"/>
+          <path id="timeline-balance" vector-effect="non-scaling-stroke"/>
+          <path id="filtered-transaction-markers"        vector-effect="non-scaling-stroke"/>
+          <path id="timeline-hovered-transaction-marker" vector-effect="non-scaling-stroke"/>
+        </g>
+      </svg>
+      <div id="timeline-month-labels" class="timeline-labels"></div>
+      <div id="timeline-year-labels"  class="timeline-labels"></div>
+    </div>
     <div class="table-container">
       <table>
         <thead>

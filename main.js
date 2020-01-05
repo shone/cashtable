@@ -97,7 +97,7 @@ function loadCsv(csv) {
 
 function dateStringToTimestampMs(string) {
   const [year, month, day] = string.split('-');
-  return new Date(year, month-1, day).getTime();
+  return new Date(parseInt(year), parseInt(month)-1, parseInt(day)).getTime();
 }
 
 const timelineMarker = document.getElementById('timeline-hovered-transaction-marker');
@@ -107,21 +107,26 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
   const amountFieldIndex  = fields.findIndex(field => field.name === 'Amount (EUR)');
 
   const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
-  const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
-  const firstYearTimestampMs = (new Date(firstYear, 0, 1)).getTime();
 
   let yearsPath = '';
-  const yearDurationMs = 1000 * 60 * 60 * 24 * 365.25;
-  for (let timestamp = firstYearTimestampMs; timestamp < timestamps[timestamps.length-1]; timestamp += yearDurationMs*2) {
-    yearsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${yearDurationMs / totalDuration} v 1.2 h -${yearDurationMs / totalDuration} Z `;
+  let monthsPath = '';
+  const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
+  const lastYear  = parseInt(transactions[transactions.length-1][dateFieldIndex].split('-')[0]);
+  for (let year = firstYear; year <= lastYear; year++) {
+    if ((year % 2) === 0) {
+      const timestampStart = new Date(year,     0, 1).getTime();
+      const timestampEnd   = new Date(year + 1, 0, 1).getTime();
+      yearDurationMs = timestampEnd - timestampStart;
+      yearsPath += `M ${(timestampStart - timestamps[0]) / totalDuration} -0.1 h ${yearDurationMs / totalDuration} v 1.2 h -${yearDurationMs / totalDuration} Z `;
+    }
+    for (let month = 0; month < 12; month += 2) {
+      const monthTimestampStart = new Date(year, month  , 1).getTime();
+      const monthTimestampEnd   = new Date(year, month+1, 1).getTime();
+      const monthDurationMs = monthTimestampEnd - monthTimestampStart;
+      monthsPath += `M ${(monthTimestampStart - timestamps[0]) / totalDuration} -0.1 h ${monthDurationMs / totalDuration} v 1.2 h -${monthDurationMs / totalDuration} Z `;
+    }
   }
   document.getElementById('timeline-years').setAttribute('d', yearsPath);
-
-  let monthsPath = '';
-  const monthDurationMs = 1000 * 60 * 60 * 24 * 30.44;
-  for (let timestamp = firstYearTimestampMs; timestamp < timestamps[timestamps.length-1]; timestamp += monthDurationMs*2) {
-    monthsPath += `M ${(timestamp - timestamps[0]) / totalDuration} -0.1 h ${monthDurationMs / totalDuration} v 1.2 h -${monthDurationMs / totalDuration} Z `;
-  }
   document.getElementById('timeline-months').setAttribute('d', monthsPath);
 
   const balancePath = 'M 0,20 ' + balances.map((balance, index) =>
@@ -129,7 +134,9 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
   ).join('');
   document.getElementById('timeline-balance').setAttribute('d', balancePath);
 
-  const timelineGroupElement = document.getElementById('timeline-group');
+  const timelineGroupElement       = document.getElementById('timeline-group');
+  const timelineYearLabelsElement  = document.getElementById('timeline-year-labels');
+  const timelineMonthLabelsElement = document.getElementById('timeline-month-labels');
 
   let timestampRangeStart = timestamps[0];
   let timestampRangeEnd   = timestamps[timestamps.length-1];
@@ -139,12 +146,46 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
   function updateRange() {
     const rangeDuration = timestampRangeEnd - timestampRangeStart;
     const rangeBalance  = balanceRangeEnd   - balanceRangeStart;
+    const dateRangeStart = new Date(timestampRangeStart);
+    const dateRangeEnd   = new Date(timestampRangeEnd);
+
+    // Scale/translate graph paths
     const scaleX = totalDuration / rangeDuration;
     const scaleY = maxBalance    / rangeBalance;
     const translateX = -(timestampRangeStart - timestamps[0]) / totalDuration;
     const translateY = -balanceRangeStart / maxBalance;
     timelineGroupElement.style.transform = `scale(${scaleX},${scaleY}) translate(${translateX}px,${translateY}px)`;
+
+    // Year labels
+    const yearRangeStart = dateRangeStart.getFullYear();
+    const yearRangeEnd   = dateRangeEnd.getFullYear();
+    timelineYearLabelsElement.innerHTML = '';
+    for (let year = yearRangeStart; year <= yearRangeEnd; year++) {
+      const timestampStart = Math.max(new Date(year,     0, 1).getTime(), timestampRangeStart);
+      const timestampEnd   = Math.min(new Date(year + 1, 0, 1).getTime(), timestampRangeEnd);
+      timelineYearLabelsElement.insertAdjacentHTML('beforeend', `
+        <span style="left: ${((timestampStart - timestampRangeStart) / rangeDuration) * 100}%; width: ${((timestampEnd - timestampStart) / rangeDuration) * 100}%">
+          ${year}
+        </span>
+      `);
+    }
+
+    // Month labels
+    const monthRangeStart = (dateRangeStart.getFullYear() * 12) + dateRangeStart.getMonth();
+    const monthRangeEnd   = (dateRangeEnd.getFullYear()   * 12) + dateRangeEnd.getMonth();
+    timelineMonthLabelsElement.innerHTML = '';
+    const monthStrings = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    for (let month = monthRangeStart; month <= monthRangeEnd; month++) {
+      const timestampStart = Math.max(new Date(Math.floor((month)  /12), (month)  %12, 1).getTime(), timestampRangeStart);
+      const timestampEnd   = Math.min(new Date(Math.floor((month+1)/12), (month+1)%12, 1).getTime(), timestampRangeEnd);
+      timelineMonthLabelsElement.insertAdjacentHTML('beforeend', `
+        <span style="left: ${((timestampStart - timestampRangeStart) / rangeDuration) * 100}%; width: ${((timestampEnd - timestampStart) / rangeDuration) * 100}%">
+          ${monthStrings[month%12]}
+        </span>
+      `);
+    }
   }
+  updateRange();
 
   const timelineElement = document.getElementById('timeline');
 
@@ -167,35 +208,26 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
 
   timelineElement.onmousedown = event => {
     event.preventDefault();
-    let lastTimelineDragX = event.pageX;
-    let lastTimelineDragY = event.pageY;
+    let lastEvent = {pageX: event.pageX, pageY: event.pageY};
     function handleMousemove(event) {
-      if (event.buttons === 1) {
-        const boundingRect = timelineElement.getBoundingClientRect();
-        isDraggingTimeline = true;
-        timelineElement.style.cursor = 'grab';
-        const deltaXRatio = (lastTimelineDragX - event.pageX) / boundingRect.width;
-        const deltaYRatio = (lastTimelineDragY - event.pageY) / boundingRect.height;
-        let deltaX = (timestampRangeEnd - timestampRangeStart) * deltaXRatio;
-        let deltaY = (balanceRangeEnd   - balanceRangeStart  ) * deltaYRatio;
-        if ((timestampRangeEnd + deltaX) > timestamps[timestamps.length-1]) {
-          deltaX = timestamps[timestamps.length-1] - timestampRangeEnd;
-        } else if ((timestampRangeStart + deltaX) < timestamps[0]) {
-          deltaX = timestamps[0] - timestampRangeStart;
-        }
-        if ((balanceRangeEnd + deltaY) > maxBalance) {
-          deltaY = maxBalance - balanceRangeEnd;
-        } else if ((balanceRangeStart + deltaY) < 0) {
-          deltaY = -balanceRangeStart;
-        }
-        timestampRangeStart += deltaX,
-        timestampRangeEnd   += deltaX
-        balanceRangeStart   += deltaY;
-        balanceRangeEnd     += deltaY;
-        updateRange();
-        lastTimelineDragX = event.pageX;
-        lastTimelineDragY = event.pageY;
-      }
+      if (event.buttons !== 1) return;
+      isDraggingTimeline = true;
+      timelineElement.style.cursor = 'grab';
+      const boundingRect = timelineElement.getBoundingClientRect();
+      const deltaXRatio = (lastEvent.pageX - event.pageX) / boundingRect.width;
+      const deltaYRatio = (lastEvent.pageY - event.pageY) / boundingRect.height;
+      let deltaX = (timestampRangeEnd - timestampRangeStart) * deltaXRatio;
+      let deltaY = (balanceRangeEnd   - balanceRangeStart  ) * deltaYRatio;
+      deltaX = Math.min(deltaX, timestamps[timestamps.length-1] - timestampRangeEnd);
+      deltaX = Math.max(deltaX, timestamps[0] - timestampRangeStart);
+      deltaY = Math.min(deltaY, maxBalance - balanceRangeEnd);
+      deltaY = Math.max(deltaY, -balanceRangeStart);
+      timestampRangeStart += deltaX,
+      timestampRangeEnd   += deltaX
+      balanceRangeStart   += deltaY;
+      balanceRangeEnd     += deltaY;
+      updateRange();
+      lastEvent = {pageX: event.pageX, pageY: event.pageY};
     }
     window.addEventListener('mousemove', handleMousemove);
     window.addEventListener('mouseup', event => {
