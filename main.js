@@ -137,6 +137,8 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
   const timelineGroupElement       = document.getElementById('timeline-group');
   const timelineYearLabelsElement  = document.getElementById('timeline-year-labels');
   const timelineMonthLabelsElement = document.getElementById('timeline-month-labels');
+  const xAxisRangeSlider           = document.getElementById('timeline-x-axis-range-slider');
+  const xAxisRangeSliderHandles    = document.querySelector('#timeline-x-axis-range-slider .handles');
 
   let timestampRangeStart = timestamps[0];
   let timestampRangeEnd   = timestamps[timestamps.length-1];
@@ -184,8 +186,67 @@ function generateTimeline({transactions, fields, timestamps, totalDuration, bala
         </span>
       `);
     }
+
+    // Range slider
+    xAxisRangeSliderHandles.style.width = ((rangeDuration / totalDuration) * 100) + '%';
+    xAxisRangeSliderHandles.style.left  = (((timestampRangeStart - timestamps[0]) / totalDuration) * 100) + '%';
   }
   updateRange();
+
+  xAxisRangeSlider.querySelector('.handle.minimum').onmousedown = onRangeSliderMousedown;
+  xAxisRangeSlider.querySelector('.handle.maximum').onmousedown = onRangeSliderMousedown;
+  function onRangeSliderMousedown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const handle = event.target;
+    let lastPageX = event.pageX;
+    const rangeSliderWidth = xAxisRangeSlider.getBoundingClientRect().width;
+    const minimumRangeMs = 1000 * 60 * 60 * 24;
+    function onMousemove(event) {
+      const deltaMs = totalDuration * ((event.pageX - lastPageX) / rangeSliderWidth);
+      if (handle.classList.contains('minimum')) {
+        timestampRangeStart = Math.max(timestampRangeStart + deltaMs, timestamps[0]);
+        timestampRangeEnd = Math.max(timestampRangeEnd, timestampRangeStart + minimumRangeMs);
+      } else if (handle.classList.contains('maximum')) {
+        timestampRangeEnd = Math.min(timestampRangeEnd + deltaMs, timestamps[timestamps.length-1]);
+        timestampRangeStart = Math.min(timestampRangeStart, timestampRangeEnd - minimumRangeMs);
+      }
+      updateRange();
+      lastPageX = event.pageX;
+    }
+    window.addEventListener('mousemove', onMousemove);
+    window.addEventListener('mouseup', () => {
+      window.removeEventListener('mousemove', onMousemove);
+    }, {once: true});
+  }
+  xAxisRangeSliderHandles.onmousedown = event => {
+    event.preventDefault();
+    xAxisRangeSliderHandles.style.cursor = 'grabbing';
+    let lastPageX = event.pageX;
+    const rangeSliderWidth = xAxisRangeSlider.getBoundingClientRect().width;
+    const timestampRangeStartOriginal = timestampRangeStart;
+    const timestampRangeEndOriginal   = timestampRangeEnd;
+    let deltaTotal = 0;
+    function onMousemove(event) {
+      const deltaPx = event.pageX - lastPageX;
+      const deltaMs = totalDuration * (deltaPx / rangeSliderWidth);
+      deltaTotal += deltaMs;
+      timestampRangeStart = Math.max(timestampRangeStartOriginal + deltaTotal, timestamps[0]);
+      timestampRangeEnd   = Math.min(timestampRangeEndOriginal   + deltaTotal, timestamps[timestamps.length-1]);
+      updateRange();
+      lastPageX = event.pageX;
+    }
+    window.addEventListener('mousemove', onMousemove);
+    window.addEventListener('mouseup', () => {
+      window.removeEventListener('mousemove', onMousemove);
+      xAxisRangeSliderHandles.style.cursor = '';
+    }, {once: true});
+  }
+  xAxisRangeSlider.ondblclick = event => {
+    timestampRangeStart = timestamps[0];
+    timestampRangeEnd   = timestamps[timestamps.length-1];
+    updateRange();
+  }
 
   const timelineElement = document.getElementById('timeline');
 

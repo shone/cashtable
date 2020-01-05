@@ -50,19 +50,18 @@ button {
 }
 #timeline {
   width:  100%;
-  height: calc(100% - 40px);
+  height: calc(100% - 60px);
 }
 #timeline-group {
   pointer-events: none;
 }
 #timeline-months {
-  fill: rgba(176, 199, 255, 0.5);
+  fill: rgba(199, 216, 255, 0.5);
   stroke: none;
 }
 #timeline-years {
-  fill: #d2e7ff;
-  stroke: black;
-  stroke-width: 1px;
+  fill: #93c6ff;
+  stroke: none;
 }
 #timeline-balance {
   fill: none;
@@ -88,8 +87,8 @@ button {
   height: 20px;
   overflow: hidden;
 }
-#timeline-month-labels { bottom: 20px; }
-#timeline-year-labels  { bottom:  0;   }
+#timeline-month-labels { bottom: 40px; }
+#timeline-year-labels  { bottom: 20px; }
 .timeline-labels span {
   position: absolute;
   top:    0;
@@ -99,7 +98,44 @@ button {
   text-align: center;
   border-left:  1px solid white;
   border-right: 1px solid white;
+  user-select: none;
 }
+#timeline-x-axis-range-slider {
+  left:   0;
+  right:  0;
+  bottom: 0;
+}
+
+.range-slider {
+  position: absolute;
+  height: 20px;
+}
+.range-slider .handles {
+  position: absolute;
+  top:    0;
+  bottom: 0;
+  cursor: grab;
+}
+.range-slider .handles::before {
+  content: '';
+  position: absolute;
+  left:  0;
+  right: 0;
+  top: calc(50% - 1px);
+  height: 2px;;
+  background: black;
+  pointer-events: none;
+}
+.range-slider .handle {
+  position: absolute;
+  top:    0;
+  bottom: 0;
+  width: 20px;
+  cursor: ew-resize;
+  background: no-repeat center / 100% url('data:image/svg+xml;utf8,<svg width="64" height="64" version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="black"><path d="m1.046 280.1v16.94" stroke-width="2.117"/><path d="m10.21 281.1-7.432 7.432 7.432 7.432" stroke-linecap="round" stroke-width="1.323"/><path d="m17.12 288.5h-14.35" stroke-width="1.323"/></g></svg>');
+}
+.range-slider .handle.minimum { left:  0; }
+.range-slider .handle.maximum { right: 0; transform: rotate(180deg); }
 
 .table-container {
   overflow: auto;
