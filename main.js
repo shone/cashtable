@@ -20,6 +20,10 @@ openFileScreen.querySelector('input[type="file"]').onchange = async event => {
     openFileScreen.remove();
   }
 }
+document.getElementById('view-sample-csv-button').onclick = () => {
+  loadCsv(generateSampleCsv());
+  openFileScreen.remove();
+}
 
 function loadCsv(csv) {
   const lines = csv.split('\n');
