@@ -6,12 +6,16 @@
   </head>
   <body>
     <div id="open-file-screen">
-      <h1>Drop CSV file here</h1>
-      <p>-or-</p>
-      <input type="file">
-      <button id="open-file-button">Choose CSV file...</button>
-      <p>-or-</p>
-      <button id="view-sample-csv-button">View sample CSV</button>
+      <h1>Number26 Transaction Explorer</h1>
+      <p>Graph, filter and analyze Number26 bank account CSV data.</p>
+      <div class="file-options">
+        <div class="drop-zone">Drop CSV file here</div>
+        <div class="separator">or</div>
+        <input type="file">
+        <button id="open-file-button">Choose CSV file...</button>
+        <div class="separator">or</div>
+        <button id="view-sample-csv-button">View sample CSV</button>
+      </div>
     </div>
     <div id="timeline-container">
       <svg id="timeline" viewBox="0 0 1 1" preserveAspectRatio="none">

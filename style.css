@@ -19,24 +19,88 @@ button {
   top:    0;
   right:  0;
   bottom: 0;
+  padding: 15px;
   z-index: 1;
   background: white;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items:     center;
+  overflow-y: auto;
 }
 #open-file-screen h1 {
   text-align: center;
 }
+#open-file-screen .file-options {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items:     center;
+  padding-top:    40px;
+  padding-bottom: 40px;
+}
+#open-file-screen .file-options .separator {
+  font-style: italic;
+  position: relative;
+  color: #666;
+  margin: 10px;
+}
+#open-file-screen .file-options .separator::before {
+  content: '';
+  position: absolute;
+  top: calc(55%);
+  right: calc(100% + 5px);
+  height: 1px;
+  width: 20px;
+  background: #666;
+}
+#open-file-screen .file-options .separator::after {
+  content: '';
+  position: absolute;
+  top: calc(55%);
+  left: calc(100% + 5px);
+  height: 1px;
+  width: 20px;
+  background: #666;
+}
+#open-file-screen .drop-zone {
+  border: 1px solid #36a18b;
+  padding: 20px;
+  border-radius: 6px;
+  width: 250px;
+  text-align: center;
+  box-sizing: border-box;
+}
 #open-file-screen button {
   background: #36a18b;
   color: white;
+  font-weight: bold;
+  width: 250px;
   padding: 10px;
   padding-left:  30px;
   padding-right: 30px;
   border-radius: 6px;
   font-size: 18px;
+  box-shadow: 2px 3px 8px #00000061;
+  outline: none;
+  position: relative;
+}
+#open-file-screen button:hover {
+  background: #40c1a7;
+}
+#open-file-screen button:focus::before {
+  content: '';
+  position: absolute;
+  left:   -3px;
+  top:    -3px;
+  right:  -3px;
+  bottom: -3px;
+  border: 2px solid #36a18b;
+  border-radius: 8px;
+}
+#open-file-screen button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 5px #00000061;
 }
 #open-file-screen input[type='file'] {
   display: none;
