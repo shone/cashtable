@@ -1,0 +1,87 @@
+.table-container {
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+}
+
+th {
+  position: sticky;
+  background: orange;
+  white-space: nowrap;
+  outline: 2px solid white;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+tr.field-names th { top:    2px; }
+tr.filters     th { top:   25px; }
+tr.totals      th { bottom: 2px; }
+
+tr.field-names th {
+  white-space: nowrap;
+}
+
+tbody tr          { background: #ddd; }
+tbody tr:hover,
+tbody tr.hover    { background: #bbb; color: white; }
+tbody tr.selected { background: #acd0ff; }
+
+td {
+  vertical-align: top;
+}
+
+td.date           { font-family: monospace; font-size: 1.2em; }
+td.account-number { font-family: monospace; font-size: 1.2em; }
+td.decimal        { font-family: monospace; font-size: 1.2em; }
+td.currency-code  { font-family: monospace; font-size: 1.2em; }
+
+table .euro          { max-width:  95px; }
+table .currency      { max-width:  95px; }
+table .date          { max-width: 100px; }
+table .currency-code { max-width:  35px; }
+table .decimal       { max-width:  80px; }
+
+td.euro,
+td.currency,
+tfoot th.euro,
+tfoot th.currency {
+  text-align: right;
+  font-family: monospace;
+  font-size: 1.2em;
+}
+td.euro.positive-number {
+  color: green;
+  font-weight: bold;
+}
+
+tr.filters input {
+  width: -webkit-fill-available;
+  width: -moz-available;
+  box-sizing: border-box;
+}
+tr.filters th:not(.filter-active)::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  width: 25px;
+  top:    2px;
+  bottom: 2px;
+  background: no-repeat center / 70% url('data:image/svg+xml;utf8,<svg width="64" height="64" version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="black" stroke-linecap="round" stroke-width="2.117"><circle cx="5.897" cy="286.1" r="4.46"/><path d="m9.388 289.4 6.014 6.014"/></g></svg>');
+  pointer-events: none;
+}
+tr.filters .clear-button {
+  display: none;
+}
+tr.filters th.filter-active .clear-button {
+  display: block;
+  position: absolute;
+  right: 2px;
+  width: 20px;
+  top:    2px;
+  bottom: 2px;
+  background: no-repeat center / 60% #36a18b url('data:image/svg+xml;utf8,<svg width="64" height="64" version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="white" stroke-linecap="round" stroke-width="2.381"><path d="m1.729 281.8 13.47 13.49"/><path d="m1.721 295.3 13.49-13.47"/></g></svg>');
+}
+tr.filters th.filter-active .clear-button:hover {
+  background-color: #40c1a7;
+}
