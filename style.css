@@ -12,6 +12,9 @@ button {
   cursor: pointer;
   border: none;
 }
+button::-moz-focus-inner {
+  border: 0;
+}
 
 #open-file-screen {
   position: fixed;
