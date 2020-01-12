@@ -377,7 +377,7 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
   document.querySelector('tr.field-names').append(...fieldNameTrElements);
 
   document.querySelector('tr.filters').innerHTML = fields.map(field =>
-    `<th class="${field.type}"><input><button></button></th>`
+    `<th class="${field.type}"><input><button class="clear-button" title="Clear filter"></button></th>`
   ).join('');
 
   document.querySelector('tr.totals').innerHTML = fields.map(field =>
@@ -414,8 +414,6 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
   trElements.reverse();
   document.querySelector('tbody').append(...trElements);
 
-  const filters = fields.map(() => '');
-
   const totalElements = [...document.querySelector('tr.totals').children];
 
   function applyFilters() {
@@ -425,6 +423,7 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
 
     let timelineMarkersPath = '';
 
+    const filters = [...document.querySelectorAll('tr.filters input')].map(input => input.value.toLowerCase());
     const allFiltersEmpty = filters.every(filter => !filter);
 
     for (const [transactionIndex, transaction] of transactions.entries()) {
@@ -474,13 +473,11 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
 
     document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
   }
-  applyFilters();
 
   document.querySelector('tr.filters').oninput = event => {
     const input = event.target;
     const thElement = input.closest('th');
-    const fieldIndex = [...document.querySelector('tr.filters').children].indexOf(thElement);
-    filters[fieldIndex] = input.value.toLowerCase();
+    thElement.classList.toggle('filter-active', input.value !== '');
     applyFilters();
   }
 
@@ -489,8 +486,18 @@ function generateTable({transactions, fields, timestamps, totalDuration, balance
       const input = event.target;
       input.value = '';
       const thElement = input.closest('th');
-      const fieldIndex = [...document.querySelector('tr.filters').children].indexOf(thElement);
-      filters[fieldIndex] = input.value.toLowerCase();
+      thElement.classList.remove('filter-active');
+      applyFilters();
+    }
+  }
+
+  document.querySelector('tr.filters').onclick = event => {
+    if (event.target.classList.contains('clear-button')) {
+      const thElement = event.target.closest('th');
+      thElement.classList.remove('filter-active');
+      const input = thElement.querySelector('input');
+      input.value = '';
+      input.focus();
       applyFilters();
     }
   }
