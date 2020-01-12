@@ -15,20 +15,24 @@ button {
 
 #open-file-screen {
   position: fixed;
-  left:   0;
-  top:    0;
-  right:  0;
-  bottom: 0;
+  width:  100%;
+  height: 100%;
+  box-sizing: border-box;
   padding: 15px;
   z-index: 1;
   background: white;
   display: flex;
   flex-direction: column;
-  align-items:     center;
+  align-items: center;
   overflow-y: auto;
+  box-shadow: none;
+  transition: 0.5s box-shadow;
 }
 #open-file-screen h1 {
   text-align: center;
+}
+#open-file-screen.dragging-file-over {
+  box-shadow: inset 0 0 20px 9px rgba(54, 161, 139, 0.6);
 }
 #open-file-screen .file-options {
   flex-grow: 1;
@@ -39,11 +43,24 @@ button {
   padding-top:    40px;
   padding-bottom: 40px;
 }
+#open-file-screen.dragging-file-over * {
+  pointer-events: none;
+}
+#open-file-screen :not(.drag-drop) {
+  transition: 0.5s opacity;
+}
+#open-file-screen.dragging-file-over :not(.drag-drop) {
+  opacity: 0.1;
+}
+#open-file-screen.dragging-file-over .file-options {
+  opacity: 1;
+}
 #open-file-screen .file-options .separator {
   font-style: italic;
   position: relative;
   color: #666;
-  margin: 10px;
+  margin-top:    20px;
+  margin-bottom: 20px;
 }
 #open-file-screen .file-options .separator::before {
   content: '';
@@ -63,13 +80,9 @@ button {
   width: 20px;
   background: #666;
 }
-#open-file-screen .drop-zone {
-  border: 1px solid #36a18b;
-  padding: 20px;
-  border-radius: 6px;
-  width: 250px;
+#open-file-screen .drag-drop {
+  font-size: 22px;
   text-align: center;
-  box-sizing: border-box;
 }
 #open-file-screen button {
   background: #36a18b;

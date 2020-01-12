@@ -1,4 +1,6 @@
 const openFileScreen = document.getElementById('open-file-screen');
+openFileScreen.ondragenter = () => openFileScreen.classList.add('dragging-file-over');
+openFileScreen.ondragleave = () => openFileScreen.classList.remove('dragging-file-over');
 openFileScreen.ondrop = async event => {
   event.preventDefault();
   const items = event.dataTransfer.items;
