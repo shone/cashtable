@@ -5,8 +5,8 @@ openFileScreen.ondrop = async event => {
   event.preventDefault();
   const items = event.dataTransfer.items;
   if (items && items.length === 1 && items[0].kind === 'file') {
-    const text = await items[0].getAsFile().text();
-    loadCsv(text);
+    const file = items[0].getAsFile();
+    loadCsvFile(file);
     openFileScreen.remove();
   }
 }
@@ -17,18 +17,26 @@ document.getElementById('open-file-button').onclick = () => {
 openFileScreen.querySelector('input[type="file"]').onchange = async event => {
   const files = event.target.files;
   if (files.length === 1) {
-    const text = await files[0].text();
-    loadCsv(text);
+    loadCsvFile(files[0]);
     openFileScreen.remove();
   }
 }
 document.getElementById('view-sample-csv-button').onclick = () => {
-  loadCsv(generateSampleCsv());
+  loadCsvString(generateSampleCsv());
   openFileScreen.remove();
 }
 
-function loadCsv(csv) {
-  const lines = csv.split('\n');
+async function loadCsvFile(csvFile) {
+  const fileReader = new FileReader();
+  const text = await new Promise(resolve => {
+    fileReader.onloadend = event => resolve(event.srcElement.result);
+    fileReader.readAsText(csvFile);
+  });
+  loadCsvString(text);
+}
+
+function loadCsvString(csvString) {
+  const lines = csvString.split('\n');
   lines.splice(-1, 1); // Delete last line, which is empty
   const csvJson = JSON.parse('[' + lines.map(line => '[' + line + ']').join(',') + ']');
 
