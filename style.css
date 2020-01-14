@@ -121,3 +121,13 @@ button::-moz-focus-inner {
 #open-file-screen input[type='file'] {
   display: none;
 }
+
+#separator {
+  height: 15px;
+  flex-shrink: 0;
+  flex-grow:   0;
+  cursor: ns-resize;
+}
+#separator:hover {
+  background-color: grey;
+}

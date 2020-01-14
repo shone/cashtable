@@ -117,3 +117,12 @@ function dateStringToTimestampMs(string) {
   const [year, month, day] = string.split('-');
   return new Date(parseInt(year), parseInt(month)-1, parseInt(day)).getTime();
 }
+
+document.getElementById('separator').onmousedown = event => {
+  let lastPageY = event.pageY;
+  function handleMousemove(event) {
+    const delta = event.pageY - lastPageY;
+
+    lastPageY = event.pageY;
+  }
+}
