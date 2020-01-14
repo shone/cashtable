@@ -2,8 +2,6 @@ const timelineElement            = document.getElementById('timeline');
 const timelineGroupElement       = document.getElementById('timeline-group');
 const timelineYearLabelsElement  = document.getElementById('timeline-year-labels');
 const timelineMonthLabelsElement = document.getElementById('timeline-month-labels');
-const xAxisRangeSlider           = document.getElementById('timeline-x-axis-range-slider');
-const xAxisRangeSliderHandles    = document.querySelector('#timeline-x-axis-range-slider .handles');
 const timelineMarker             = document.getElementById('timeline-hovered-transaction-marker');
 
 let timestampRangeStart = 0;
@@ -50,6 +48,23 @@ function updateTimeline() {
   updateRange();
 }
 
+const xAxisRangeSlider = initRangeSlider(
+  document.getElementById('timeline-x-axis-range-slider'),
+  (rangeStart, rangeEnd) => {
+    timestampRangeStart = timestamps[0] + (totalDuration * rangeStart);
+    timestampRangeEnd   = timestamps[0] + (totalDuration * rangeEnd);
+    updateRange();
+  }
+);
+const yAxisRangeSlider = initRangeSlider(
+  document.getElementById('timeline-y-axis-range-slider'),
+  (rangeStart, rangeEnd) => {
+    balanceRangeStart = maxBalance * rangeStart;
+    balanceRangeEnd   = maxBalance * rangeEnd;
+    updateRange();
+  }
+);
+
 function updateRange() {
   const rangeDuration = timestampRangeEnd - timestampRangeStart;
   const rangeBalance  = balanceRangeEnd   - balanceRangeStart;
@@ -60,7 +75,7 @@ function updateRange() {
   const scaleX = totalDuration / rangeDuration;
   const scaleY = maxBalance    / rangeBalance;
   const translateX = -(timestampRangeStart - timestamps[0]) / totalDuration;
-  const translateY = -balanceRangeStart / maxBalance;
+  const translateY = (balanceRangeEnd / maxBalance) - 1;
   timelineGroupElement.style.transform = `scale(${scaleX},${scaleY}) translate(${translateX}px,${translateY}px)`;
 
   // Year labels
@@ -93,65 +108,16 @@ function updateRange() {
   }
 
   // Range slider
-  xAxisRangeSliderHandles.style.width = ((rangeDuration / totalDuration) * 100) + '%';
-  xAxisRangeSliderHandles.style.left  = (((timestampRangeStart - timestamps[0]) / totalDuration) * 100) + '%';
+  xAxisRangeSlider.setRange(
+    (timestampRangeStart - timestamps[0]) / totalDuration,
+    (timestampRangeEnd   - timestamps[0]) / totalDuration
+  );
+  yAxisRangeSlider.setRange(
+    balanceRangeStart / maxBalance,
+    balanceRangeEnd   / maxBalance
+  );
 }
 updateRange();
-
-xAxisRangeSlider.querySelector('.handle.minimum').onmousedown = onRangeSliderMousedown;
-xAxisRangeSlider.querySelector('.handle.maximum').onmousedown = onRangeSliderMousedown;
-function onRangeSliderMousedown(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  const handle = event.target;
-  let lastPageX = event.pageX;
-  const rangeSliderWidth = xAxisRangeSlider.getBoundingClientRect().width;
-  const minimumRangeMs = 1000 * 60 * 60 * 24;
-  function onMousemove(event) {
-    const deltaMs = totalDuration * ((event.pageX - lastPageX) / rangeSliderWidth);
-    if (handle.classList.contains('minimum')) {
-      timestampRangeStart = Math.max(timestampRangeStart + deltaMs, timestamps[0]);
-      timestampRangeEnd = Math.max(timestampRangeEnd, timestampRangeStart + minimumRangeMs);
-    } else if (handle.classList.contains('maximum')) {
-      timestampRangeEnd = Math.min(timestampRangeEnd + deltaMs, timestamps[timestamps.length-1]);
-      timestampRangeStart = Math.min(timestampRangeStart, timestampRangeEnd - minimumRangeMs);
-    }
-    updateRange();
-    lastPageX = event.pageX;
-  }
-  window.addEventListener('mousemove', onMousemove);
-  window.addEventListener('mouseup', () => {
-    window.removeEventListener('mousemove', onMousemove);
-  }, {once: true});
-}
-xAxisRangeSliderHandles.onmousedown = event => {
-  event.preventDefault();
-  xAxisRangeSliderHandles.style.cursor = 'grabbing';
-  let lastPageX = event.pageX;
-  const rangeSliderWidth = xAxisRangeSlider.getBoundingClientRect().width;
-  const timestampRangeStartOriginal = timestampRangeStart;
-  const timestampRangeEndOriginal   = timestampRangeEnd;
-  let deltaTotal = 0;
-  function onMousemove(event) {
-    const deltaPx = event.pageX - lastPageX;
-    const deltaMs = totalDuration * (deltaPx / rangeSliderWidth);
-    deltaTotal += deltaMs;
-    timestampRangeStart = Math.max(timestampRangeStartOriginal + deltaTotal, timestamps[0]);
-    timestampRangeEnd   = Math.min(timestampRangeEndOriginal   + deltaTotal, timestamps[timestamps.length-1]);
-    updateRange();
-    lastPageX = event.pageX;
-  }
-  window.addEventListener('mousemove', onMousemove);
-  window.addEventListener('mouseup', () => {
-    window.removeEventListener('mousemove', onMousemove);
-    xAxisRangeSliderHandles.style.cursor = '';
-  }, {once: true});
-}
-xAxisRangeSlider.ondblclick = event => {
-  timestampRangeStart = timestamps[0];
-  timestampRangeEnd   = timestamps[timestamps.length-1];
-  updateRange();
-}
 
 timelineElement.onwheel = event => {
   let timestampZoomAmount = (timestampRangeEnd - timestampRangeStart) * ((event.deltaY < 0) ? 0.1 : -0.1);
@@ -180,8 +146,8 @@ timelineElement.onmousedown = event => {
     const boundingRect = timelineElement.getBoundingClientRect();
     const deltaXRatio = (lastEvent.pageX - event.pageX) / boundingRect.width;
     const deltaYRatio = (lastEvent.pageY - event.pageY) / boundingRect.height;
-    let deltaX = (timestampRangeEnd - timestampRangeStart) * deltaXRatio;
-    let deltaY = (balanceRangeEnd   - balanceRangeStart  ) * deltaYRatio;
+    let deltaX = (timestampRangeEnd - timestampRangeStart) *  deltaXRatio;
+    let deltaY = (balanceRangeEnd   - balanceRangeStart  ) * -deltaYRatio;
     deltaX = Math.min(deltaX, timestamps[timestamps.length-1] - timestampRangeEnd);
     deltaX = Math.max(deltaX, timestamps[0] - timestampRangeStart);
     deltaY = Math.min(deltaY, maxBalance - balanceRangeEnd);
