@@ -121,3 +121,14 @@ button::-moz-focus-inner {
 #open-file-screen input[type='file'] {
   display: none;
 }
+
+#separator {
+  height: 15px;
+  flex-shrink: 0;
+  flex-grow:   0;
+  cursor: ns-resize;
+  background: no-repeat center / contain url('data:image/svg+xml;utf8,<svg width="70" height="40" viewBox="0 0 18.5 10.6" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="black" stroke-linecap="round" stroke-width="1.8"><path d="M1 3.5h16.5M1 6.9h16.5"/></g></svg>');
+}
+#separator:hover {
+  background-color: #ddd;
+}

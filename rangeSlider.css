@@ -1,5 +1,6 @@
 .range-slider {
   position: absolute;
+  overflow: hidden;
 }
 .range-slider[data-orientation="vertical"]   { width:  20px; }
 .range-slider[data-orientation="horizontal"] { height: 20px; }

@@ -117,3 +117,19 @@ function dateStringToTimestampMs(string) {
   const [year, month, day] = string.split('-');
   return new Date(parseInt(year), parseInt(month)-1, parseInt(day)).getTime();
 }
+
+document.getElementById('separator').onmousedown = event => {
+  event.preventDefault();
+  let lastPageY = event.pageY;
+  const timelineContainer = document.getElementById('timeline-container');
+  function handleMousemove(event) {
+    const delta = event.pageY - lastPageY;
+    const currentHeight = parseInt(timelineContainer.style.height || '250px');
+    timelineContainer.style.height = (Math.min(currentHeight, window.innerHeight - 15) + delta) + 'px';
+    lastPageY = event.pageY;
+  }
+  window.addEventListener('mousemove', handleMousemove);
+  window.addEventListener('mouseup', () => {
+    window.removeEventListener('mousemove', handleMousemove);
+  }, {once: true});
+}

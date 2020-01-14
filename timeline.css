@@ -1,6 +1,7 @@
 #timeline-container {
   width: 100%;
   height: 250px;
+  max-height: calc(100vh - 15px);
   flex-shrink: 0;
   position: relative;
 }
