@@ -27,22 +27,31 @@
           <path id="timeline-years"   vector-effect="non-scaling-stroke"/>
           <path id="timeline-months"  vector-effect="non-scaling-stroke"/>
           <path id="timeline-balance" vector-effect="non-scaling-stroke"/>
-          <path id="filtered-transaction-markers"        vector-effect="non-scaling-stroke"/>
+          <path id="filtered-transaction-markers" vector-effect="non-scaling-stroke"/>
           <path id="timeline-hovered-transaction-marker" vector-effect="non-scaling-stroke"/>
         </g>
       </svg>
-      <div id="timeline-month-labels" class="timeline-labels"></div>
-      <div id="timeline-year-labels"  class="timeline-labels"></div>
-      <div id="timeline-x-axis-range-slider" class="range-slider" data-orientation="horizontal">
-        <div class="handles">
-          <span class="handle minimum"></span>
-          <span class="handle maximum"></span>
+      <div id="timeline-transaction-labels-container">
+        <div id="timeline-transaction-labels">
+          <span id="timeline-hovered-transaction-label"></span>
         </div>
       </div>
-      <div id="timeline-y-axis-range-slider" class="range-slider" data-orientation="vertical">
-        <div class="handles">
-          <span class="handle minimum"></span>
-          <span class="handle maximum"></span>
+      <div id="timeline-x-axis-controls">
+        <div id="timeline-month-labels" class="timeline-date-labels"></div>
+        <div id="timeline-year-labels"  class="timeline-date-labels"></div>
+        <div id="timeline-x-axis-range-slider" class="range-slider" data-orientation="horizontal">
+          <div class="handles">
+            <span class="handle minimum"></span>
+            <span class="handle maximum"></span>
+          </div>
+        </div>
+      </div>
+      <div id="timeline-y-axis-controls">
+        <div id="timeline-y-axis-range-slider" class="range-slider" data-orientation="vertical">
+          <div class="handles">
+            <span class="handle minimum"></span>
+            <span class="handle maximum"></span>
+          </div>
         </div>
       </div>
     </div>

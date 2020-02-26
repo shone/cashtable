@@ -109,8 +109,21 @@ function loadCsvString(csvString) {
   balances = transactions.map(transaction => transaction[balanceFieldIndex]);
   maxBalance = Math.max(...balances);
 
-  updateTimeline();
-  updateTable();
+  const transactionData = {transactions, fields, timestamps, balances, totalDuration, maxBalance};
+
+  const timeline = new Timeline(transactionData);
+  const table = new Table(transactionData);
+
+  timeline.onTransactionHover = transactionIndex => {
+    table.setHoveredTransaction(transactionIndex);
+  }
+
+  table.onTransactionHover = transactionIndex => {
+    timeline.setHoveredTransaction(transactionIndex);
+  }
+  table.onTransactionsFiltered = transactionIndices => {
+    timeline.setFilteredTransactions(transactionIndices);
+  }
 }
 
 function dateStringToTimestampMs(string) {

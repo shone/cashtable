@@ -1,6 +1,8 @@
-let trElements = [];
+function Table({transactions, fields, timestamps, balances}) {
+  const self = this;
 
-function updateTable() {
+  let trElements = [];
+
   const fieldNameTrElements = fields.map(field => {
     const element = document.createElement('th');
     element.classList.add(field.type);
@@ -34,130 +36,147 @@ function updateTable() {
   trElements.reverse();
   document.querySelector('tbody').append(...trElements);
 
+  self.onTransactionsFiltered = transactions => {};
+
   applyFilters();
-}
 
-function formatValueForTable(value, fieldIndex) {
-  if (fields[fieldIndex].type === 'euro' || fields[fieldIndex].type === 'currency') {
-    if (isNaN(value)) {
-      return '';
+  function formatValueForTable(value, fieldIndex) {
+    if (fields[fieldIndex].type === 'euro' || fields[fieldIndex].type === 'currency') {
+      if (isNaN(value)) {
+        return '';
+      } else {
+        const sign = (fields[fieldIndex].name !== 'Balance' && value > 0) ? '+' : '';
+        return `${sign}${value.toFixed(2)}`;
+      }
     } else {
-      const sign = (fields[fieldIndex].name !== 'Balance' && value > 0) ? '+' : '';
-      return `${sign}${value.toFixed(2)}`;
+      return value;
     }
-  } else {
-    return value;
   }
-}
 
-function applyFilters() {
-  let firstTransaction = null;
-  let lastTransaction  = null;
+  function applyFilters() {
+    let firstTransaction = null;
+    let lastTransaction  = null;
 
-  const totals = fields.map(() => 0);
+    const totals = fields.map(() => 0);
 
-  let timelineMarkersPath = '';
+//     let timelineMarkersPath = '';
 
-  const filters = [...document.querySelectorAll('tr.filters input')].map(input => input.value.toLowerCase());
-  const allFiltersEmpty = filters.every(filter => !filter);
+    const filters = [...document.querySelectorAll('tr.filters input')].map(input => input.value.toLowerCase());
+    const allFiltersEmpty = filters.every(filter => !filter);
 
-  for (const [transactionIndex, transaction] of transactions.entries()) {
-    const shouldShow = allFiltersEmpty || filters.every((filter, fieldIndex) => {
-      if (!filter) {
-        return true;
-      }
-      const formattedValue = formatValueForTable(transaction[fieldIndex], fieldIndex);
-      return formattedValue.toLowerCase().includes(filter);
-    });
-    trElements[(transactions.length-1) - transactionIndex].style.display = shouldShow ? 'table-row' : 'none';
-    if (shouldShow) {
-      if (firstTransaction === null) {
-        firstTransaction = transaction;
-      }
-      lastTransaction = transaction;
+    const filteredTransactionIndices = [];
 
-      if (!allFiltersEmpty) {
-        timelineMarkersPath += `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},0 v 1 `;
-      }
+    for (const [transactionIndex, transaction] of transactions.entries()) {
+      const shouldShow = allFiltersEmpty || filters.every((filter, fieldIndex) => {
+        if (!filter) {
+          return true;
+        }
+        const formattedValue = formatValueForTable(transaction[fieldIndex], fieldIndex);
+        return formattedValue.toLowerCase().includes(filter);
+      });
+      trElements[(transactions.length-1) - transactionIndex].style.display = shouldShow ? 'table-row' : 'none';
+      if (shouldShow) {
+        if (firstTransaction === null) {
+          firstTransaction = transaction;
+        }
+        lastTransaction = transaction;
 
-      for (const [fieldIndex, field] of fields.entries()) {
-        if (field.type === 'euro' || field.type === 'currency') {
-          const number = parseFloat(transaction[fieldIndex]);
-          if (!isNaN(number)) {
-            totals[fieldIndex] += number;
+        if (!allFiltersEmpty) {
+//           timelineMarkersPath += `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},0 v 1 `;
+          filteredTransactionIndices.push(transactionIndex);
+        }
+
+        for (const [fieldIndex, field] of fields.entries()) {
+          if (field.type === 'euro' || field.type === 'currency') {
+            const number = parseFloat(transaction[fieldIndex]);
+            if (!isNaN(number)) {
+              totals[fieldIndex] += number;
+            }
           }
         }
       }
     }
+
+    self.onTransactionsFiltered(filteredTransactionIndices);
+
+    const totalElements = [...document.querySelector('tr.totals').children];
+    for (const [fieldIndex, field] of fields.entries()) {
+      if ((field.type === 'euro' || field.type === 'currency') && field.name !== 'Balance') {
+        totalElements[fieldIndex].textContent = totals[fieldIndex].toFixed(2);
+      } else if (field.type === 'date') {
+        if (firstTransaction !== null && lastTransaction !== null && firstTransaction !== lastTransaction) {
+          const firstTimestampMs = dateStringToTimestampMs(firstTransaction[fieldIndex]);
+          const lastTimestampMs  = dateStringToTimestampMs(lastTransaction[fieldIndex]);
+          const durationMs = lastTimestampMs - firstTimestampMs;
+          const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
+          const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
+          const years  = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30 * 12));
+          totalElements[fieldIndex].textContent = `${years}Y ${months}M ${days}D`;
+        }
+      }
+    }
+
+//     document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
   }
 
-  const totalElements = [...document.querySelector('tr.totals').children];
-  for (const [fieldIndex, field] of fields.entries()) {
-    if ((field.type === 'euro' || field.type === 'currency') && field.name !== 'Balance') {
-      totalElements[fieldIndex].textContent = totals[fieldIndex].toFixed(2);
-    } else if (field.type === 'date') {
-      if (firstTransaction !== null && lastTransaction !== null && firstTransaction !== lastTransaction) {
-        const firstTimestampMs = dateStringToTimestampMs(firstTransaction[fieldIndex]);
-        const lastTimestampMs  = dateStringToTimestampMs(lastTransaction[fieldIndex]);
-        const durationMs = lastTimestampMs - firstTimestampMs;
-        const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
-        const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
-        const years  = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30 * 12));
-        totalElements[fieldIndex].textContent = `${years}Y ${months}M ${days}D`;
-      }
+  document.querySelector('tr.filters').oninput = event => {
+    const input = event.target;
+    const thElement = input.closest('th');
+    thElement.classList.toggle('filter-active', input.value !== '');
+    applyFilters();
+  }
+
+  document.querySelector('tr.filters').onkeydown = event => {
+    if (event.key === 'Escape' && event.target.tagName === 'INPUT') {
+      const input = event.target;
+      input.value = '';
+      const thElement = input.closest('th');
+      thElement.classList.remove('filter-active');
+      applyFilters();
     }
   }
 
-  document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
-}
-
-document.querySelector('tr.filters').oninput = event => {
-  const input = event.target;
-  const thElement = input.closest('th');
-  thElement.classList.toggle('filter-active', input.value !== '');
-  applyFilters();
-}
-
-document.querySelector('tr.filters').onkeydown = event => {
-  if (event.key === 'Escape' && event.target.tagName === 'INPUT') {
-    const input = event.target;
-    input.value = '';
-    const thElement = input.closest('th');
-    thElement.classList.remove('filter-active');
-    applyFilters();
+  document.querySelector('tr.filters').onclick = event => {
+    if (event.target.classList.contains('clear-button')) {
+      const thElement = event.target.closest('th');
+      thElement.classList.remove('filter-active');
+      const input = thElement.querySelector('input');
+      input.value = '';
+      input.focus();
+      applyFilters();
+    }
   }
-}
 
-document.querySelector('tr.filters').onclick = event => {
-  if (event.target.classList.contains('clear-button')) {
-    const thElement = event.target.closest('th');
-    thElement.classList.remove('filter-active');
-    const input = thElement.querySelector('input');
-    input.value = '';
-    input.focus();
-    applyFilters();
+  document.querySelector('tbody').onclick = event => {
+    const trElement = event.target.closest('tr');
+    if (trElement) {
+      trElement.classList.toggle('selected');
+    }
   }
-}
 
-document.querySelector('tbody').onclick = event => {
-  const trElement = event.target.closest('tr');
-  if (trElement) {
-    trElement.classList.toggle('selected');
-  }
-}
+  self.onTransactionHover = transactionIndex => {};
 
-document.querySelector('tbody').onmouseover = event => {
-  const trElement = event.target.closest('tr');
-  if (trElement) {
-    const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
-    const x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
-    const y = balances[transactionIndex] / maxBalance;
-    timelineMarker.setAttribute('d', `M ${x},0 v 1 M 0,${y} h 1`);
+  document.querySelector('tbody').onmouseover = event => {
+    const trElement = event.target.closest('tr');
+    if (trElement) {
+      const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
+      self.onTransactionHover(transactionIndex);
+    }
   }
-}
-document.querySelector('tbody').onmouseout = event => {
-  const trElement = event.target.closest('tr');
-  if (trElement) {
-    timelineMarker.setAttribute('d', '');
+  document.querySelector('tbody').onmouseout = event => {
+    const trElement = event.target.closest('tr');
+    if (trElement) {
+      self.onTransactionHover(null);
+    }
+  }
+
+  self.setHoveredTransaction = transactionIndex => {
+    const previouslyHoveredElement = document.querySelector('tbody tr.hover');
+    if (previouslyHoveredElement) {
+      previouslyHoveredElement.classList.remove('hover');
+    }
+    if (transactionIndex !== null) {
+      document.querySelector('tbody').children[(transactions.length-1) - transactionIndex].classList.add('hover');
+    }
   }
 }
