@@ -34,12 +34,12 @@
 }
 #timeline .filtered-transaction-markers {
   fill: none;
-  stroke: red;
+  stroke: var(--teal);
   stroke-width: 1px;
 }
 #timeline .hovered-transaction-marker {
   fill: none;
-  stroke: #009a27;
+  stroke: var(--ocean);
   stroke-width: 1px;
   transform: scaleY(-1) translateY(-1px);
 }
@@ -59,7 +59,7 @@
 }
 #timeline .top-area .transaction-labels label {
   font-family: monospace;
-  background: red;
+  background: var(--teal);
   color: white;
   position: absolute;
   top: 0;
@@ -79,8 +79,8 @@
 }
 #timeline .top-area .transaction-labels .hovered-transaction-label {
   z-index: 1;
+  background: var(--ocean);
   box-shadow: 0 0 4px black;
-  background: green;
   pointer-events: none;
 }
 
@@ -97,7 +97,7 @@
   position: absolute;
   top:    0;
   bottom: 0;
-  background: black;
+  background: #323232;
   color: white;
   text-align: center;
   border-left:  1px solid white;

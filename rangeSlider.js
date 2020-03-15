@@ -1,11 +1,12 @@
 function initRangeSlider(rangeSliderElement, callback) {
+
   let rangeStart = 0;
   let rangeEnd   = 1;
   const minRange = 0.001;
   const orientation = rangeSliderElement.dataset.orientation;
-  rangeSliderElement.querySelector('.handle.minimum').onmousedown = onHandleMousedown;
-  rangeSliderElement.querySelector('.handle.maximum').onmousedown = onHandleMousedown;
+
   const handlesElement = rangeSliderElement.querySelector('.handles');
+
   function updateRange() {
     const range = rangeEnd - rangeStart;
     if (orientation === 'horizontal') {
@@ -16,6 +17,10 @@ function initRangeSlider(rangeSliderElement, callback) {
       handlesElement.style.bottom = (rangeStart * 100) + '%';
     }
   }
+  updateRange();
+
+  rangeSliderElement.querySelector('.handle.minimum').onmousedown = onHandleMousedown;
+  rangeSliderElement.querySelector('.handle.maximum').onmousedown = onHandleMousedown;
   function onHandleMousedown(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -45,8 +50,7 @@ function initRangeSlider(rangeSliderElement, callback) {
       window.removeEventListener('mousemove', onMousemove);
     }, {once: true});
   }
-  handlesElement.style.left  = '0';
-  handlesElement.style.width = '100%';
+
   handlesElement.onmousedown = event => {
     event.preventDefault();
     handlesElement.style.cursor = 'grabbing';

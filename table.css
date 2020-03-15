@@ -2,14 +2,27 @@
   overflow: auto;
 }
 
+.table-container::-webkit-scrollbar {
+  width: 16px;
+  background: transparent;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--teal);
+  border: 2px solid white;
+  border-radius: 8px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--teal-highlight);
+}
+
 table {
   width: 100%;
 }
 
 th {
   position: sticky;
-  background: orange;
   white-space: nowrap;
+  background: white;
   outline: 2px solid white;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -24,7 +37,7 @@ tr.field-names th {
 
 tbody tr          { background: #ddd; }
 tbody tr:hover,
-tbody tr.hover    { background: #bbb; color: white; }
+tbody tr.hover    { background: var(--ocean); color: white; }
 tbody tr.selected { background: #acd0ff; }
 
 td {
@@ -59,6 +72,16 @@ tr.filters input {
   width: -webkit-fill-available;
   width: -moz-available;
   box-sizing: border-box;
+  border: 2px solid rgb(245, 245, 245);
+  background: rgb(245, 245, 245);
+  border-radius: 4px;
+  height: 24px;
+  padding-left:  4px;
+  padding-right: 4px;
+}
+tr.filters input:focus {
+  border-color: var(--teal);
+  outline: none;
 }
 tr.filters th:not(.filter-active)::after {
   content: '';
@@ -67,7 +90,7 @@ tr.filters th:not(.filter-active)::after {
   width: 25px;
   top:    2px;
   bottom: 2px;
-  background: no-repeat center / 70% url('data:image/svg+xml;utf8,<svg width="64" height="64" version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="black" stroke-linecap="round" stroke-width="2.117"><circle cx="5.897" cy="286.1" r="4.46"/><path d="m9.388 289.4 6.014 6.014"/></g></svg>');
+  background: no-repeat center / 70% url('data:image/svg+xml;utf8,<svg version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="black" stroke-linecap="round" stroke-width="1.5"><circle cx="5.897" cy="286.1" r="4.46"/><path d="m9.388 289.4 6.014 6.014"/></g></svg>');
   pointer-events: none;
 }
 tr.filters .clear-button {
@@ -80,8 +103,11 @@ tr.filters th.filter-active .clear-button {
   width: 20px;
   top:    2px;
   bottom: 2px;
-  background: no-repeat center / 60% #36a18b url('data:image/svg+xml;utf8,<svg width="64" height="64" version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="white" stroke-linecap="round" stroke-width="2.381"><path d="m1.729 281.8 13.47 13.49"/><path d="m1.721 295.3 13.49-13.47"/></g></svg>');
+  border-top-right-radius:    4px;
+  border-bottom-right-radius: 4px;
+  background: no-repeat center / 60% url('data:image/svg+xml;utf8,<svg version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="%2336a18b" stroke-linecap="round" stroke-width="3"><path d="m1.729 281.8 13.47 13.49"/><path d="m1.721 295.3 13.49-13.47"/></g></svg>');
 }
 tr.filters th.filter-active .clear-button:hover {
-  background-color: #40c1a7;
+  background-color: var(--teal);
+  background-image: url('data:image/svg+xml;utf8,<svg version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="white" stroke-linecap="round" stroke-width="3"><path d="m1.729 281.8 13.47 13.49"/><path d="m1.721 295.3 13.49-13.47"/></g></svg>');
 }
