@@ -1,4 +1,4 @@
-#timeline-container {
+#timeline {
   width: 100%;
   height: 250px;
   max-height: calc(100vh - 15px);
@@ -6,7 +6,7 @@
   flex-shrink: 0;
   position: relative;
 }
-#timeline {
+#timeline svg {
   position: absolute;
   top:  20px;
   left: 20px;
@@ -14,47 +14,47 @@
   height: calc(100% - 85px);
   overflow: visible;
 }
-#timeline-group {
+#timeline svg g {
   pointer-events: none;
 }
-#timeline-months {
+#timeline path.months {
   fill: rgba(199, 216, 255, 0.5);
   stroke: none;
 }
-#timeline-years {
+#timeline path.years {
   fill: #93c6ff;
   stroke: none;
 }
-#timeline-balance {
+#timeline path.balance {
   fill: none;
   stroke: black;
   stroke-width: 1px;
   transform: scaleY(-1) translateY(-1px);
 }
-#filtered-transaction-markers {
+#timeline .filtered-transaction-markers {
   fill: none;
   stroke: red;
   stroke-width: 1px;
 }
-#timeline-hovered-transaction-marker {
+#timeline .hovered-transaction-marker {
   fill: none;
   stroke: #009a27;
   stroke-width: 1px;
   transform: scaleY(-1) translateY(-1px);
 }
-#timeline-transaction-labels-container {
+#timeline .transaction-labels-container {
   position: absolute;
   left:  20px;
   right: 40px;
   top: 0;
   height: 20px;
 }
-#timeline-transaction-labels {
+#timeline .transaction-labels {
   position: absolute;
   top:    0;
   bottom: 0;
 }
-#timeline-transaction-labels span {
+#timeline .transaction-labels span {
   font-family: monospace;
   background: red;
   color: white;
@@ -66,15 +66,15 @@
   border-bottom-right-radius: 3px;
   pointer-events: none;
 }
-#timeline-transaction-labels span.collapsed {
+#timeline .transaction-labels span.collapsed {
   font-size: 0;
   width: 6px !important;
   margin-left: -3px !important;
 }
-#timeline-transaction-labels span.hidden {
+#timeline .transaction-labels span.hidden {
   display: none;
 }
-#timeline-transaction-labels #timeline-hovered-transaction-label {
+#timeline .hovered-transaction-label {
   z-index: 1;
   box-shadow: 0 0 4px black;
   background: green;
@@ -86,8 +86,8 @@
   height: 20px;
   overflow: hidden;
 }
-#timeline-month-labels { bottom: 40px; }
-#timeline-year-labels  { bottom: 20px; }
+#timeline .month-labels { bottom: 40px; }
+#timeline .year-labels  { bottom: 20px; }
 .timeline-date-labels span {
   position: absolute;
   top:    0;
@@ -99,7 +99,7 @@
   border-right: 1px solid white;
   user-select: none;
 }
-#timeline-x-axis-controls {
+#timeline .x-axis-controls {
   position: absolute;
   left:   0;
   right:  0;
@@ -107,7 +107,7 @@
   height: 60px;
   background: white;
 }
-#timeline-y-axis-controls {
+#timeline .y-axis-controls {
   position: absolute;
   right:  0;
   top:    0;
@@ -115,12 +115,12 @@
   width: 20px;
   background: white;
 }
-#timeline-x-axis-range-slider {
+#timeline .x-axis-controls .range-slider {
   left:   20px;
   right:  40px;
   bottom: 0;
 }
-#timeline-y-axis-range-slider {
+#timeline .y-axis-controls .range-slider {
   top:    20px;
   right:  0;
   bottom: 65px;

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="utf-8"/>
     <title>N26 Transaction Explorer</title>
@@ -8,7 +9,9 @@
     <link rel="stylesheet" href="table.css">
     <link rel="stylesheet" href="rangeSlider.css">
   </head>
+
   <body>
+
     <div id="open-file-screen">
       <h1>Number26 Transaction Explorer</h1>
       <p>Graph, filter and analyze Number26 bank account CSV data.</p>
@@ -21,33 +24,34 @@
         <button id="view-sample-csv-button">View sample CSV</button>
       </div>
     </div>
-    <div id="timeline-container">
-      <svg id="timeline" viewBox="0 0 1 1" preserveAspectRatio="none">
-        <g id="timeline-group">
-          <path id="timeline-years"   vector-effect="non-scaling-stroke"/>
-          <path id="timeline-months"  vector-effect="non-scaling-stroke"/>
-          <path id="timeline-balance" vector-effect="non-scaling-stroke"/>
-          <path id="filtered-transaction-markers" vector-effect="non-scaling-stroke"/>
-          <path id="timeline-hovered-transaction-marker" vector-effect="non-scaling-stroke"/>
+
+    <div id="timeline">
+      <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+        <g>
+          <path class="years"   vector-effect="non-scaling-stroke"/>
+          <path class="months"  vector-effect="non-scaling-stroke"/>
+          <path class="balance" vector-effect="non-scaling-stroke"/>
+          <path class="filtered-transaction-markers" vector-effect="non-scaling-stroke"/>
+          <path class="hovered-transaction-marker"   vector-effect="non-scaling-stroke"/>
         </g>
       </svg>
-      <div id="timeline-transaction-labels-container">
-        <div id="timeline-transaction-labels">
-          <span id="timeline-hovered-transaction-label"></span>
+      <div class="transaction-labels-container">
+        <div class="transaction-labels">
+          <span class="hovered-transaction-label"></span>
         </div>
       </div>
-      <div id="timeline-x-axis-controls">
-        <div id="timeline-month-labels" class="timeline-date-labels"></div>
-        <div id="timeline-year-labels"  class="timeline-date-labels"></div>
-        <div id="timeline-x-axis-range-slider" class="range-slider" data-orientation="horizontal">
+      <div class="x-axis-controls">
+        <div class="timeline-date-labels month-labels"></div>
+        <div class="timeline-date-labels year-labels" ></div>
+        <div class="range-slider" data-orientation="horizontal">
           <div class="handles">
             <span class="handle minimum"></span>
             <span class="handle maximum"></span>
           </div>
         </div>
       </div>
-      <div id="timeline-y-axis-controls">
-        <div id="timeline-y-axis-range-slider" class="range-slider" data-orientation="vertical">
+      <div class="y-axis-controls">
+        <div class="range-slider" data-orientation="vertical">
           <div class="handles">
             <span class="handle minimum"></span>
             <span class="handle maximum"></span>
@@ -55,24 +59,26 @@
         </div>
       </div>
     </div>
+
     <div id="separator"></div>
+
     <div class="table-container">
       <table>
         <thead>
           <tr class="field-names"></tr>
           <tr class="filters"></tr>
         </thead>
-        <tbody>
-        </tbody>
+        <tbody></tbody>
         <tfoot>
           <tr class="totals">
         </tfoot>
       </table>
     </div>
   </body>
-  <script src="main.js"></script>
-  <script src="rangeSlider.js"></script>
-  <script src="timeline.js"></script>
-  <script src="table.js"></script>
-  <script src="sampleCsv.js"></script>
+
+  <script src="main.js"       > </script>
+  <script src="rangeSlider.js"> </script>
+  <script src="timeline.js"   > </script>
+  <script src="table.js"      > </script>
+  <script src="sampleCsv.js"  > </script>
 </html>

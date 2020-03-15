@@ -111,7 +111,7 @@ function loadCsvString(csvString) {
 
   const transactionData = {transactions, fields, timestamps, balances, totalDuration, maxBalance};
 
-  const timeline = new Timeline(transactionData);
+  const timeline = new initTimeline(transactionData);
   const table = new Table(transactionData);
 
   timeline.onTransactionHover = transactionIndex => {

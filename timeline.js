@@ -1,13 +1,16 @@
-function Timeline({transactions, fields, timestamps, balances}) {
+function initTimeline({transactions, fields, timestamps, balances}) {
   const self = this;
 
-  const timelineElement            = document.getElementById('timeline');
-  const timelineGroupElement       = document.getElementById('timeline-group');
-  const timelineYearLabelsElement  = document.getElementById('timeline-year-labels');
-  const timelineMonthLabelsElement = document.getElementById('timeline-month-labels');
-  const hoveredTransactionMarker   = document.getElementById('timeline-hovered-transaction-marker');
-  const hoveredTransactionLabel    = document.getElementById('timeline-hovered-transaction-label');
-  const transactionLabelsElement   = document.getElementById('timeline-transaction-labels');
+  const timeline = document.getElementById('timeline');
+
+  const svg                        = timeline.querySelector('svg');
+  const svgGroup                   = timeline.querySelector('svg g');
+  const yearLabelsContainer        = timeline.querySelector('.year-labels');
+  const monthLabelsContainer       = timeline.querySelector('.month-labels');
+  const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
+  const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
+  const hoveredTransactionMarker   = timeline.querySelector('.hovered-transaction-marker');
+  const filteredTransactionMarkers = timeline.querySelector('.filtered-transaction-markers');
 
   let timestampRangeStart = 0;
   let timestampRangeEnd   = 0;
@@ -15,7 +18,7 @@ function Timeline({transactions, fields, timestamps, balances}) {
   let balanceRangeEnd     = 0;
 
   const xAxisRangeSlider = initRangeSlider(
-    document.getElementById('timeline-x-axis-range-slider'),
+    timeline.querySelector('.x-axis-controls .range-slider'),
     (rangeStart, rangeEnd) => {
       timestampRangeStart = timestamps[0] + (totalDuration * rangeStart);
       timestampRangeEnd   = timestamps[0] + (totalDuration * rangeEnd);
@@ -23,7 +26,7 @@ function Timeline({transactions, fields, timestamps, balances}) {
     }
   );
   const yAxisRangeSlider = initRangeSlider(
-    document.getElementById('timeline-y-axis-range-slider'),
+    timeline.querySelector('.y-axis-controls .range-slider'),
     (rangeStart, rangeEnd) => {
       balanceRangeStart = maxBalance * rangeStart;
       balanceRangeEnd   = maxBalance * rangeEnd;
@@ -53,16 +56,16 @@ function Timeline({transactions, fields, timestamps, balances}) {
       monthsPath += `M ${(monthTimestampStart - timestamps[0]) / totalDuration} -1 h ${monthDurationMs / totalDuration} v 3 h -${monthDurationMs / totalDuration} Z `;
     }
   }
-  document.getElementById('timeline-years').setAttribute('d', yearsPath);
-  document.getElementById('timeline-months').setAttribute('d', monthsPath);
+  timeline.querySelector('path.years').setAttribute('d', yearsPath);
+  timeline.querySelector('path.months').setAttribute('d', monthsPath);
 
   const balancePath = 'M 0,0 ' + balances.map((balance, index) =>
     `L ${(timestamps[index] - timestamps[0]) / totalDuration} ${(balance - transactions[index][amountFieldIndex]) / maxBalance} v ${transactions[index][amountFieldIndex] / maxBalance}`
   ).join('');
-  document.getElementById('timeline-balance').setAttribute('d', balancePath);
+  timeline.querySelector('path.balance').setAttribute('d', balancePath);
 
   let filteredTransactionIndices = [];
-  let transactionLabelElements = [];
+  let transactionLabels = [];
   const labelCharacterWidth = 8;
 
   timestampRangeStart = timestamps[0];
@@ -83,16 +86,16 @@ function Timeline({transactions, fields, timestamps, balances}) {
     const translateX = -(timestampRangeStart - timestamps[0]) / totalDuration;
     const translateY = (balanceRangeEnd / maxBalance) - 1;
     const transform = `scale(${scaleX},${scaleY}) translate(${translateX}px,${translateY}px)`;
-    timelineGroupElement.style.transform = transform;
+    svgGroup.style.transform = transform;
 
     // Year labels
     const yearRangeStart = dateRangeStart.getFullYear();
     const yearRangeEnd   = dateRangeEnd.getFullYear();
-    timelineYearLabelsElement.innerHTML = '';
+    yearLabelsContainer.innerHTML = '';
     for (let year = yearRangeStart; year <= yearRangeEnd; year++) {
       const timestampStart = Math.max(new Date(year,     0, 1).getTime(), timestampRangeStart);
       const timestampEnd   = Math.min(new Date(year + 1, 0, 1).getTime(), timestampRangeEnd);
-      timelineYearLabelsElement.insertAdjacentHTML('beforeend', `
+      yearLabelsContainer.insertAdjacentHTML('beforeend', `
         <span style="left: ${((timestampStart - timestampRangeStart) / rangeDuration) * 100}%; width: ${((timestampEnd - timestampStart) / rangeDuration) * 100}%">
           ${year}
         </span>
@@ -102,20 +105,20 @@ function Timeline({transactions, fields, timestamps, balances}) {
     // Month labels
     const monthRangeStart = (dateRangeStart.getFullYear() * 12) + dateRangeStart.getMonth();
     const monthRangeEnd   = (dateRangeEnd.getFullYear()   * 12) + dateRangeEnd.getMonth();
-    timelineMonthLabelsElement.innerHTML = '';
+    monthLabelsContainer.innerHTML = '';
     const monthStrings = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     for (let month = monthRangeStart; month <= monthRangeEnd; month++) {
       const timestampStart = Math.max(new Date(Math.floor((month)  /12), (month)  %12, 1).getTime(), timestampRangeStart);
       const timestampEnd   = Math.min(new Date(Math.floor((month+1)/12), (month+1)%12, 1).getTime(), timestampRangeEnd);
-      timelineMonthLabelsElement.insertAdjacentHTML('beforeend', `
+      monthLabelsContainer.insertAdjacentHTML('beforeend', `
         <span style="left: ${((timestampStart - timestampRangeStart) / rangeDuration) * 100}%; width: ${((timestampEnd - timestampStart) / rangeDuration) * 100}%">
           ${monthStrings[month%12]}
         </span>
       `);
     }
 
-    transactionLabelsElement.style.width = `${(totalDuration / rangeDuration) * 100}%`;
-    transactionLabelsElement.style.left = (((timestamps[0] - timestampRangeStart) / rangeDuration) * 100) + '%';
+    transactionLabelsContainer.style.width = `${(totalDuration / rangeDuration) * 100}%`;
+    transactionLabelsContainer.style.left = (((timestamps[0] - timestampRangeStart) / rangeDuration) * 100) + '%';
     updateTransactionLabelsVisibility();
 
     // Range sliders
@@ -130,12 +133,12 @@ function Timeline({transactions, fields, timestamps, balances}) {
   }
   updateRange();
 
-  timelineElement.onwheel = event => {
+  svg.onwheel = event => {
     let timestampZoomAmount = (timestampRangeEnd - timestampRangeStart) * ((event.deltaY < 0) ? 0.1 : -0.1);
     let balanceZoomAmount   = (balanceRangeEnd   - balanceRangeStart  ) * ((event.deltaY < 0) ? 0.1 : -0.1);
     if (event.altKey)   timestampZoomAmount = 0;
     if (event.shiftKey) balanceZoomAmount   = 0;
-    const boundingRect = timelineElement.getBoundingClientRect();
+    const boundingRect = svg.getBoundingClientRect();
     const cursorXRatio = event.offsetX / boundingRect.width;
     const cursorYRatio = event.offsetY / boundingRect.height;
     timestampRangeStart = Math.max(timestampRangeStart + (timestampZoomAmount * cursorXRatio),     timestamps[0]);
@@ -147,14 +150,14 @@ function Timeline({transactions, fields, timestamps, balances}) {
 
   let isDraggingTimeline = false;
 
-  timelineElement.onmousedown = event => {
+  svg.onmousedown = event => {
     event.preventDefault();
     let lastEvent = {pageX: event.pageX, pageY: event.pageY};
     function handleMousemove(event) {
       if (event.buttons !== 1) return;
       isDraggingTimeline = true;
-      timelineElement.style.cursor = 'grab';
-      const boundingRect = timelineElement.getBoundingClientRect();
+      svg.style.cursor = 'grab';
+      const boundingRect = svg.getBoundingClientRect();
       const deltaXRatio = (lastEvent.pageX - event.pageX) / boundingRect.width;
       const deltaYRatio = (lastEvent.pageY - event.pageY) / boundingRect.height;
       let deltaX = (timestampRangeEnd - timestampRangeStart) *  deltaXRatio;
@@ -175,13 +178,13 @@ function Timeline({transactions, fields, timestamps, balances}) {
       event.preventDefault();
       window.removeEventListener('mousemove', handleMousemove);
       isDraggingTimeline = false;
-      timelineElement.style.cursor = '';
+      svg.style.cursor = '';
     }, {once: true});
   }
 
   function getTransactionIndexAtTimelinePixelsX(x) {
     const timelineRangeDuration = timestampRangeEnd - timestampRangeStart;
-    const timestamp = timestampRangeStart + (timelineRangeDuration * (x / timelineElement.getBoundingClientRect().width));
+    const timestamp = timestampRangeStart + (timelineRangeDuration * (x / svg.getBoundingClientRect().width));
     let transactionIndex = Math.round(transactions.length * ((timestamp - timestamps[0]) / totalDuration));
     if (transactionIndex < 0) transactionIndex = 0;
     if (transactionIndex >= transactions.length) transactionIndex = transactions.length - 1;
@@ -195,7 +198,7 @@ function Timeline({transactions, fields, timestamps, balances}) {
     }
   }
 
-  timelineElement.onmouseup = event => {
+  svg.onmouseup = event => {
     if (isDraggingTimeline) {
       return;
     }
@@ -216,13 +219,13 @@ function Timeline({transactions, fields, timestamps, balances}) {
 
   self.onTransactionHover = transactionIndex => {};
 
-  timelineElement.onmousemove = event => {
+  svg.onmousemove = event => {
     const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
     self.setHoveredTransaction(transactionIndex);
     self.onTransactionHover(transactionIndex);
   }
 
-  timelineElement.onmouseout = () => {
+  svg.onmouseout = () => {
     hoveredTransactionMarker.setAttribute('d', '');
     hoveredTransactionLabel.classList.add('hidden');
     self.onTransactionHover(null);
@@ -254,12 +257,12 @@ function Timeline({transactions, fields, timestamps, balances}) {
   self.setFilteredTransactions = transactionIndices => {
     filteredTransactionIndices = transactionIndices;
     const timelineMarkersPath = transactionIndices.map(transactionIndex => `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},-0.1 v 1.2 `).join('');
-    document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
+    filteredTransactionMarkers.setAttribute('d', timelineMarkersPath);
 
-    while (transactionLabelElements.length > 0) {
-      transactionLabelElements.pop().remove();
+    while (transactionLabels.length > 0) {
+      transactionLabels.pop().remove();
     }
-    transactionLabelElements = filteredTransactionIndices.map(transactionIndex => {
+    transactionLabels = filteredTransactionIndices.map(transactionIndex => {
       const label = document.createElement('span');
       const amount = transactions[transactionIndex][amountFieldIndex];
       label.string = formatAmountForLabel(amount);
@@ -270,26 +273,26 @@ function Timeline({transactions, fields, timestamps, balances}) {
       label.style.marginLeft = (label.string.length * labelCharacterWidth * -0.5) + 'px';
       return label;
     });
-    transactionLabelsElement.append(...transactionLabelElements);
+    transactionLabelsContainer.append(...transactionLabels);
 
     updateTransactionLabelsVisibility();
   }
 
   function updateTransactionLabelsVisibility() {
-    if (transactionLabelElements.length === 0) {
+    if (transactionLabels.length === 0) {
       return;
     }
 
     const minLabelMargin = 2;
     const collapsedLabelWidth = 6;
-    const labelsElementWidth = transactionLabelsElement.getBoundingClientRect().width;
+    const labelsElementWidth = transactionLabelsContainer.getBoundingClientRect().width;
 
-    for (const label of transactionLabelElements) {
+    for (const label of transactionLabels) {
       label.isCollapsed = true;
     }
 
-    for (let i=0; i<transactionLabelElements.length; i++) {
-      const label = transactionLabelElements[i];
+    for (let i=0; i<transactionLabels.length; i++) {
+      const label = transactionLabels[i];
       const labelX = label.x * labelsElementWidth;
       const labelTextWidth = label.string.length * labelCharacterWidth;
       const labelTextLeft  = labelX - (labelTextWidth / 2);
@@ -297,7 +300,7 @@ function Timeline({transactions, fields, timestamps, balances}) {
 
       let hasSpaceLeft = true;
       if (i > 0) {
-        const previousLabel = transactionLabelElements[i-1];
+        const previousLabel = transactionLabels[i-1];
         let previousLabelRight = previousLabel.x * labelsElementWidth;
         if (previousLabel.isCollapsed) {
           previousLabelRight += collapsedLabelWidth / 2;
@@ -310,8 +313,8 @@ function Timeline({transactions, fields, timestamps, balances}) {
       }
 
       let hasSpaceRight = true;
-      if (i < transactionLabelElements.length-1) {
-        const nextLabel = transactionLabelElements[i+1];
+      if (i < transactionLabels.length-1) {
+        const nextLabel = transactionLabels[i+1];
         let nextLabelLeft = nextLabel.x * labelsElementWidth;
         if (nextLabel.isCollapsed) {
           nextLabelLeft -= collapsedLabelWidth / 2;
@@ -329,11 +332,11 @@ function Timeline({transactions, fields, timestamps, balances}) {
   }
   window.addEventListener('resize', updateTransactionLabelsVisibility);
 
-  transactionLabelsElement.onmousemove = event => {
+  transactionLabelsContainer.onmousemove = event => {
     if (filteredTransactionIndices.length > 0) {
       const startTimestamp = timestamps[filteredTransactionIndices[0]];
       const endTimestamp   = timestamps[filteredTransactionIndices[filteredTransactionIndices.length-1]];
-      const labelsElementWidth = transactionLabelsElement.getBoundingClientRect().width;
+      const labelsElementWidth = transactionLabelsContainer.getBoundingClientRect().width;
       const cursorTimestamp = timestamps[0] + ((event.offsetX / labelsElementWidth) * totalDuration);
       let i = Math.round(filteredTransactionIndices.length * ((cursorTimestamp - startTimestamp) / (endTimestamp - startTimestamp)));
       i = Math.max(i, 0);
@@ -355,7 +358,7 @@ function Timeline({transactions, fields, timestamps, balances}) {
     }
   }
 
-  transactionLabelsElement.onmouseout = () => {
+  transactionLabelsContainer.onmouseout = () => {
     self.setHoveredTransaction(null);
     self.onTransactionHover(null);
   }
