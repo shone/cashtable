@@ -1,3 +1,5 @@
+'use strict';
+
 const openFileScreen = document.getElementById('open-file-screen');
 openFileScreen.ondragenter = () => openFileScreen.classList.add('dragging-file-over');
 openFileScreen.ondragleave = () => openFileScreen.classList.remove('dragging-file-over');
@@ -117,6 +119,9 @@ function loadCsvString(csvString) {
   timeline.onTransactionHover = transactionIndex => {
     table.setHoveredTransaction(transactionIndex);
   }
+  timeline.onTransactionClicked = transactionIndex => {
+    table.scrollTransactionIntoView(transactionIndex);
+  }
 
   table.onTransactionHover = transactionIndex => {
     timeline.setHoveredTransaction(transactionIndex);
@@ -134,11 +139,11 @@ function dateStringToTimestampMs(string) {
 document.getElementById('separator').onmousedown = event => {
   event.preventDefault();
   let lastPageY = event.pageY;
-  const timelineContainer = document.getElementById('timeline-container');
+  const timeline = document.getElementById('timeline');
   function handleMousemove(event) {
     const delta = event.pageY - lastPageY;
-    const currentHeight = parseInt(timelineContainer.style.height || '250px');
-    timelineContainer.style.height = (Math.min(currentHeight, window.innerHeight - 15) + delta) + 'px';
+    const currentHeight = parseInt(timeline.style.height || '250px');
+    timeline.style.height = (Math.min(currentHeight, window.innerHeight - 15) + delta) + 'px';
     lastPageY = event.pageY;
   }
   window.addEventListener('mousemove', handleMousemove);

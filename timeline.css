@@ -6,6 +6,7 @@
   flex-shrink: 0;
   position: relative;
 }
+
 #timeline svg {
   position: absolute;
   top:  20px;
@@ -42,19 +43,21 @@
   stroke-width: 1px;
   transform: scaleY(-1) translateY(-1px);
 }
-#timeline .transaction-labels-container {
+
+#timeline .top-area {
   position: absolute;
   left:  20px;
   right: 40px;
   top: 0;
   height: 20px;
 }
-#timeline .transaction-labels {
+#timeline .top-area .transaction-labels {
   position: absolute;
   top:    0;
   bottom: 0;
+  pointer-events: none;
 }
-#timeline .transaction-labels span {
+#timeline .top-area .transaction-labels label {
   font-family: monospace;
   background: red;
   color: white;
@@ -64,22 +67,24 @@
   height: 15px;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
-  pointer-events: none;
+  pointer-events: auto;
 }
-#timeline .transaction-labels span.collapsed {
+#timeline .top-area .transaction-labels label.collapsed {
   font-size: 0;
   width: 6px !important;
   margin-left: -3px !important;
 }
-#timeline .transaction-labels span.hidden {
+#timeline .top-area .transaction-labels label.hidden {
   display: none;
 }
-#timeline .hovered-transaction-label {
+#timeline .top-area .transaction-labels .hovered-transaction-label {
   z-index: 1;
   box-shadow: 0 0 4px black;
   background: green;
+  pointer-events: none;
 }
-.timeline-date-labels {
+
+#timeline .timeline-date-labels {
   position: absolute;
   left: 20px;
   right: 40px;
@@ -88,7 +93,7 @@
 }
 #timeline .month-labels { bottom: 40px; }
 #timeline .year-labels  { bottom: 20px; }
-.timeline-date-labels span {
+#timeline .timeline-date-labels span {
   position: absolute;
   top:    0;
   bottom: 0;
@@ -99,6 +104,7 @@
   border-right: 1px solid white;
   user-select: none;
 }
+
 #timeline .x-axis-controls {
   position: absolute;
   left:   0;

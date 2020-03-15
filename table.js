@@ -1,3 +1,5 @@
+'use strict';
+
 function Table({transactions, fields, timestamps, balances}) {
   const self = this;
 
@@ -177,6 +179,21 @@ function Table({transactions, fields, timestamps, balances}) {
     }
     if (transactionIndex !== null) {
       document.querySelector('tbody').children[(transactions.length-1) - transactionIndex].classList.add('hover');
+    }
+  }
+
+  self.scrollTransactionIntoView = transactionIndex => {
+    const trElement = document.querySelector('tbody').children[(transactions.length-1) - transactionIndex];
+    const tableContainerElement = document.querySelector('.table-container');
+    let targetScrollTop = null;
+    if (trElement.offsetTop < (tableContainerElement.scrollTop + 100)) {
+      targetScrollTop = trElement.offsetTop - 100;
+    } else if (trElement.offsetTop > (tableContainerElement.scrollTop + tableContainerElement.offsetHeight - 100)) {
+      targetScrollTop = (trElement.offsetTop - tableContainerElement.offsetHeight) + 100;
+    }
+    if (targetScrollTop !== null) {
+      const scrollDelta = targetScrollTop - tableContainerElement.scrollTop;
+      tableContainerElement.scrollTo({top: targetScrollTop, behavior: Math.abs(scrollDelta) < 2000 ? 'smooth' : 'auto'});
     }
   }
 }

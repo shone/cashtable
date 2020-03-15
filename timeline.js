@@ -1,3 +1,5 @@
+'use strict';
+
 function initTimeline({transactions, fields, timestamps, balances}) {
   const self = this;
 
@@ -7,6 +9,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   const svgGroup                   = timeline.querySelector('svg g');
   const yearLabelsContainer        = timeline.querySelector('.year-labels');
   const monthLabelsContainer       = timeline.querySelector('.month-labels');
+  const topArea                    = timeline.querySelector('.top-area');
   const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
   const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
   const hoveredTransactionMarker   = timeline.querySelector('.hovered-transaction-marker');
@@ -46,7 +49,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     if ((year % 2) === 0) {
       const timestampStart = new Date(year,     0, 1).getTime();
       const timestampEnd   = new Date(year + 1, 0, 1).getTime();
-      yearDurationMs = timestampEnd - timestampStart;
+      const yearDurationMs = timestampEnd - timestampStart;
       yearsPath += `M ${(timestampStart - timestamps[0]) / totalDuration} -1 h ${yearDurationMs / totalDuration} v 3 h -${yearDurationMs / totalDuration} Z `;
     }
     for (let month = 0; month < 12; month += 2) {
@@ -198,23 +201,15 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     }
   }
 
+  self.onTransactionClicked = transactionIndex => {};
+
   svg.onmouseup = event => {
     if (isDraggingTimeline) {
       return;
     }
     const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-    const trElement = document.querySelector('tbody').children[(transactions.length-1) - transactionIndex];
-    const tableContainerElement = document.querySelector('.table-container');
-    let targetScrollTop = null;
-    if (trElement.offsetTop < (tableContainerElement.scrollTop + 100)) {
-      targetScrollTop = trElement.offsetTop - 100;
-    } else if (trElement.offsetTop > (tableContainerElement.scrollTop + tableContainerElement.offsetHeight - 100)) {
-      targetScrollTop = (trElement.offsetTop - tableContainerElement.offsetHeight) + 100;
-    }
-    if (targetScrollTop !== null) {
-      const scrollDelta = targetScrollTop - tableContainerElement.scrollTop;
-      tableContainerElement.scrollTo({top: targetScrollTop, behavior: Math.abs(scrollDelta) < 2000 ? 'smooth' : 'auto'});
-    }
+    self.onTransactionClicked(transactionIndex);
+
   }
 
   self.onTransactionHover = transactionIndex => {};
@@ -263,7 +258,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
       transactionLabels.pop().remove();
     }
     transactionLabels = filteredTransactionIndices.map(transactionIndex => {
-      const label = document.createElement('span');
+      const label = document.createElement('label');
       const amount = transactions[transactionIndex][amountFieldIndex];
       label.string = formatAmountForLabel(amount);
       label.x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
@@ -271,6 +266,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
       label.style.left = (label.x * 100) + '%';
       label.style.width = (label.string.length * labelCharacterWidth) + 'px';
       label.style.marginLeft = (label.string.length * labelCharacterWidth * -0.5) + 'px';
+      label.transactionIndex = transactionIndex;
       return label;
     });
     transactionLabelsContainer.append(...transactionLabels);
@@ -332,33 +328,27 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   }
   window.addEventListener('resize', updateTransactionLabelsVisibility);
 
-  transactionLabelsContainer.onmousemove = event => {
-    if (filteredTransactionIndices.length > 0) {
-      const startTimestamp = timestamps[filteredTransactionIndices[0]];
-      const endTimestamp   = timestamps[filteredTransactionIndices[filteredTransactionIndices.length-1]];
-      const labelsElementWidth = transactionLabelsContainer.getBoundingClientRect().width;
-      const cursorTimestamp = timestamps[0] + ((event.offsetX / labelsElementWidth) * totalDuration);
-      let i = Math.round(filteredTransactionIndices.length * ((cursorTimestamp - startTimestamp) / (endTimestamp - startTimestamp)));
-      i = Math.max(i, 0);
-      i = Math.min(i, filteredTransactionIndices.length-1);
-      while (true) {
-        const delta     = Math.abs(cursorTimestamp - timestamps[filteredTransactionIndices[i  ]]);
-        const deltaNext = Math.abs(cursorTimestamp - timestamps[filteredTransactionIndices[i+1]]);
-        const deltaPrev = Math.abs(cursorTimestamp - timestamps[filteredTransactionIndices[i-1]]);
-        if (!isNaN(deltaNext) && (deltaNext < delta) && (deltaNext <= deltaPrev)) { i++; continue; }
-        if (!isNaN(deltaPrev) && (deltaPrev < delta) && (deltaPrev <  deltaNext)) { i--; continue; }
-        self.setHoveredTransaction(filteredTransactionIndices[i]);
-        self.onTransactionHover(filteredTransactionIndices[i]);
-        return;
-      }
-    } else {
+  topArea.onmousemove = event => {
+    if (event.target === topArea) {
       const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
       self.setHoveredTransaction(transactionIndex);
       self.onTransactionHover(transactionIndex);
+    } else if (event.target.tagName === 'LABEL') {
+      self.setHoveredTransaction(event.target.transactionIndex);
+      self.onTransactionHover(event.target.transactionIndex);
     }
   }
 
-  transactionLabelsContainer.onmouseout = () => {
+  topArea.onclick = event => {
+    if (event.target === topArea) {
+      const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
+      self.onTransactionClicked(transactionIndex);
+    } else if (event.target.tagName === 'LABEL') {
+      self.onTransactionClicked(event.target.transactionIndex);
+    }
+  }
+
+  topArea.onmouseout = () => {
     self.setHoveredTransaction(null);
     self.onTransactionHover(null);
   }
