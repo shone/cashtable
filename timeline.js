@@ -229,8 +229,7 @@ function Timeline({transactions, fields, timestamps, balances}) {
   }
 
   function formatAmountForLabel(amount) {
-    const string = amount.toFixed(2);
-    return amount > 0 ? '+' + string : string;
+    return `${amount > 0 ? '+' : ''}${amount.toFixed(2)}`;
   }
 
   self.setHoveredTransaction = transactionIndex => {
@@ -252,16 +251,80 @@ function Timeline({transactions, fields, timestamps, balances}) {
     }
   }
 
+  self.setFilteredTransactions = transactionIndices => {
+    filteredTransactionIndices = transactionIndices;
+    const timelineMarkersPath = transactionIndices.map(transactionIndex => `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},-0.1 v 1.2 `).join('');
+    document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
+
+    while (transactionLabelElements.length > 0) {
+      transactionLabelElements.pop().remove();
+    }
+    transactionLabelElements = filteredTransactionIndices.map(transactionIndex => {
+      const label = document.createElement('span');
+      const amount = transactions[transactionIndex][amountFieldIndex];
+      label.string = formatAmountForLabel(amount);
+      label.x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
+      label.textContent = label.string;
+      label.style.left = (label.x * 100) + '%';
+      label.style.width = (label.string.length * labelCharacterWidth) + 'px';
+      label.style.marginLeft = (label.string.length * labelCharacterWidth * -0.5) + 'px';
+      return label;
+    });
+    transactionLabelsElement.append(...transactionLabelElements);
+
+    updateTransactionLabelsVisibility();
+  }
+
   function updateTransactionLabelsVisibility() {
-    const rangeDuration = timestampRangeEnd - timestampRangeStart;
+    if (transactionLabelElements.length === 0) {
+      return;
+    }
+
+    const minLabelMargin = 2;
+    const collapsedLabelWidth = 6;
     const labelsElementWidth = transactionLabelsElement.getBoundingClientRect().width;
 
-    for (let i=1; i<transactionLabelElements.length; i++) {
-      const cntLabel = transactionLabelElements[i];
-      const nxtLabel = transactionLabelElements[i-1];
-      const nxtLabelLeft  = (nxtLabel.x * labelsElementWidth) - (nxtLabel.string.length * labelCharacterWidth * 0.5);
-      const cntLabelRight = (cntLabel.x * labelsElementWidth) + (cntLabel.string.length * labelCharacterWidth * 0.5);
-      nxtLabel.classList.toggle('collapsed', (nxtLabelLeft - cntLabelRight) < 2);
+    for (const label of transactionLabelElements) {
+      label.isCollapsed = true;
+    }
+
+    for (let i=0; i<transactionLabelElements.length; i++) {
+      const label = transactionLabelElements[i];
+      const labelX = label.x * labelsElementWidth;
+      const labelTextWidth = label.string.length * labelCharacterWidth;
+      const labelTextLeft  = labelX - (labelTextWidth / 2);
+      const labelTextRight = labelX + (labelTextWidth / 2);
+
+      let hasSpaceLeft = true;
+      if (i > 0) {
+        const previousLabel = transactionLabelElements[i-1];
+        let previousLabelRight = previousLabel.x * labelsElementWidth;
+        if (previousLabel.isCollapsed) {
+          previousLabelRight += collapsedLabelWidth / 2;
+        } else {
+          previousLabelRight += (previousLabel.string.length * labelCharacterWidth) / 2;
+        }
+        if ((labelTextLeft - previousLabelRight) < minLabelMargin) {
+          hasSpaceLeft = false;
+        }
+      }
+
+      let hasSpaceRight = true;
+      if (i < transactionLabelElements.length-1) {
+        const nextLabel = transactionLabelElements[i+1];
+        let nextLabelLeft = nextLabel.x * labelsElementWidth;
+        if (nextLabel.isCollapsed) {
+          nextLabelLeft -= collapsedLabelWidth / 2;
+        } else {
+          nextLabelLeft -= (nextLabel.string.length * labelCharacterWidth) / 2;
+        }
+        if ((nextLabelLeft - labelTextRight) < minLabelMargin) {
+          hasSpaceRight = false;
+        }
+      }
+
+      label.isCollapsed = !(hasSpaceLeft && hasSpaceRight);
+      label.classList.toggle('collapsed', label.isCollapsed);
     }
   }
   window.addEventListener('resize', updateTransactionLabelsVisibility);
@@ -295,31 +358,5 @@ function Timeline({transactions, fields, timestamps, balances}) {
   transactionLabelsElement.onmouseout = () => {
     self.setHoveredTransaction(null);
     self.onTransactionHover(null);
-  }
-
-  self.setFilteredTransactions = transactionIndices => {
-    filteredTransactionIndices = transactionIndices;
-    const timelineMarkersPath = transactionIndices.map(transactionIndex => `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},-0.1 v 1.2 `).join('');
-    document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
-
-    while (transactionLabelElements.length > 0) {
-      const labelElement = transactionLabelElements.pop();
-      labelElement.remove();
-    }
-    transactionLabelElements = filteredTransactionIndices.map(transactionIndex => {
-      const label = document.createElement('span');
-      const amount = transactions[transactionIndex][amountFieldIndex];
-      label.string = formatAmountForLabel(amount);
-      label.x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
-      label.textContent = label.string;
-      label.style.left = (label.x * 100) + '%';
-      label.style.width = (label.string.length * labelCharacterWidth) + 'px';
-      label.style.marginLeft = (label.string.length * labelCharacterWidth * -0.5) + 'px';
-      return label;
-    });
-    transactionLabelElements.reverse();
-    transactionLabelsElement.append(...transactionLabelElements);
-
-    updateTransactionLabelsVisibility();
   }
 }
