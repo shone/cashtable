@@ -55,9 +55,11 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   let years  = [];
   let months = [];
   for (let year = firstYear; year <= (lastYear + 1); year++) {
-    years.push({number: year, positionRatio: (new Date(year, 0, 1).getTime() - timestamps[0]) / totalDuration});
+    const yearTimestamp = new Date(year, 0, 1).getTime();
+    years.push({number: year, timestamp: yearTimestamp, positionRatio: (yearTimestamp - timestamps[0]) / totalDuration});
     for (let month = 0; month < 12; month++) {
-      months.push({number: month, positionRatio: (new Date(year, month, 1).getTime() - timestamps[0]) / totalDuration});
+      const monthTimestamp = new Date(year, month, 1).getTime();
+      months.push({number: month, timestamp: monthTimestamp, positionRatio: (monthTimestamp - timestamps[0]) / totalDuration});
     }
   }
 
@@ -349,6 +351,26 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     const labelWidth = labelContainerWidth * (averageMonthMs / rangeDuration);
     const longNameWidth = 40;
     monthLabelsContainer.dataset.length = labelWidth < longNameWidth ? 'short' : 'long';
+
+    years.slice(0, -1).forEach((year, index) => {
+      const label = yearLabelsContainer.children[index];
+
+      // Overhangs the left edge of the screen?
+      if (year.timestamp < timestampRangeStart && years[index+1].timestamp > timestampRangeStart) {
+        // Move text so it stays on the screen
+        label.style.paddingLeft = `${((timestampRangeStart - year.timestamp) / totalDuration) * 100}%`;
+      } else {
+        label.style.paddingLeft = null;
+      }
+
+      // Overhangs the right edge of the screen?
+      if (year.timestamp < timestampRangeEnd && years[index+1].timestamp > timestampRangeEnd) {
+        // Move text so it stays on the screen
+        label.style.paddingRight = `${((years[index+1].timestamp - timestampRangeEnd) / totalDuration) * 100}%`;
+      } else {
+        label.style.paddingRight = null;
+      }
+    });
   }
 
   window.addEventListener('resize', () => {
