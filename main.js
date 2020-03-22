@@ -1,31 +1,53 @@
 'use strict';
 
-const openFileScreen = document.getElementById('open-file-screen');
-openFileScreen.ondragenter = () => openFileScreen.classList.add('dragging-file-over');
-openFileScreen.ondragleave = () => openFileScreen.classList.remove('dragging-file-over');
-openFileScreen.ondrop = async event => {
+const landingPage = document.getElementById('landing-page');
+
+// Setup 'Open CSV file' buttons
+const fileInput = landingPage.querySelector('input[type="file"]');
+landingPage.querySelector('header .open-file-button').onclick = () => fileInput.click();
+landingPage.querySelector('#intro .open-file-button').onclick = () => fileInput.click();
+fileInput.onchange = async event => {
+  const files = event.target.files;
+  if (files.length === 1) {
+    await loadCsvFile(files[0]);
+    landingPage.remove();
+    document.getElementById('app').classList.add('loaded');
+  }
+}
+
+// Setup drag-drop
+landingPage.ondragenter = () => landingPage.classList.add('dragging-file-over');
+landingPage.ondragleave = () => landingPage.classList.remove('dragging-file-over');
+landingPage.ondrop = async event => {
   event.preventDefault();
   const items = event.dataTransfer.items;
   if (items && items.length === 1 && items[0].kind === 'file') {
     const file = items[0].getAsFile();
     await loadCsvFile(file);
-    openFileScreen.remove();
+    landingPage.remove();
+    document.getElementById('app').classList.add('loaded');
   }
 }
-openFileScreen.ondragover = event => event.preventDefault();
-document.getElementById('open-file-button').onclick = () => {
-  openFileScreen.querySelector('input[type="file"]').click();
-}
-openFileScreen.querySelector('input[type="file"]').onchange = async event => {
-  const files = event.target.files;
-  if (files.length === 1) {
-    await loadCsvFile(files[0]);
-    openFileScreen.remove();
-  }
-}
+landingPage.ondragover = event => event.preventDefault();
+
 document.getElementById('view-sample-csv-button').onclick = async () => {
-  await loadCsvString(generateSampleCsv());
-  openFileScreen.remove();
+  const sampleCsv = generateSampleCsv();
+  await loadCsvString(sampleCsv);
+  landingPage.remove();
+  document.getElementById('app').classList.add('loaded');
+}
+
+// Slide-in 'Get your CSV file' instructions when they are scrolled to
+const csvInstructionsRevealer = new IntersectionObserver(
+  entries => entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  }),
+  {threshold: 0.2}
+);
+for (const div of document.querySelectorAll('#csv-instructions div')) {
+  csvInstructionsRevealer.observe(div);
 }
 
 let transactions = []
@@ -136,7 +158,7 @@ function dateStringToTimestampMs(string) {
   return new Date(parseInt(year), parseInt(month)-1, parseInt(day)).getTime();
 }
 
-document.getElementById('separator').onmousedown = event => {
+document.getElementById('splitter').onmousedown = event => {
   event.preventDefault();
   let lastPageY = event.pageY;
   const timeline = document.getElementById('timeline');

@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="utf-8"/>
-    <title>N26 Transaction Explorer</title>
+    <title>Transaction Explorer</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="timeline.css">
     <link rel="stylesheet" href="table.css">
@@ -12,67 +12,125 @@
 
   <body>
 
-    <div id="open-file-screen">
-      <h1>Number26 Transaction Explorer</h1>
-      <p>Graph, filter and analyze Number26 bank account CSV data.</p>
-      <div class="file-options">
-        <div class="drag-drop">Drag-drop CSV file</div>
-        <div class="separator">or</div>
-        <input type="file">
-        <button id="open-file-button">Choose CSV file...</button>
-        <div class="separator">or</div>
-        <button id="view-sample-csv-button">View sample CSV</button>
-      </div>
+    <div id="landing-page">
+      <header>
+        <h1>Transaction Explorer</h1>
+        <a href="https://github.com/joshua-shone/n26">Source code</a>
+        <a href="https://joshshone.com">Author</a>
+        <button class="open-file-button">Open CSV file</button>
+      </header>
+      <section id="intro">
+        <h2>A fan-made analysis app</h2>
+        <p>
+          Use this unofficial app to graph, filter and analyze your N26 bank account transactions.
+          All without your banking data leaving your computer.
+        </p>
+        <div>
+          <input type="file" accept=".csv">
+          <button class="open-file-button">Open CSV file</button>
+        </div>
+      </section>
+      <section id="preview">
+        <img src="screenshot.png">
+        <button id="view-sample-csv-button">View Sample Data</button>
+      </section>
+      <section id="csv-instructions">
+        <h2>Get your CSV file</h2>
+        <div>
+          <img src="n26_online_banking_link.png" width="363" height="94"></img>
+          <p>
+            Go to the N26 website to access Online Banking.
+          </p>
+        </div>
+        <div>
+          <img src="n26_download_button.png" width="141" height="132"></img>
+          <p>
+            Go to the downloads section.
+          </p>
+        </div>
+        <div>
+          <img src="n26_csv_date_selector.png" width="449" height="420"></img>
+          <p>
+            Select your entire transaction history.
+          </p>
+        </div>
+        <div>
+          <img src="n26_download_csv_button.png" width="200" height="80"></img>
+          <p>
+            Download your CSV file.
+          </p>
+        </div>
+      </section>
+      <section id="security-information">
+        <h2>Security information</h2>
+        <p>Your CSV file contains personal information such as:</p>
+        <ul>
+          <li>Account numbers</li>
+          <li>Names</li>
+          <li>Transaction amounts</li>
+        </ul>
+        <p>Keep this file in a secure location, or delete it after use.</p>
+        <p>Note that this app processes CSV data locally, without sending it to an external server.</p>
+        <p>
+          <a href="https://github.com/joshua-shone/n26">View source on GitHub</a>
+        </p>
+      </section>
+      <section id="disclaimer">
+        <h2>Disclaimer</h2>
+        <p>This app and its author are not affiliated or endorsed by N26 GmbH or any other bank.</p>
+      </section>
     </div>
 
-    <div id="timeline">
-      <svg viewBox="0 0 1 1" preserveAspectRatio="none">
-        <g>
-          <path class="years"   vector-effect="non-scaling-stroke"/>
-          <path class="months"  vector-effect="non-scaling-stroke"/>
-          <path class="balance" vector-effect="non-scaling-stroke"/>
-          <path class="filtered-transaction-markers" vector-effect="non-scaling-stroke"/>
-          <path class="hovered-transaction-marker"   vector-effect="non-scaling-stroke"/>
-        </g>
-      </svg>
-      <div class="top-area">
-        <div class="transaction-labels">
-          <label class="hovered-transaction-label"></label>
+    <div id="app">
+      <div id="timeline">
+        <svg viewBox="0 0 1 1" preserveAspectRatio="none">
+          <g>
+            <path class="years"   vector-effect="non-scaling-stroke"/>
+            <path class="months"  vector-effect="non-scaling-stroke"/>
+            <path class="balance" vector-effect="non-scaling-stroke"/>
+            <path class="filtered-transaction-markers" vector-effect="non-scaling-stroke"/>
+            <path class="hovered-transaction-marker"   vector-effect="non-scaling-stroke"/>
+          </g>
+        </svg>
+        <div class="top-area">
+          <div class="transaction-labels">
+            <label class="hovered-transaction-label"></label>
+          </div>
         </div>
-      </div>
-      <div class="x-axis-controls">
-        <div class="timeline-date-labels month-labels"></div>
-        <div class="timeline-date-labels year-labels" ></div>
-        <div class="range-slider" data-orientation="horizontal">
-          <div class="handles">
-            <span class="handle minimum"></span>
-            <span class="handle maximum"></span>
+        <div class="x-axis-controls">
+          <div class="timeline-date-labels month-labels"></div>
+          <div class="timeline-date-labels year-labels" ></div>
+          <div class="range-slider" data-orientation="horizontal">
+            <div class="handles">
+              <span class="handle minimum"></span>
+              <span class="handle maximum"></span>
+            </div>
+          </div>
+        </div>
+        <div class="y-axis-controls">
+          <div class="range-slider" data-orientation="vertical">
+            <div class="handles">
+              <span class="handle minimum"></span>
+              <span class="handle maximum"></span>
+            </div>
           </div>
         </div>
       </div>
-      <div class="y-axis-controls">
-        <div class="range-slider" data-orientation="vertical">
-          <div class="handles">
-            <span class="handle minimum"></span>
-            <span class="handle maximum"></span>
-          </div>
-        </div>
+
+      <div id="splitter"></div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr class="field-names"></tr>
+            <tr class="filters"></tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr class="totals">
+          </tfoot>
+        </table>
       </div>
-    </div>
-
-    <div id="separator"></div>
-
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr class="field-names"></tr>
-          <tr class="filters"></tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr class="totals">
-        </tfoot>
-      </table>
     </div>
   </body>
 

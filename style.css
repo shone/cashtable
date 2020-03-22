@@ -1,16 +1,14 @@
 html {
-  height: 100%;
+  font-family: sans-serif;
   --teal: #36a18b;
   --teal-highlight: #40bfa5;
   --rhubarb: #cc7d7a;
   --sand: #cda15e;
   --ocean: #286778;
+  --secondary-petrol: #c8d7e5;
 }
 body {
   margin: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 button {
@@ -24,37 +22,220 @@ button:focus {
   outline: none;
 }
 
-#open-file-screen {
+#landing-page {
+  display: flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+  --header-height: 70px;
+  padding-top: var(--header-height);
+}
+#landing-page header {
   position: fixed;
-  width:  100%;
-  height: 100%;
-  box-sizing: border-box;
-  padding: 15px;
+  top:   0;
+  left:  0;
+  right: 0;
   z-index: 1;
+  height: var(--header-height);
+  --max-header-width: 1370px;
   background: white;
+  padding-left:  35px;
+  padding-right: 35px;
+  display: flex;
+  align-items: center;
+}
+@media (min-width: 1450px) {
+  #landing-page header {
+    padding-left:  calc((100vw - var(--max-header-width)) / 2);
+    padding-right: calc((100vw - var(--max-header-width)) / 2);
+  }
+}
+#landing-page header a {
+  color: black;
+  text-decoration: none;
+  margin-left:  15px;
+  margin-right: 15px;
+}
+#landing-page header a:hover {
+  color: var(--teal);
+}
+#landing-page header button {
+  background: var(--teal);
+  color: white;
+  height: 40px;
+  min-height: 40px;
+  min-width: 170px;
+  font-size: 14px;
+  margin-left: 10px;
+}
+#landing-page header button:hover {
+  background: var(--teal-highlight);
+}
+#landing-page h1 {
+  font-size: 25px;
+  margin-right: auto;
+}
+#landing-page h2 {
+  font-size: 39.6px;
+  margin-top:    15px;
+  margin-bottom: 15px;
+}
+#landing-page p {
+  font-size: 18px;
+  line-height: 1.75;
+  margin-top:    10px;
+  margin-bottom: 10px;
+}
+#landing-page section {
+  width: 500px;
+  min-height: 500px;
+  height: calc(100vh - 200px);
+  padding: 30px;
+  flex-grow: 1;
+  box-sizing: border-box;
+}
+#landing-page button {
+  font-weight: bold;
+  min-width: 250px;
+  min-height: 48px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  padding-left:  30px;
+  padding-right: 30px;
+  border-radius: 6px;
+  font-size: 18px;
+  box-shadow: 2px 3px 8px #00000061;
+  position: relative;
+}
+#landing-page button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 5px #00000061;
+}
+
+section#intro {
+  background: var(--ocean);
+  color: white;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  overflow-y: auto;
-  box-shadow: none;
-  transition: 0.5s box-shadow;
+  justify-content: center;
 }
-#open-file-screen h1 {
-  text-align: center;
+section#intro h2 {
+  font-size: 34px;
 }
-#open-file-screen.dragging-file-over {
-  box-shadow: inset 0 0 20px 9px rgba(54, 161, 139, 0.6);
+section#intro > * {
+  width: 450px;
+  max-width: calc(100vw - 75px);
+  margin-left:  auto;
+  margin-right: auto;
 }
-#open-file-screen .file-options {
-  flex-grow: 1;
+section#intro button {
+  background: #bed1d7;
+  color: var(--ocean);
+  display: inline-block;
+}
+section#intro button:hover {
+  background: #d6eaf1;
+}
+section#intro input[type='file'] {
+  display: none;
+}
+
+section#preview {
+  background: var(--secondary-petrol);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items:     center;
-  padding-top:    40px;
-  padding-bottom: 40px;
 }
-#open-file-screen.dragging-file-over * {
+section#preview img[src="screenshot.png"] {
+  width: 80%;
+  margin: 20px;
+  box-shadow: 5px 8px 35px rgba(0, 0, 0, 0.4);
+}
+section#preview button {
+  background: var(--teal);
+  color: white;
+}
+section#preview button:hover {
+  background: var(--teal-highlight);
+}
+
+section#csv-instructions {
+  height: auto;
+  width: 100vw;
+}
+section#csv-instructions h2 {
+  text-align: center;
+}
+section#csv-instructions > div {
+  display: flex;
+  margin-top:    60px;
+  margin-bottom: 60px;
+  margin-left:  auto;
+  margin-right: auto;
+  max-width: 800px;
+}
+
+section#csv-instructions > div > * {
+  flex-grow: 1;
+  width: 100px;
+  opacity: 0;
+  transition: 1s opacity, 1s transform;
+}
+section#csv-instructions > div > img {
+  object-fit: contain;
+  object-position: right;
+  margin-right: 40px;
+  transform: translate(-200px);
+}
+section#csv-instructions > div > p {
+  margin-left: 40px;
+  transform: translate(200px);
+}
+section#csv-instructions > div.visible > * {
+  opacity: 1;
+  transform: translate(0);
+}
+
+section#security-information {
+  background: var(--rhubarb);
+  color: white;
+  height: auto;
+  min-height: auto;
+}
+section#security-information > * {
+  width: 450px;
+  max-width: 100%;
+  margin-left:  auto;
+  margin-right: auto;
+}
+section#security-information a {
+  display: inline-block;
+  line-height: 30px;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  background: no-repeat right / 12px 20px url('data:image/svg+xml;utf8,<svg width="12" height="20" xmlns="http://www.w3.org/2000/svg"><path fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M2,2 L10,10 L2,18"/></svg>');
+  padding-right: 22px;
+}
+
+section#disclaimer {
+  background: var(--sand);
+  color: white;
+  height: auto;
+  min-height: auto;
+}
+section#disclaimer > * {
+  width: 450px;
+  max-width: 100%;
+  margin-left:  auto;
+  margin-right: auto;
+}
+
+/*#open-file-screen.dragging-file-over {
+  box-shadow: inset 0 0 20px 9px rgba(54, 161, 139, 0.6);
+}*/
+/*#open-file-screen.dragging-file-over * {
   pointer-events: none;
 }
 #open-file-screen :not(.drag-drop) {
@@ -65,78 +246,32 @@ button:focus {
 }
 #open-file-screen.dragging-file-over .file-options {
   opacity: 1;
-}
-#open-file-screen .file-options .separator {
-  font-style: italic;
-  position: relative;
-  color: #666;
-  margin-top:    20px;
-  margin-bottom: 20px;
-}
-#open-file-screen .file-options .separator::before {
-  content: '';
-  position: absolute;
-  top: calc(55%);
-  right: calc(100% + 5px);
-  height: 1px;
-  width: 20px;
-  background: #666;
-}
-#open-file-screen .file-options .separator::after {
-  content: '';
-  position: absolute;
-  top: calc(55%);
-  left: calc(100% + 5px);
-  height: 1px;
-  width: 20px;
-  background: #666;
-}
-#open-file-screen .drag-drop {
+}*/
+/*#open-file-screen .drag-drop {
   font-size: 22px;
   text-align: center;
+}*/
+
+#app {
+  display:none;
 }
-#open-file-screen button {
-  background: #36a18b;
-  color: white;
-  font-weight: bold;
-  width: 250px;
-  padding: 10px;
-  padding-left:  30px;
-  padding-right: 30px;
-  border-radius: 6px;
-  font-size: 18px;
-  box-shadow: 2px 3px 8px #00000061;
-  outline: none;
-  position: relative;
-}
-#open-file-screen button:hover {
-  background: #40c1a7;
-}
-#open-file-screen button:focus::before {
-  content: '';
-  position: absolute;
-  left:   -3px;
-  top:    -3px;
-  right:  -3px;
-  bottom: -3px;
-  border: 2px solid #36a18b;
-  border-radius: 8px;
-}
-#open-file-screen button:active {
-  transform: translate(3px, 3px);
-  box-shadow: 1px 1px 5px #00000061;
-}
-#open-file-screen input[type='file'] {
-  display: none;
+#app.loaded {
+  position: fixed;
+  left:   0;
+  top:    0;
+  right:  0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-#separator {
+#splitter {
   height: 15px;
   flex-shrink: 0;
   flex-grow:   0;
   cursor: ns-resize;
   background: no-repeat center / contain url('data:image/svg+xml;utf8,<svg width="70" height="40" viewBox="0 0 18.5 10.6" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="black" stroke-linecap="round" stroke-width="1.8"><path d="M1 3.5h16.5M1 6.9h16.5"/></g></svg>');
 }
-#separator:hover {
+#splitter:hover {
   background-color: #ddd;
 }
