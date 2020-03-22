@@ -146,20 +146,31 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   }
   updateRange();
 
-  svg.onwheel = event => {
-    let timestampZoomAmount = (timestampRangeEnd - timestampRangeStart) * ((event.deltaY < 0) ? 0.1 : -0.1);
-    let balanceZoomAmount   = (balanceRangeEnd   - balanceRangeStart  ) * ((event.deltaY < 0) ? 0.1 : -0.1);
-    if (event.altKey)   timestampZoomAmount = 0;
-    if (event.shiftKey) balanceZoomAmount   = 0;
-    const boundingRect = svg.getBoundingClientRect();
-    const cursorXRatio = event.offsetX / boundingRect.width;
-    const cursorYRatio = event.offsetY / boundingRect.height;
+  function zoom({amount, origin}) {
+    const timestampZoomAmount = (timestampRangeEnd - timestampRangeStart) * amount;
+    const balanceZoomAmount   = (balanceRangeEnd   - balanceRangeStart  ) * amount;
+
+    let cursorXRatio = 0.5;
+    let cursorYRatio = 0.5;
+    if (origin) {
+      const boundingRect = svg.getBoundingClientRect();
+      cursorXRatio = origin.x / boundingRect.width;
+      cursorYRatio = origin.y / boundingRect.height;
+    }
+
     timestampRangeStart = Math.max(timestampRangeStart + (timestampZoomAmount * cursorXRatio),     timestamps[0]);
     timestampRangeEnd   = Math.min(timestampRangeEnd   - (timestampZoomAmount * (1-cursorXRatio)), timestamps[timestamps.length-1]);
-    balanceRangeStart   = Math.max(balanceRangeStart + (balanceZoomAmount * cursorXRatio), 0);
-    balanceRangeEnd     = Math.min(balanceRangeEnd   - (balanceZoomAmount * (1-cursorYRatio)), maxBalance);
+
+    balanceRangeStart = Math.max(balanceRangeStart + (balanceZoomAmount * cursorXRatio), 0);
+    balanceRangeEnd   = Math.min(balanceRangeEnd   - (balanceZoomAmount * (1-cursorYRatio)), maxBalance);
+
     updateRange();
   }
+
+  svg.onwheel = event => zoom({amount: event.deltaY < 0 ? 0.1 : -0.1, origin: {x: event.offsetX, y: event.offsetY}});
+
+  timeline.querySelector('.corner-controls .zoom-in').onclick  = () => zoom({amount:  0.1});
+  timeline.querySelector('.corner-controls .zoom-out').onclick = () => zoom({amount: -0.1});
 
   let isDraggingTimeline = false;
 
