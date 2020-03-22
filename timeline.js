@@ -258,7 +258,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     } else {
       const x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
       const y = balances[transactionIndex] / maxBalance;
-      hoveredTransactionMarker.setAttribute('d', `M ${x},-0.1 v 1.2 M 0,${y} h 1`);
+      hoveredTransactionMarker.setAttribute('d', `M ${x},-0.1 v 1.2 M -1,${y} h 3`);
 
       const amount = transactions[transactionIndex][amountFieldIndex];
       const string = formatAmountForLabel(amount);
