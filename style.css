@@ -105,34 +105,6 @@ button:focus {
   box-shadow: 1px 1px 5px #00000061;
 }
 
-@media (min-width: 1450px) {
-  #landing-page header {
-    padding-left:  calc((100vw - var(--max-header-width)) / 2);
-    padding-right: calc((100vw - var(--max-header-width)) / 2);
-  }
-}
-@media (max-width: 750px) {
-  #landing-page header {
-    padding-left:  30px;
-    padding-right: 30px;
-  }
-  #landing-page header h1 {
-    font-size: 0;
-  }
-  #landing-page header h1::before {
-    content: 'TE';
-    font-size: 25px;
-  }
-  #landing-page header button {
-    min-width: auto;
-    padding-left:  10px;
-    padding-right: 10px;
-  }
-  #landing-page section {
-    height: auto;
-  }
-}
-
 section#intro {
   background: var(--ocean);
   color: white;
@@ -225,8 +197,7 @@ section#security-information {
   min-height: auto;
 }
 section#security-information > * {
-  width: 450px;
-  max-width: 100%;
+  max-width: 450px;
   margin-left:  auto;
   margin-right: auto;
 }
@@ -247,10 +218,41 @@ section#disclaimer {
   min-height: auto;
 }
 section#disclaimer > * {
-  width: 450px;
-  max-width: 100%;
+  max-width: 450px;
   margin-left:  auto;
   margin-right: auto;
+}
+
+@media (min-width: 1450px) {
+  #landing-page header {
+    padding-left:  calc((100vw - var(--max-header-width)) / 2);
+    padding-right: calc((100vw - var(--max-header-width)) / 2);
+  }
+}
+@media (max-width: 750px) {
+  #landing-page header {
+    padding-left:  30px;
+    padding-right: 30px;
+  }
+  #landing-page header h1 {
+    font-size: 0;
+  }
+  #landing-page header h1::before {
+    content: 'TE';
+    font-size: 25px;
+  }
+  #landing-page header button {
+    min-width: auto;
+    padding-left:  10px;
+    padding-right: 10px;
+  }
+  #landing-page section {
+    height: auto;
+    min-height: auto;
+  }
+  section#preview img[src="screenshot.png"] {
+    width: 100%;
+  }
 }
 
 /*#open-file-screen.dragging-file-over {
