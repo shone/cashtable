@@ -7,6 +7,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
 
   const svg                        = timeline.querySelector('svg');
   const svgGroup                   = timeline.querySelector('svg g');
+  const dateLabelsContainer        = timeline.querySelector('.date-labels');
   const monthLabelsContainer       = timeline.querySelector('.date-labels .months');
   const yearLabelsContainer        = timeline.querySelector('.date-labels .years');
   const topArea                    = timeline.querySelector('.top-area');
@@ -79,10 +80,12 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   }).join(''));
 
   // Month labels
-  const monthStrings = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthNamesLong = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthNamesShort = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
   monthLabelsContainer.innerHTML = months.slice(0, -1).map((month, index) => `
     <label style="left: ${month.positionRatio * 100}%; width: ${(months[index+1].positionRatio - month.positionRatio) * 100}%">
-      ${monthStrings[month.number % 12]}
+      <div class="long-name">${monthNamesLong[month.number % 12]}</div>
+      <div class="short-name">${monthNamesShort[month.number % 12]}</div>
     </label>
   `).join('');
 
@@ -120,10 +123,11 @@ function initTimeline({transactions, fields, timestamps, balances}) {
 
     transactionLabelsContainer.style.width = labelContainerWidth;
     transactionLabelsContainer.style.left = labelContainerLeft;
-    updateTransactionLabelsVisibility();
+    collapseTransactionLabelsToFit();
 
     monthLabelsContainer.style.width = labelContainerWidth;
     monthLabelsContainer.style.left = labelContainerLeft;
+    setDateLabelLengthsToFit();
 
     yearLabelsContainer.style.width = labelContainerWidth;
     yearLabelsContainer.style.left = labelContainerLeft;
@@ -274,7 +278,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
       label.transactionIndex = transactionIndex;
       return label;
     });
-    updateTransactionLabelsVisibility();
+    collapseTransactionLabelsToFit();
     transactionLabelsContainer.append(...transactionLabels);
 
     filteredTransactionMarkers.setAttribute('d', filteredTransactionIndices.map(transactionIndex =>
@@ -282,7 +286,9 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     ).join(''));
   }
 
-  function updateTransactionLabelsVisibility() {
+  function collapseTransactionLabelsToFit() {
+    // Collapse (or un-collapse) each label depending on if there's enough space to fit the text
+
     if (transactionLabels.length === 0) {
       return;
     }
@@ -334,7 +340,21 @@ function initTimeline({transactions, fields, timestamps, balances}) {
       label.classList.toggle('collapsed', label.isCollapsed);
     }
   }
-  window.addEventListener('resize', updateTransactionLabelsVisibility);
+
+  function setDateLabelLengthsToFit() {
+    // Set short or long labels depending on if there's enough space to fit the text
+    const averageMonthMs = 1000 * 60 * 60 * 24 * 30.42;
+    const labelContainerWidth = dateLabelsContainer.getBoundingClientRect().width;
+    const rangeDuration = timestampRangeEnd - timestampRangeStart;
+    const labelWidth = labelContainerWidth * (averageMonthMs / rangeDuration);
+    const longNameWidth = 40;
+    monthLabelsContainer.dataset.length = labelWidth < longNameWidth ? 'short' : 'long';
+  }
+
+  window.addEventListener('resize', () => {
+    collapseTransactionLabelsToFit();
+    setDateLabelLengthsToFit();
+  });
 
   topArea.onmousemove = event => {
     if (event.target === topArea) {

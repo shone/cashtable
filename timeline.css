@@ -107,6 +107,11 @@
   border-right: 1px solid white;
   user-select: none;
 }
+#timeline .date-labels .months label div {
+  display: none;
+}
+#timeline .date-labels .months[data-length="short"] label .short-name { display: block; }
+#timeline .date-labels .months[data-length="long"]  label .long-name  { display: block; }
 
 #timeline .x-axis-controls {
   position: absolute;
