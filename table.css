@@ -38,8 +38,11 @@ tr.field-names th {
 
 tbody tr          { background: #ddd; }
 tbody tr:hover,
-tbody tr.hover    { background: var(--ocean); color: white; }
+tbody tr.hover    { background: var(--ocean); }
 tbody tr.selected { background: #acd0ff; }
+
+tbody tr:hover td,
+tbody tr.hover td  { color: white !important; }
 
 td {
   vertical-align: top;
