@@ -7,13 +7,16 @@ function initTimeline({transactions, fields, timestamps, balances}) {
 
   const svg                        = timeline.querySelector('svg');
   const svgGroup                   = timeline.querySelector('svg g');
-  const yearLabelsContainer        = timeline.querySelector('.year-labels');
-  const monthLabelsContainer       = timeline.querySelector('.month-labels');
+  const monthLabelsContainer       = timeline.querySelector('.date-labels .months');
+  const yearLabelsContainer        = timeline.querySelector('.date-labels .years');
   const topArea                    = timeline.querySelector('.top-area');
   const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
   const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
   const hoveredTransactionMarker   = timeline.querySelector('.hovered-transaction-marker');
   const filteredTransactionMarkers = timeline.querySelector('.filtered-transaction-markers');
+
+  const firstTransaction = transactions[0];
+  const lastTransaction  = transactions[transactions.length-1];
 
   let timestampRangeStart = 0;
   let timestampRangeEnd   = 0;
@@ -38,34 +41,57 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   );
 
   const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
+  const dateFieldIndex   = fields.findIndex(field => field.name === 'Date');
 
-  const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
+  // Balance path
+  timeline.querySelector('path.balance').setAttribute('d', 'M 0,0 ' + balances.map((balance, index) =>
+    `L ${(timestamps[index] - timestamps[0]) / totalDuration} ${(balance - transactions[index][amountFieldIndex]) / maxBalance} v ${transactions[index][amountFieldIndex] / maxBalance}`
+  ).join(''));
 
-  let yearsPath = '';
-  let monthsPath = '';
-  const firstYear = parseInt(transactions[0][dateFieldIndex].split('-')[0]);
-  const lastYear  = parseInt(transactions[transactions.length-1][dateFieldIndex].split('-')[0]);
-  for (let year = firstYear; year <= lastYear; year++) {
-    if ((year % 2) === 0) {
-      const timestampStart = new Date(year,     0, 1).getTime();
-      const timestampEnd   = new Date(year + 1, 0, 1).getTime();
-      const yearDurationMs = timestampEnd - timestampStart;
-      yearsPath += `M ${(timestampStart - timestamps[0]) / totalDuration} -1 h ${yearDurationMs / totalDuration} v 3 h -${yearDurationMs / totalDuration} Z `;
-    }
-    for (let month = 0; month < 12; month += 2) {
-      const monthTimestampStart = new Date(year, month  , 1).getTime();
-      const monthTimestampEnd   = new Date(year, month+1, 1).getTime();
-      const monthDurationMs = monthTimestampEnd - monthTimestampStart;
-      monthsPath += `M ${(monthTimestampStart - timestamps[0]) / totalDuration} -1 h ${monthDurationMs / totalDuration} v 3 h -${monthDurationMs / totalDuration} Z `;
+  const firstYear = parseInt(firstTransaction[dateFieldIndex].split('-')[0]);
+  const lastYear  = parseInt(lastTransaction[dateFieldIndex].split('-')[0]);
+
+  let years  = [];
+  let months = [];
+  for (let year = firstYear; year <= (lastYear + 1); year++) {
+    years.push({number: year, positionRatio: (new Date(year, 0, 1).getTime() - timestamps[0]) / totalDuration});
+    for (let month = 0; month < 12; month++) {
+      months.push({number: month, positionRatio: (new Date(year, month, 1).getTime() - timestamps[0]) / totalDuration});
     }
   }
-  timeline.querySelector('path.years').setAttribute('d', yearsPath);
-  timeline.querySelector('path.months').setAttribute('d', monthsPath);
 
-  const balancePath = 'M 0,0 ' + balances.map((balance, index) =>
-    `L ${(timestamps[index] - timestamps[0]) / totalDuration} ${(balance - transactions[index][amountFieldIndex]) / maxBalance} v ${transactions[index][amountFieldIndex] / maxBalance}`
-  ).join('');
-  timeline.querySelector('path.balance').setAttribute('d', balancePath);
+  // Years grid
+  timeline.querySelector('path.years').setAttribute('d', years.map((year, index) => {
+    if ((index % 2) === 0) {
+      return `M ${year.positionRatio} -1 v 3 `;
+    } else {
+      return `H ${year.positionRatio} v -3 Z `;
+    }
+  }).join(''));
+
+  // Months grid
+  timeline.querySelector('path.months').setAttribute('d', months.map((month, index) => {
+    if ((index % 2) === 0) {
+      return `M ${month.positionRatio} -1 v 3 `;
+    } else {
+      return `H ${month.positionRatio} v -3 Z `;
+    }
+  }).join(''));
+
+  // Month labels
+  const monthStrings = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  monthLabelsContainer.innerHTML = months.slice(0, -1).map((month, index) => `
+    <label style="left: ${month.positionRatio * 100}%; width: ${(months[index+1].positionRatio - month.positionRatio) * 100}%">
+      ${monthStrings[month.number % 12]}
+    </label>
+  `).join('');
+
+  // Year labels
+  yearLabelsContainer.innerHTML = years.slice(0, -1).map((year, index) => `
+    <label style="left: ${year.positionRatio * 100}%; width: ${(years[index+1].positionRatio - year.positionRatio) * 100}%">
+      ${year.number}
+    </label>
+  `).join('');
 
   let filteredTransactionIndices = [];
   let transactionLabels = [];
@@ -80,8 +106,6 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   function updateRange() {
     const rangeDuration = timestampRangeEnd - timestampRangeStart;
     const rangeBalance  = balanceRangeEnd   - balanceRangeStart;
-    const dateRangeStart = new Date(timestampRangeStart);
-    const dateRangeEnd   = new Date(timestampRangeEnd);
 
     // Scale/translate graph paths
     const scaleX = totalDuration / rangeDuration;
@@ -91,38 +115,18 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     const transform = `scale(${scaleX},${scaleY}) translate(${translateX}px,${translateY}px)`;
     svgGroup.style.transform = transform;
 
-    // Year labels
-    const yearRangeStart = dateRangeStart.getFullYear();
-    const yearRangeEnd   = dateRangeEnd.getFullYear();
-    yearLabelsContainer.innerHTML = '';
-    for (let year = yearRangeStart; year <= yearRangeEnd; year++) {
-      const timestampStart = Math.max(new Date(year,     0, 1).getTime(), timestampRangeStart);
-      const timestampEnd   = Math.min(new Date(year + 1, 0, 1).getTime(), timestampRangeEnd);
-      yearLabelsContainer.insertAdjacentHTML('beforeend', `
-        <span style="left: ${((timestampStart - timestampRangeStart) / rangeDuration) * 100}%; width: ${((timestampEnd - timestampStart) / rangeDuration) * 100}%">
-          ${year}
-        </span>
-      `);
-    }
+    const labelContainerWidth = `${(totalDuration / rangeDuration) * 100}%`;
+    const labelContainerLeft  = `${((timestamps[0] - timestampRangeStart) / rangeDuration) * 100}%`;
 
-    // Month labels
-    const monthRangeStart = (dateRangeStart.getFullYear() * 12) + dateRangeStart.getMonth();
-    const monthRangeEnd   = (dateRangeEnd.getFullYear()   * 12) + dateRangeEnd.getMonth();
-    monthLabelsContainer.innerHTML = '';
-    const monthStrings = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    for (let month = monthRangeStart; month <= monthRangeEnd; month++) {
-      const timestampStart = Math.max(new Date(Math.floor((month)  /12), (month)  %12, 1).getTime(), timestampRangeStart);
-      const timestampEnd   = Math.min(new Date(Math.floor((month+1)/12), (month+1)%12, 1).getTime(), timestampRangeEnd);
-      monthLabelsContainer.insertAdjacentHTML('beforeend', `
-        <span style="left: ${((timestampStart - timestampRangeStart) / rangeDuration) * 100}%; width: ${((timestampEnd - timestampStart) / rangeDuration) * 100}%">
-          ${monthStrings[month%12]}
-        </span>
-      `);
-    }
-
-    transactionLabelsContainer.style.width = `${(totalDuration / rangeDuration) * 100}%`;
-    transactionLabelsContainer.style.left = (((timestamps[0] - timestampRangeStart) / rangeDuration) * 100) + '%';
+    transactionLabelsContainer.style.width = labelContainerWidth;
+    transactionLabelsContainer.style.left = labelContainerLeft;
     updateTransactionLabelsVisibility();
+
+    monthLabelsContainer.style.width = labelContainerWidth;
+    monthLabelsContainer.style.left = labelContainerLeft;
+
+    yearLabelsContainer.style.width = labelContainerWidth;
+    yearLabelsContainer.style.left = labelContainerLeft;
 
     // Range sliders
     xAxisRangeSlider.setRange(
@@ -251,12 +255,13 @@ function initTimeline({transactions, fields, timestamps, balances}) {
 
   self.setFilteredTransactions = transactionIndices => {
     filteredTransactionIndices = transactionIndices;
-    const timelineMarkersPath = transactionIndices.map(transactionIndex => `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},-0.1 v 1.2 `).join('');
-    filteredTransactionMarkers.setAttribute('d', timelineMarkersPath);
 
+    // Clear existing labels
     while (transactionLabels.length > 0) {
       transactionLabels.pop().remove();
     }
+
+    // Set new labels
     transactionLabels = filteredTransactionIndices.map(transactionIndex => {
       const label = document.createElement('label');
       const amount = transactions[transactionIndex][amountFieldIndex];
@@ -269,9 +274,12 @@ function initTimeline({transactions, fields, timestamps, balances}) {
       label.transactionIndex = transactionIndex;
       return label;
     });
+    updateTransactionLabelsVisibility();
     transactionLabelsContainer.append(...transactionLabels);
 
-    updateTransactionLabelsVisibility();
+    filteredTransactionMarkers.setAttribute('d', filteredTransactionIndices.map(transactionIndex =>
+      `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},-0.1 v 1.2 `
+    ).join(''));
   }
 
   function updateTransactionLabelsVisibility() {

@@ -84,16 +84,19 @@
   pointer-events: none;
 }
 
-#timeline .timeline-date-labels {
+#timeline .date-labels {
   position: absolute;
-  left: 20px;
-  right: 40px;
-  height: 20px;
+  left:   20px;
+  right:  40px;
+  height: 40px;
+  bottom: 20px;
   overflow: hidden;
 }
-#timeline .month-labels { bottom: 40px; }
-#timeline .year-labels  { bottom: 20px; }
-#timeline .timeline-date-labels span {
+#timeline .date-labels > div {
+  position: relative;
+  height: 20px;
+}
+#timeline .date-labels label {
   position: absolute;
   top:    0;
   bottom: 0;
