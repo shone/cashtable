@@ -19,8 +19,8 @@ function initRangeSlider(rangeSliderElement, callback) {
   }
   updateRange();
 
-  rangeSliderElement.querySelector('.handle.minimum').onmousedown = onHandleMousedown;
-  rangeSliderElement.querySelector('.handle.maximum').onmousedown = onHandleMousedown;
+  rangeSliderElement.querySelector('.handles .minimum').onmousedown = onHandleMousedown;
+  rangeSliderElement.querySelector('.handles .maximum').onmousedown = onHandleMousedown;
   function onHandleMousedown(event) {
     event.preventDefault();
     event.stopPropagation();
