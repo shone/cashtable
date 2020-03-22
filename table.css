@@ -21,6 +21,7 @@ table {
 
 th {
   position: sticky;
+  position: -webkit-sticky; /* For Safari */
   white-space: nowrap;
   background: white;
   outline: 2px solid white;
