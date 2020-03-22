@@ -43,12 +43,6 @@ button:focus {
   display: flex;
   align-items: center;
 }
-@media (min-width: 1450px) {
-  #landing-page header {
-    padding-left:  calc((100vw - var(--max-header-width)) / 2);
-    padding-right: calc((100vw - var(--max-header-width)) / 2);
-  }
-}
 #landing-page header a {
   color: black;
   text-decoration: none;
@@ -99,7 +93,6 @@ button:focus {
   min-height: 48px;
   margin-top: 10px;
   margin-bottom: 10px;
-  padding: 10px;
   padding-left:  30px;
   padding-right: 30px;
   border-radius: 6px;
@@ -110,6 +103,34 @@ button:focus {
 #landing-page button:active {
   transform: translate(3px, 3px);
   box-shadow: 1px 1px 5px #00000061;
+}
+
+@media (min-width: 1450px) {
+  #landing-page header {
+    padding-left:  calc((100vw - var(--max-header-width)) / 2);
+    padding-right: calc((100vw - var(--max-header-width)) / 2);
+  }
+}
+@media (max-width: 750px) {
+  #landing-page header {
+    padding-left:  30px;
+    padding-right: 30px;
+  }
+  #landing-page header h1 {
+    font-size: 0;
+  }
+  #landing-page header h1::before {
+    content: 'TE';
+    font-size: 25px;
+  }
+  #landing-page header button {
+    min-width: auto;
+    padding-left:  10px;
+    padding-right: 10px;
+  }
+  #landing-page section {
+    height: auto;
+  }
 }
 
 section#intro {
@@ -184,7 +205,7 @@ section#csv-instructions > div > * {
 }
 section#csv-instructions > div > img {
   object-fit: contain;
-  object-position: right;
+  object-position: top right;
   margin-right: 40px;
   transform: translate(-200px);
 }
