@@ -18,6 +18,9 @@
 #timeline svg g {
   pointer-events: none;
 }
+#timeline path {
+  vector-effect: non-scaling-stroke;
+}
 #timeline path.months {
   fill: rgba(199, 216, 255, 0.5);
   stroke: none;
