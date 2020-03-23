@@ -3,7 +3,7 @@
 const landingPage = document.getElementById('landing-page');
 
 // Setup 'Open CSV file' buttons
-const fileInput = landingPage.querySelector('input[type="file"]');
+const fileInput = document.querySelector('input[type="file"]');
 landingPage.querySelector('header .open-file-button').onclick = () => fileInput.click();
 landingPage.querySelector('#intro .open-file-button').onclick = () => fileInput.click();
 fileInput.onchange = async event => {
@@ -60,8 +60,8 @@ let maxBalance    = 0;
 async function loadCsvFile(csvFile) {
   const fileReader = new FileReader();
   const text = await new Promise(resolve => {
-    fileReader.onloadend = event => resolve(event.srcElement.result);
     fileReader.readAsText(csvFile);
+    fileReader.onloadend = () => resolve(fileReader.result);
   });
   await loadCsvString(text);
 }
@@ -73,63 +73,59 @@ function loadCsvString(csvString) {
 
   const fieldNames = csvJson.splice(0, 1)[0];
 
-  const fieldInfo = {
-    'Date':                      {type: 'date'},
-    'Payee':                     {type: 'string'},
-    'Account number':            {type: 'account-number'},
-    'Transaction type':          {type: 'string'},
-    'Payment reference':         {type: 'string'},
-    'Category':                  {type: 'string'},
-    'Amount (EUR)':              {type: 'euro'},
-    'Amount (Foreign Currency)': {type: 'currency'},
-    'Type Foreign Currency':     {type: 'currency-code'},
-    'Exchange Rate':             {type: 'decimal'},
+  const fieldTypes = {
+    'Date':                      'date',
+    'Payee':                     'string',
+    'Account number':            'account-number',
+    'Transaction type':          'string',
+    'Payment reference':         'string',
+    'Category':                  'string',
+    'Amount (EUR)':              'euro',
+    'Amount (Foreign Currency)': 'currency',
+    'Type Foreign Currency':     'currency-code',
+    'Exchange Rate':             'decimal',
   }
 
-  fields = fieldNames.map(fieldName => ({...fieldInfo[fieldName], name: fieldName}));
+  fields = fieldNames.map(name => ({name: name, type: fieldTypes[name]}));
   fields.push({name: 'Balance', type: 'euro'});
 
-  const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
+  const amountFieldIndex  = fields.findIndex(field => field.name === 'Amount (EUR)');
+  const dateFieldIndex    = fields.findIndex(field => field.name === 'Date');
+  const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
 
   let balance = 0;
   transactions = csvJson.map(line => {
-    balance += parseFloat(line[amountFieldIndex]);
     return line.map((value, index) => {
       switch (fields[index].type) {
         case 'euro':
         case 'currency':
         case 'number':
           return parseFloat(value);
+        default:
+          return value;
       }
-      return value;
-    }).concat(balance);
+    }).concat(balance += parseFloat(line[amountFieldIndex]));
   });
 
-  const dateFieldIndex = fields.findIndex(field => field.name === 'Date');
+  timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
 
-  let previousDateString = null;
-  let sameDayIndices = [];
-  function fixupSameDayTransactions() {
-    for (const [sameDayIndex, transactionIndex] of sameDayIndices.entries()) {
-      timestamps[transactionIndex] += 1000 * 60 * 60 * 24 * (sameDayIndex / sameDayIndices.length);
+  // When multiple transactions occur on the same day, spread their timestamps over the day
+  let firstIndexOfDay = 0;
+  for (let i=1; i<timestamps.length; i++) {
+    if (timestamps[i] !== timestamps[firstIndexOfDay] || i === timestamps.length-1) {
+      spreadTimestampsOverDay(firstIndexOfDay, i);
+      firstIndexOfDay = i;
     }
   }
-  for (const [transactionIndex, transaction] of transactions.entries()) {
-    const dateString = transaction[dateFieldIndex];
-    timestamps.push(dateStringToTimestampMs(dateString));
-    if (dateString === previousDateString) {
-      sameDayIndices.push(transactionIndex);
-    } else {
-      fixupSameDayTransactions();
-      sameDayIndices = [transactionIndex];
+  function spreadTimestampsOverDay(startIndex, endIndex) {
+    const total = endIndex - startIndex;
+    for (let i=startIndex; i<endIndex; i++) {
+      timestamps[i] += 1000 * 60 * 60 * 24 * ((i - startIndex) / total);
     }
-    previousDateString = dateString;
   }
-  fixupSameDayTransactions();
 
   totalDuration = timestamps[timestamps.length-1] - timestamps[0];
 
-  const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
   balances = transactions.map(transaction => transaction[balanceFieldIndex]);
   maxBalance = Math.max(...balances);
 
@@ -138,19 +134,11 @@ function loadCsvString(csvString) {
   const timeline = new initTimeline(transactionData);
   const table = new Table(transactionData);
 
-  timeline.onTransactionHover = transactionIndex => {
-    table.setHoveredTransaction(transactionIndex);
-  }
-  timeline.onTransactionClicked = transactionIndex => {
-    table.scrollTransactionIntoView(transactionIndex);
-  }
+  timeline.onTransactionHover   = transactionIndex => table.setHoveredTransaction(transactionIndex);
+  timeline.onTransactionClicked = transactionIndex => table.scrollTransactionIntoView(transactionIndex);
 
-  table.onTransactionHover = transactionIndex => {
-    timeline.setHoveredTransaction(transactionIndex);
-  }
-  table.onTransactionsFiltered = transactionIndices => {
-    timeline.setFilteredTransactions(transactionIndices);
-  }
+  table.onTransactionHover     = transactionIndex   => timeline.setHoveredTransaction(transactionIndex);
+  table.onTransactionsFiltered = transactionIndices => timeline.setFilteredTransactions(transactionIndices);
 }
 
 function dateStringToTimestampMs(string) {
