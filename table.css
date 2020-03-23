@@ -1,21 +1,21 @@
-.table-container {
+#table-container {
   overflow: auto;
 }
 
-.table-container::-webkit-scrollbar {
+#table-container::-webkit-scrollbar {
   width: 16px;
   background: transparent;
 }
-.table-container::-webkit-scrollbar-thumb {
+#table-container::-webkit-scrollbar-thumb {
   background: var(--teal);
   border: 2px solid white;
   border-radius: 8px;
 }
-.table-container::-webkit-scrollbar-thumb:hover {
+#table-container::-webkit-scrollbar-thumb:hover {
   background: var(--teal-highlight);
 }
 
-table {
+#table-container table {
   width: 100%;
 }
 

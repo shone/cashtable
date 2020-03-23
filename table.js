@@ -61,8 +61,6 @@ function Table({transactions, fields, timestamps, balances}) {
 
     const totals = fields.map(() => 0);
 
-//     let timelineMarkersPath = '';
-
     const filters = [...document.querySelectorAll('tr.filters input')].map(input => input.value.toLowerCase());
     const allFiltersEmpty = filters.every(filter => !filter);
 
@@ -84,7 +82,6 @@ function Table({transactions, fields, timestamps, balances}) {
         lastTransaction = transaction;
 
         if (!allFiltersEmpty) {
-//           timelineMarkersPath += `M ${(timestamps[transactionIndex] - timestamps[0]) / totalDuration},0 v 1 `;
           filteredTransactionIndices.push(transactionIndex);
         }
 
@@ -117,8 +114,6 @@ function Table({transactions, fields, timestamps, balances}) {
         }
       }
     }
-
-//     document.getElementById('filtered-transaction-markers').setAttribute('d', timelineMarkersPath);
   }
 
   document.querySelector('tr.filters').oninput = event => {
@@ -183,17 +178,17 @@ function Table({transactions, fields, timestamps, balances}) {
   }
 
   self.scrollTransactionIntoView = transactionIndex => {
-    const trElement = document.querySelector('tbody').children[(transactions.length-1) - transactionIndex];
-    const tableContainerElement = document.querySelector('.table-container');
+    const tableContainer = document.getElementById('table-container');
+    const tr = tableContainer.querySelector('tbody').children[(transactions.length-1) - transactionIndex];
     let targetScrollTop = null;
-    if (trElement.offsetTop < (tableContainerElement.scrollTop + 100)) {
-      targetScrollTop = trElement.offsetTop - 100;
-    } else if (trElement.offsetTop > (tableContainerElement.scrollTop + tableContainerElement.offsetHeight - 100)) {
-      targetScrollTop = (trElement.offsetTop - tableContainerElement.offsetHeight) + 100;
+    if (tr.offsetTop < (tableContainer.scrollTop + 100)) {
+      targetScrollTop = tr.offsetTop - 100;
+    } else if (tr.offsetTop > (tableContainer.scrollTop + tableContainer.offsetHeight - 100)) {
+      targetScrollTop = (tr.offsetTop - tableContainer.offsetHeight) + 100;
     }
     if (targetScrollTop !== null) {
-      const scrollDelta = targetScrollTop - tableContainerElement.scrollTop;
-      tableContainerElement.scrollTo({top: targetScrollTop, behavior: Math.abs(scrollDelta) < 2000 ? 'smooth' : 'auto'});
+      const scrollDelta = targetScrollTop - tableContainer.scrollTop;
+      tableContainer.scrollTo({top: targetScrollTop, behavior: Math.abs(scrollDelta) < 2000 ? 'smooth' : 'auto'});
     }
   }
 }
