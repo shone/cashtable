@@ -3,25 +3,21 @@
 function Table({transactions, fields, timestamps, balances}) {
   const self = this;
 
-  let trElements = [];
+  document.querySelector('tr.field-names').innerHTML = fields.map(field => `<th class="${field.type}"></th>`).join('');
+  document.querySelectorAll('tr.field-names th').forEach((th, index) => th.textContent = fields[index].name);
 
-  const fieldNameTrElements = fields.map(field => {
-    const element = document.createElement('th');
-    element.classList.add(field.type);
-    element.textContent = field.name;
-    return element;
-  });
-  document.querySelector('tr.field-names').append(...fieldNameTrElements);
-
-  document.querySelector('tr.filters').innerHTML = fields.map(field =>
-    `<th class="${field.type}"><input><button class="clear-button" title="Clear filter"></button></th>`
-  ).join('');
+  document.querySelector('tr.filters').innerHTML = fields.map(field => `
+    <th class="${field.type}">
+      <input>
+      <button class="clear-button" title="Clear filter"></button>
+    </th>
+  `).join('');
 
   document.querySelector('tr.totals').innerHTML = fields.map(field =>
     `<th class="${field.type}"></th>`
   ).join('');
 
-  trElements = transactions.map(transaction => {
+  const trElements = transactions.map(transaction => {
     const trElement = document.createElement('tr');
     const tdElements = transaction.map((value, fieldIndex) => {
       const tdElement = document.createElement('td');
