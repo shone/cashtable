@@ -53,6 +53,7 @@
   right: 40px;
   top: 0;
   height: 20px;
+  user-select: none;
 }
 #timeline .top-area .transaction-labels {
   position: absolute;
