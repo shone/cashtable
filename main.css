@@ -54,9 +54,30 @@ input[type='file'] {
 #app header h1 {
   font-size: 20px;
   padding-left: 45px;
+  padding-right: 30px;
   line-height: 50px;
   margin: 0;
   background: no-repeat left / 35px url('data:image/svg+xml;utf8,<svg viewBox="0 0 16.9 16.9" xmlns="http://www.w3.org/2000/svg"><path d="M6.2.5L2.8 3.8V15c0 .9.7 1.6 1.6 1.6h8.1c1 0 1.6-.7 1.6-1.6V2c0-.8-.7-1.5-1.6-1.5H6.2z" fill="black"/><g fill="none" stroke="white" stroke-linecap="round" stroke-width="1.1"><path d="M5.5 6.4h6M5.5 8.7h6M5.5 10.9h6M5.5 13.2h6"/></g><path d="M6.2.3v3.2c0 .2-.1.3-.3.3H2.7v1h3.2c.8 0 1.4-.6 1.4-1.3V.3z" fill="white"/></svg>');
+}
+#app header .last-updated {
+  display: flex;
+  align-items: center;
+  margin-left:  15px;
+  margin-right: 15px;
+}
+#app header .last-updated label {
+  padding-right: 12px;
+  font-size: 14px;
+}
+#app header .last-updated .date {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: center;
+}
+#app header .last-updated .time-since {
+  text-align: center;
+  font-size: 14px;
 }
 
 #splitter {

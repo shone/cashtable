@@ -33,6 +33,8 @@ landingPage.ondragover = event => event.preventDefault();
 document.getElementById('view-sample-csv-button').onclick = async () => {
   document.title = 'Sample CSV';
   document.querySelector('#app h1').textContent = 'Sample CSV';
+  document.querySelector('#app .last-updated .date').textContent = dateToString(new Date());
+  document.querySelector('#app .last-updated .time-since').textContent = '(up-to-date)';
 
   const sampleCsv = generateSampleCsv();
   await loadCsvString(sampleCsv);
@@ -60,9 +62,34 @@ let balances     = [];
 let totalDuration = 0;
 let maxBalance    = 0;
 
+function dateToString(date) {
+  const day   = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth()+1).padStart(2, '0');
+  const year  = String(date.getFullYear());
+  return `${day}.${month}.${year}`;
+}
+
+function milisecondsToHumanReadableDuration(ms) {
+  const minuteMs = 1000 * 60;
+  const hourMs   = minuteMs * 60;
+  const dayMs    = hourMs * 24;
+  const monthMs  = dayMs * 30.42;
+
+  if (ms >= monthMs*2)  return `~${Math.round(ms / monthMs)} months ago`;
+  if (ms >= dayMs*2)    return `~${Math.round(ms / dayMs)} days ago`;
+  if (ms >= hourMs*2)   return `~${Math.round(ms / hourMs)} hours ago`;
+  if (ms >= minuteMs*2) return `~${Math.round(ms / minuteMs)} minutes ago`;
+  return 'up-to-date';
+}
+
 async function loadCsvFile(csvFile) {
   document.title = csvFile.name;
   document.querySelector('#app h1').textContent = csvFile.name;
+
+  const now = (new Date()).getTime();
+  const msSinceLastModified = now - csvFile.lastModified;
+  document.querySelector('#app .last-updated .date').textContent = dateToString(new Date(csvFile.lastModified));
+  document.querySelector('#app .last-updated .time-since').textContent = `(${milisecondsToHumanReadableDuration(msSinceLastModified)})`;
 
   const fileReader = new FileReader();
   const text = await new Promise(resolve => {
@@ -116,8 +143,7 @@ function loadCsvString(csvString) {
   timestamps = transactions.map(transaction => dateStringToTimestampMs(transaction[dateFieldIndex]));
 
   // When multiple transactions occur on the same day, spread their timestamps over the day
-  let firstIndexOfDay = 0;
-  for (let i=1; i<timestamps.length; i++) {
+  for (let i=1, firstIndexOfDay=0; i<timestamps.length; i++) {
     if (timestamps[i] !== timestamps[firstIndexOfDay] || i === timestamps.length-1) {
       spreadTimestampsOverDay(firstIndexOfDay, i);
       firstIndexOfDay = i;
