@@ -105,9 +105,6 @@ section#intro button {
 section#intro button:hover {
   background: #d6eaf1;
 }
-section#intro input[type='file'] {
-  display: none;
-}
 
 section#preview {
   background: var(--secondary-petrol);

@@ -31,6 +31,9 @@ landingPage.ondrop = async event => {
 landingPage.ondragover = event => event.preventDefault();
 
 document.getElementById('view-sample-csv-button').onclick = async () => {
+  document.title = 'Sample CSV';
+  document.querySelector('#app h1').textContent = 'Sample CSV';
+
   const sampleCsv = generateSampleCsv();
   await loadCsvString(sampleCsv);
   landingPage.remove();
@@ -58,6 +61,9 @@ let totalDuration = 0;
 let maxBalance    = 0;
 
 async function loadCsvFile(csvFile) {
+  document.title = csvFile.name;
+  document.querySelector('#app h1').textContent = csvFile.name;
+
   const fileReader = new FileReader();
   const text = await new Promise(resolve => {
     fileReader.readAsText(csvFile);
