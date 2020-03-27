@@ -94,7 +94,6 @@
   right:  40px;
   height: 40px;
   bottom: 20px;
-  overflow: hidden;
 }
 #timeline .date-labels > div {
   position: relative;
@@ -134,12 +133,12 @@
   background: white;
 }
 #timeline .x-axis-controls .range-slider {
-  left:   20px;
+  left:   0;
   right:  40px;
   bottom: 0;
 }
 #timeline .y-axis-controls .range-slider {
-  top:    20px;
+  top:    0;
   right:  0;
   bottom: 65px;
 }
@@ -151,6 +150,8 @@
   width:  40px;
   height: 60px;
   padding: 3px;
+  background: white;
+  border-radius: 6px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -166,7 +167,7 @@
   margin-bottom: 4px;
 }
 #timeline .corner-controls button:last-of-type {
-  margin-bottom: 0;
+  margin-bottom: 2px;
 }
 #timeline .corner-controls button:hover {
   background-color: var(--teal-highlight);
