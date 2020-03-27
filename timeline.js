@@ -1,20 +1,25 @@
 'use strict';
 
-function initTimeline({transactions, fields, timestamps, balances}) {
-  const self = this;
+window.timeline = {};
 
-  const timeline = document.getElementById('timeline');
+// Callbacks
+window.timeline.onTransactionClicked = transactionIndex => {};
+window.timeline.onTransactionHover   = transactionIndex => {};
 
-  const svg                        = timeline.querySelector('svg');
-  const svgGroup                   = timeline.querySelector('svg g');
-  const dateLabelsContainer        = timeline.querySelector('.date-labels');
-  const monthLabelsContainer       = timeline.querySelector('.date-labels .months');
-  const yearLabelsContainer        = timeline.querySelector('.date-labels .years');
-  const topArea                    = timeline.querySelector('.top-area');
-  const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
-  const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
-  const hoveredTransactionMarker   = timeline.querySelector('.hovered-transaction-marker');
-  const filteredTransactionMarkers = timeline.querySelector('.filtered-transaction-markers');
+const timeline = document.getElementById('timeline');
+
+const svg                        = timeline.querySelector('svg');
+const svgGroup                   = timeline.querySelector('svg g');
+const dateLabelsContainer        = timeline.querySelector('.date-labels');
+const monthLabelsContainer       = timeline.querySelector('.date-labels .months');
+const yearLabelsContainer        = timeline.querySelector('.date-labels .years');
+const topArea                    = timeline.querySelector('.top-area');
+const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
+const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
+const hoveredTransactionMarker   = timeline.querySelector('.hovered-transaction-marker');
+const filteredTransactionMarkers = timeline.querySelector('.filtered-transaction-markers');
+
+window.timeline.init = ({transactions, fields, timestamps, balances}) => {
 
   const firstTransaction = transactions[0];
   const lastTransaction  = transactions[transactions.length-1];
@@ -45,9 +50,12 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   const dateFieldIndex   = fields.findIndex(field => field.name === 'Date');
 
   // Balance path
-  timeline.querySelector('path.balance').setAttribute('d', 'M 0,0 ' + balances.map((balance, index) =>
-    `L ${(timestamps[index] - timestamps[0]) / totalDuration} ${(balance - transactions[index][amountFieldIndex]) / maxBalance} v ${transactions[index][amountFieldIndex] / maxBalance}`
-  ).join(''));
+  timeline.querySelector('path.balance').setAttribute('d', 'M0,0 ' + balances.map((balance, index) => {
+    const x = (timestamps[index] - timestamps[0]) / totalDuration;
+    const y = (balance - transactions[index][amountFieldIndex]) / maxBalance;
+    const yDelta = transactions[index][amountFieldIndex] / maxBalance;
+    return `L${x},${y} v${yDelta} `;
+  }).join(''));
 
   const firstYear = parseInt(firstTransaction[dateFieldIndex].split('-')[0]);
   const lastYear  = parseInt(lastTransaction[dateFieldIndex].split('-')[0]);
@@ -63,21 +71,24 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     }
   }
 
+  const gridTop    = -1;
+  const gridBottom =  3;
+
   // Years grid
   timeline.querySelector('path.years').setAttribute('d', years.map((year, index) => {
     if ((index % 2) === 0) {
-      return `M ${year.positionRatio} -1 v 3 `;
+      return `M${year.positionRatio},${gridTop} V${gridBottom} `;
     } else {
-      return `H ${year.positionRatio} v -3 Z `;
+      return `H${year.positionRatio} V${gridTop} Z `;
     }
   }).join(''));
 
   // Months grid
   timeline.querySelector('path.months').setAttribute('d', months.map((month, index) => {
     if ((index % 2) === 0) {
-      return `M ${month.positionRatio} -1 v 3 `;
+      return `M${month.positionRatio},${gridTop} V${gridBottom} `;
     } else {
-      return `H ${month.positionRatio} v -3 Z `;
+      return `H${month.positionRatio} V${gridTop} Z `;
     }
   }).join(''));
 
@@ -222,36 +233,32 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     }
   }
 
-  self.onTransactionClicked = transactionIndex => {};
-
   svg.onmouseup = event => {
     if (isDraggingTimeline) {
       return;
     }
     const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-    self.onTransactionClicked(transactionIndex);
+    window.timeline.onTransactionClicked(transactionIndex);
 
   }
 
-  self.onTransactionHover = transactionIndex => {};
-
   svg.onmousemove = event => {
     const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-    self.setHoveredTransaction(transactionIndex);
-    self.onTransactionHover(transactionIndex);
+    window.timeline.setHoveredTransaction(transactionIndex);
+    window.timeline.onTransactionHover(transactionIndex);
   }
 
   svg.onmouseout = () => {
     hoveredTransactionMarker.setAttribute('d', '');
     hoveredTransactionLabel.classList.add('hidden');
-    self.onTransactionHover(null);
+    window.timeline.onTransactionHover(null);
   }
 
   function formatAmountForLabel(amount) {
     return `${amount > 0 ? '+' : ''}${amount.toFixed(2)}`;
   }
 
-  self.setHoveredTransaction = transactionIndex => {
+  window.timeline.setHoveredTransaction = transactionIndex => {
     if (transactionIndex === null) {
       hoveredTransactionMarker.setAttribute('d', '');
       hoveredTransactionLabel.classList.add('hidden');
@@ -270,7 +277,7 @@ function initTimeline({transactions, fields, timestamps, balances}) {
     }
   }
 
-  self.setFilteredTransactions = transactionIndices => {
+  window.timeline.setFilteredTransactions = transactionIndices => {
     filteredTransactionIndices = transactionIndices;
 
     // Clear existing labels
@@ -392,25 +399,25 @@ function initTimeline({transactions, fields, timestamps, balances}) {
   topArea.onmousemove = event => {
     if (event.target === topArea) {
       const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-      self.setHoveredTransaction(transactionIndex);
-      self.onTransactionHover(transactionIndex);
+      window.timeline.setHoveredTransaction(transactionIndex);
+      window.timeline.onTransactionHover(transactionIndex);
     } else if (event.target.tagName === 'LABEL') {
-      self.setHoveredTransaction(event.target.transactionIndex);
-      self.onTransactionHover(event.target.transactionIndex);
+      window.timeline.setHoveredTransaction(event.target.transactionIndex);
+      window.timeline.onTransactionHover(event.target.transactionIndex);
     }
   }
 
   topArea.onclick = event => {
     if (event.target === topArea) {
       const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-      self.onTransactionClicked(transactionIndex);
+      window.timeline.onTransactionClicked(transactionIndex);
     } else if (event.target.tagName === 'LABEL') {
-      self.onTransactionClicked(event.target.transactionIndex);
+      window.timeline.onTransactionClicked(event.target.transactionIndex);
     }
   }
 
   topArea.onmouseout = () => {
-    self.setHoveredTransaction(null);
-    self.onTransactionHover(null);
+    window.timeline.setHoveredTransaction(null);
+    window.timeline.onTransactionHover(null);
   }
 }

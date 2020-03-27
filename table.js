@@ -1,19 +1,27 @@
 'use strict';
 
-function Table({transactions, fields, timestamps, balances}) {
-  const self = this;
+window.table = {};
 
-  document.querySelector('tr.field-names').innerHTML = fields.map(field => `<th class="${field.type}"></th>`).join('');
-  document.querySelectorAll('tr.field-names th').forEach((th, index) => th.textContent = fields[index].name);
+// Callbacks
+window.table.onTransactionsFiltered = transactions => {};
+window.table.onTransactionHover = transactionIndex => {};
 
-  document.querySelector('tr.filters').innerHTML = fields.map(field => `
+const tableContainer = document.getElementById('table-container');
+const tbody = tableContainer.querySelector('tbody');
+
+window.table.init = ({transactions, fields, timestamps, balances}) => {
+
+  tableContainer.querySelector('tr.field-names').innerHTML = fields.map(field => `<th class="${field.type}"></th>`).join('');
+  tableContainer.querySelectorAll('tr.field-names th').forEach((th, index) => th.textContent = fields[index].name);
+
+  tableContainer.querySelector('tr.filters').innerHTML = fields.map(field => `
     <th class="${field.type}">
       <input>
       <button class="clear-button" title="Clear filter"></button>
     </th>
   `).join('');
 
-  document.querySelector('tr.totals').innerHTML = fields.map(field =>
+  tableContainer.querySelector('tr.totals').innerHTML = fields.map(field =>
     `<th class="${field.type}"></th>`
   ).join('');
 
@@ -32,9 +40,7 @@ function Table({transactions, fields, timestamps, balances}) {
     return trElement;
   });
   trElements.reverse();
-  document.querySelector('tbody').append(...trElements);
-
-  self.onTransactionsFiltered = transactions => {};
+  tbody.append(...trElements);
 
   applyFilters();
 
@@ -92,7 +98,7 @@ function Table({transactions, fields, timestamps, balances}) {
       }
     }
 
-    self.onTransactionsFiltered(filteredTransactionIndices);
+    window.table.onTransactionsFiltered(filteredTransactionIndices);
 
     const totalElements = [...document.querySelector('tr.totals').children];
     for (const [fieldIndex, field] of fields.entries()) {
@@ -112,14 +118,14 @@ function Table({transactions, fields, timestamps, balances}) {
     }
   }
 
-  document.querySelector('tr.filters').oninput = event => {
+  tableContainer.querySelector('tr.filters').oninput = event => {
     const input = event.target;
     const thElement = input.closest('th');
     thElement.classList.toggle('filter-active', input.value !== '');
     applyFilters();
   }
 
-  document.querySelector('tr.filters').onkeydown = event => {
+  tableContainer.querySelector('tr.filters').onkeydown = event => {
     if (event.key === 'Escape' && event.target.tagName === 'INPUT') {
       const input = event.target;
       input.value = '';
@@ -129,7 +135,7 @@ function Table({transactions, fields, timestamps, balances}) {
     }
   }
 
-  document.querySelector('tr.filters').onclick = event => {
+  tableContainer.querySelector('tr.filters').onclick = event => {
     if (event.target.classList.contains('clear-button')) {
       const thElement = event.target.closest('th');
       thElement.classList.remove('filter-active');
@@ -140,42 +146,39 @@ function Table({transactions, fields, timestamps, balances}) {
     }
   }
 
-  document.querySelector('tbody').onclick = event => {
+  tbody.onclick = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
       trElement.classList.toggle('selected');
     }
   }
 
-  self.onTransactionHover = transactionIndex => {};
-
-  document.querySelector('tbody').onmouseover = event => {
+  tbody.onmouseover = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
       const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
-      self.onTransactionHover(transactionIndex);
+      window.table.onTransactionHover(transactionIndex);
     }
   }
-  document.querySelector('tbody').onmouseout = event => {
+  tbody.onmouseout = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
-      self.onTransactionHover(null);
+      window.table.onTransactionHover(null);
     }
   }
 
-  self.setHoveredTransaction = transactionIndex => {
-    const previouslyHoveredElement = document.querySelector('tbody tr.hover');
+  window.table.setHoveredTransaction = transactionIndex => {
+    const previouslyHoveredElement = tbody.querySelector('tr.hover');
     if (previouslyHoveredElement) {
       previouslyHoveredElement.classList.remove('hover');
     }
     if (transactionIndex !== null) {
-      document.querySelector('tbody').children[(transactions.length-1) - transactionIndex].classList.add('hover');
+      tbody.children[(transactions.length-1) - transactionIndex].classList.add('hover');
     }
   }
 
-  self.scrollTransactionIntoView = transactionIndex => {
-    const tableContainer = document.getElementById('table-container');
-    const tr = tableContainer.querySelector('tbody').children[(transactions.length-1) - transactionIndex];
+  window.table.scrollTransactionIntoView = transactionIndex => {
+    const tr = tbody.children[(transactions.length-1) - transactionIndex];
     let targetScrollTop = null;
     if (tr.offsetTop < (tableContainer.scrollTop + 100)) {
       targetScrollTop = tr.offsetTop - 100;

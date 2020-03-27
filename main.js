@@ -163,14 +163,14 @@ function loadCsvString(csvString) {
 
   const transactionData = {transactions, fields, timestamps, balances, totalDuration, maxBalance};
 
-  const timeline = new initTimeline(transactionData);
-  const table = new Table(transactionData);
+  window.timeline.init(transactionData);
+  window.table.init(transactionData);
 
-  timeline.onTransactionHover   = transactionIndex => table.setHoveredTransaction(transactionIndex);
-  timeline.onTransactionClicked = transactionIndex => table.scrollTransactionIntoView(transactionIndex);
+  window.timeline.onTransactionHover   = transactionIndex => window.table.setHoveredTransaction(transactionIndex);
+  window.timeline.onTransactionClicked = transactionIndex => window.table.scrollTransactionIntoView(transactionIndex);
 
-  table.onTransactionHover     = transactionIndex   => timeline.setHoveredTransaction(transactionIndex);
-  table.onTransactionsFiltered = transactionIndices => timeline.setFilteredTransactions(transactionIndices);
+  window.table.onTransactionHover     = transactionIndex   => window.timeline.setHoveredTransaction(transactionIndex);
+  window.table.onTransactionsFiltered = transactionIndices => window.timeline.setFilteredTransactions(transactionIndices);
 }
 
 function dateStringToTimestampMs(string) {
