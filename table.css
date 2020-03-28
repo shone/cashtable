@@ -30,7 +30,6 @@ th {
 }
 tr.field-names th { top:    2px; }
 tr.filters     th { top:   25px; }
-tr.totals      th { bottom: 2px; }
 
 tr.field-names th {
   white-space: nowrap;
@@ -60,9 +59,7 @@ table .currency-code { max-width:  35px; }
 table .decimal       { max-width:  80px; }
 
 td.euro,
-td.currency,
-tfoot th.euro,
-tfoot th.currency {
+td.currency {
   text-align: right;
   font-family: monospace;
   font-size: 1.2em;
@@ -114,4 +111,41 @@ tr.filters th.filter-active .clear-button {
 tr.filters th.filter-active .clear-button:hover {
   background-color: var(--teal);
   background-image: url('data:image/svg+xml;utf8,<svg version="1.1" viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="white" stroke-linecap="round" stroke-width="3"><path d="m1.729 281.8 13.47 13.49"/><path d="m1.721 295.3 13.49-13.47"/></g></svg>');
+}
+
+#table-container .summary {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--teal);
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+#table-container .summary > * {
+  margin-left: 20px;
+  height: 45px;
+  line-height: 45px;
+}
+#table-container .summary > *:first-child {
+  background: no-repeat left center / 25px 25px url('data:image/svg+xml;utf8,<svg width="400" height="500" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M6 5v15l189 235L4 482v14l369-2c4-46 13-93 22-138l-12-3c-11 25-19 52-43 69-26 18-61 16-91 16H79l173-209L96 33h91c58 0 141-14 164 56 4 12 7 24 8 37h13L362 5H6z"/></svg>');
+  padding-left: 45px;
+}
+#table-container .summary .positive-sum,
+#table-container .summary .negative-sum,
+#table-container .summary .balance {
+  font-family: monospace;
+}
+#table-container .summary .negative-sum {
+  color: #ffafac;
+}
+#table-container .summary .balance {
+  font-weight: bold;
+  font-size: 22px;
 }

@@ -8,8 +8,12 @@ window.table.onTransactionHover = transactionIndex => {};
 
 const tableContainer = document.getElementById('table-container');
 const tbody = tableContainer.querySelector('tbody');
+const summary = tableContainer.querySelector('.summary');
 
 window.table.init = ({transactions, fields, timestamps, balances}) => {
+
+  const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
+  const dateFieldIndex   = fields.findIndex(field => field.name === 'Date');
 
   tableContainer.querySelector('tr.field-names').innerHTML = fields.map(field => `<th class="${field.type}"></th>`).join('');
   tableContainer.querySelectorAll('tr.field-names th').forEach((th, index) => th.textContent = fields[index].name);
@@ -20,10 +24,7 @@ window.table.init = ({transactions, fields, timestamps, balances}) => {
       <button class="clear-button" title="Clear filter"></button>
     </th>
   `).join('');
-
-  tableContainer.querySelector('tr.totals').innerHTML = fields.map(field =>
-    `<th class="${field.type}"></th>`
-  ).join('');
+  const filterInputs = [...tableContainer.querySelectorAll('tr.filters input')];
 
   const trElements = transactions.map(transaction => {
     const trElement = document.createElement('tr');
@@ -45,30 +46,25 @@ window.table.init = ({transactions, fields, timestamps, balances}) => {
   applyFilters();
 
   function formatValueForTable(value, fieldIndex) {
-    if (fields[fieldIndex].type === 'euro' || fields[fieldIndex].type === 'currency') {
-      if (isNaN(value)) {
-        return '';
-      } else {
-        const sign = (fields[fieldIndex].name !== 'Balance' && value > 0) ? '+' : '';
+    switch (fields[fieldIndex].type) {
+      case 'euro': case 'currency':
+        if (isNaN(value)) return '';
+        if (fields[fieldIndex].name === 'Balance') return value.toFixed(2);
+        const sign = value > 0 ? '+' : '';
         return `${sign}${value.toFixed(2)}`;
-      }
-    } else {
-      return value;
+      default:
+        return value;
     }
   }
 
   function applyFilters() {
-    let firstTransaction = null;
-    let lastTransaction  = null;
 
-    const totals = fields.map(() => 0);
-
-    const filters = [...document.querySelectorAll('tr.filters input')].map(input => input.value.toLowerCase());
+    const filters = filterInputs.map(input => input.value.toLowerCase());
     const allFiltersEmpty = filters.every(filter => !filter);
 
     const filteredTransactionIndices = [];
 
-    for (const [transactionIndex, transaction] of transactions.entries()) {
+    const filteredTransactions = transactions.filter((transaction, transactionIndex) => {
       const shouldShow = allFiltersEmpty || filters.every((filter, fieldIndex) => {
         if (!filter) {
           return true;
@@ -77,44 +73,43 @@ window.table.init = ({transactions, fields, timestamps, balances}) => {
         return formattedValue.toLowerCase().includes(filter);
       });
       trElements[(transactions.length-1) - transactionIndex].style.display = shouldShow ? 'table-row' : 'none';
-      if (shouldShow) {
-        if (firstTransaction === null) {
-          firstTransaction = transaction;
-        }
-        lastTransaction = transaction;
-
-        if (!allFiltersEmpty) {
-          filteredTransactionIndices.push(transactionIndex);
-        }
-
-        for (const [fieldIndex, field] of fields.entries()) {
-          if (field.type === 'euro' || field.type === 'currency') {
-            const number = parseFloat(transaction[fieldIndex]);
-            if (!isNaN(number)) {
-              totals[fieldIndex] += number;
-            }
-          }
-        }
+      if (!allFiltersEmpty && shouldShow) {
+        filteredTransactionIndices.push(transactionIndex);
       }
-    }
+      return shouldShow;
+    });
 
     window.table.onTransactionsFiltered(filteredTransactionIndices);
 
-    const totalElements = [...document.querySelector('tr.totals').children];
-    for (const [fieldIndex, field] of fields.entries()) {
-      if ((field.type === 'euro' || field.type === 'currency') && field.name !== 'Balance') {
-        totalElements[fieldIndex].textContent = totals[fieldIndex].toFixed(2);
-      } else if (field.type === 'date') {
-        if (firstTransaction !== null && lastTransaction !== null && firstTransaction !== lastTransaction) {
-          const firstTimestampMs = dateStringToTimestampMs(firstTransaction[fieldIndex]);
-          const lastTimestampMs  = dateStringToTimestampMs(lastTransaction[fieldIndex]);
-          const durationMs = lastTimestampMs - firstTimestampMs;
-          const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
-          const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
-          const years  = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30 * 12));
-          totalElements[fieldIndex].textContent = `${years}Y ${months}M ${days}D`;
-        }
-      }
+    const balance = filteredTransactions.reduce((balance, transaction) => balance + parseFloat(transaction[amountFieldIndex]), 0);
+    summary.querySelector('.balance').textContent = `€${balance.toFixed(2)}`;
+
+    const positiveSum = filteredTransactions.reduce((sum, transaction) => {
+      const amount = parseFloat(transaction[amountFieldIndex]);
+      return amount > 0 ? sum + amount : sum;
+    }, 0);
+    summary.querySelector('.positive-sum').textContent = `+${positiveSum.toFixed(2)}`;
+
+    const negativeSum = filteredTransactions.reduce((sum, transaction) => {
+      const amount = parseFloat(transaction[amountFieldIndex]);
+      return amount < 0 ? sum - amount : sum;
+    }, 0);
+    summary.querySelector('.negative-sum').textContent = `-${negativeSum.toFixed(2)}`;
+
+    if (filteredTransactions.length >= 2) {
+      const firstTransaction = filteredTransactions[0];
+      const lastTransaction  = filteredTransactions[filteredTransactions.length-1];
+
+      const firstTimestampMs = dateStringToTimestampMs(firstTransaction[dateFieldIndex]);
+      const lastTimestampMs  = dateStringToTimestampMs(lastTransaction[dateFieldIndex]);
+
+      const durationMs = lastTimestampMs - firstTimestampMs;
+      const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
+      const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
+      const years  = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30 * 12));
+      summary.querySelector('.duration').textContent = `${years}Y ${months}M ${days}D`;
+    } else {
+      summary.querySelector('.duration').textContent = '';
     }
   }
 
