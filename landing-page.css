@@ -148,11 +148,14 @@ section#csv-instructions > div > * {
   opacity: 0;
   transition: 1s opacity, 1s transform;
 }
-section#csv-instructions > div > img {
-  object-fit: contain;
-  object-position: top right;
+section#csv-instructions > div > span {
   margin-right: 40px;
+  text-align: right;
   transform: translate(-200px);
+}
+section#csv-instructions > div img {
+  max-width: 100%;
+  height: auto;
 }
 section#csv-instructions > div > p {
   margin-left: 40px;
