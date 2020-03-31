@@ -133,12 +133,12 @@
   background: white;
 }
 #timeline .x-axis-controls .range-slider {
-  left:   0;
+  left:   3px;
   right:  40px;
   bottom: 0;
 }
 #timeline .y-axis-controls .range-slider {
-  top:    0;
+  top:    4px;
   right:  0;
   bottom: 65px;
 }
