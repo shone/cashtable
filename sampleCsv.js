@@ -1,3 +1,5 @@
+'use strict';
+
 function generateSampleCsv() {
   const transactions = [];
   function addTransaction({timestamp, payee, accountNumber, transactionType, paymentReference, category, amount, amountForeign, currencyCode, exchangeRate}) {

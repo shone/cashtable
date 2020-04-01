@@ -1,3 +1,5 @@
+'use strict';
+
 function initRangeSlider(rangeSliderElement, callback) {
 
   let rangeStart = 0;
