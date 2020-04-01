@@ -1,25 +1,23 @@
 'use strict';
 
-window.timeline = {};
-
-// Callbacks
-window.timeline.onTransactionClicked = transactionIndex => {};
-window.timeline.onTransactionHover   = transactionIndex => {};
-
 const timeline = document.getElementById('timeline');
 
-const svg                        = timeline.querySelector('svg');
-const svgGroup                   = timeline.querySelector('svg g');
-const dateLabelsContainer        = timeline.querySelector('.date-labels');
-const monthLabelsContainer       = timeline.querySelector('.date-labels .months');
-const yearLabelsContainer        = timeline.querySelector('.date-labels .years');
-const topArea                    = timeline.querySelector('.top-area');
-const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
-const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
-const hoveredTransactionMarker   = timeline.querySelector('.hovered-transaction-marker');
-const filteredTransactionMarkers = timeline.querySelector('.filtered-transaction-markers');
+// Callbacks
+timeline.onTransactionClicked = transactionIndex => {};
+timeline.onTransactionHover   = transactionIndex => {};
 
-window.timeline.init = ({transactions, fields, timestamps, balances}) => {
+timeline.init = ({transactions, fields, timestamps, balances}) => {
+
+  const svg                        = timeline.querySelector('svg');
+  const svgGroup                   = timeline.querySelector('svg g');
+  const dateLabelsContainer        = timeline.querySelector('.date-labels');
+  const monthLabelsContainer       = timeline.querySelector('.date-labels .months');
+  const yearLabelsContainer        = timeline.querySelector('.date-labels .years');
+  const topArea                    = timeline.querySelector('.top-area');
+  const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
+  const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
+  const hoveredTransactionMarker   = timeline.querySelector('.hovered-transaction-marker');
+  const filteredTransactionMarkers = timeline.querySelector('.filtered-transaction-markers');
 
   const firstTransaction = transactions[0];
   const lastTransaction  = transactions[transactions.length-1];
@@ -29,22 +27,19 @@ window.timeline.init = ({transactions, fields, timestamps, balances}) => {
   let balanceRangeStart   = 0;
   let balanceRangeEnd     = 0;
 
-  const xAxisRangeSlider = initRangeSlider(
-    timeline.querySelector('.x-axis-controls .range-slider'),
-    (rangeStart, rangeEnd) => {
-      timestampRangeStart = timestamps[0] + (totalDuration * rangeStart);
-      timestampRangeEnd   = timestamps[0] + (totalDuration * rangeEnd);
-      updateRange();
-    }
-  );
-  const yAxisRangeSlider = initRangeSlider(
-    timeline.querySelector('.y-axis-controls .range-slider'),
-    (rangeStart, rangeEnd) => {
-      balanceRangeStart = maxBalance * rangeStart;
-      balanceRangeEnd   = maxBalance * rangeEnd;
-      updateRange();
-    }
-  );
+  const xAxisRangeSlider = timeline.querySelector('.x-axis-controls .range-slider');
+  xAxisRangeSlider.onrangechanged = (rangeStart, rangeEnd) => {
+    timestampRangeStart = timestamps[0] + (totalDuration * rangeStart);
+    timestampRangeEnd   = timestamps[0] + (totalDuration * rangeEnd);
+    updateRange();
+  }
+
+  const yAxisRangeSlider = timeline.querySelector('.y-axis-controls .range-slider');
+  yAxisRangeSlider.onrangechanged = (rangeStart, rangeEnd) => {
+    balanceRangeStart = maxBalance * rangeStart;
+    balanceRangeEnd   = maxBalance * rangeEnd;
+    updateRange();
+  }
 
   const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
   const dateFieldIndex   = fields.findIndex(field => field.name === 'Date');
@@ -238,27 +233,27 @@ window.timeline.init = ({transactions, fields, timestamps, balances}) => {
       return;
     }
     const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-    window.timeline.onTransactionClicked(transactionIndex);
+    timeline.onTransactionClicked(transactionIndex);
 
   }
 
   svg.onmousemove = event => {
     const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-    window.timeline.setHoveredTransaction(transactionIndex);
-    window.timeline.onTransactionHover(transactionIndex);
+    timeline.setHoveredTransaction(transactionIndex);
+    timeline.onTransactionHover(transactionIndex);
   }
 
   svg.onmouseout = () => {
     hoveredTransactionMarker.setAttribute('d', '');
     hoveredTransactionLabel.classList.add('hidden');
-    window.timeline.onTransactionHover(null);
+    timeline.onTransactionHover(null);
   }
 
   function formatAmountForLabel(amount) {
     return `${amount > 0 ? '+' : ''}${amount.toFixed(2)}`;
   }
 
-  window.timeline.setHoveredTransaction = transactionIndex => {
+  timeline.setHoveredTransaction = transactionIndex => {
     if (transactionIndex === null) {
       hoveredTransactionMarker.setAttribute('d', '');
       hoveredTransactionLabel.classList.add('hidden');
@@ -277,7 +272,7 @@ window.timeline.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  window.timeline.setFilteredTransactions = transactionIndices => {
+  timeline.setFilteredTransactions = transactionIndices => {
     filteredTransactionIndices = transactionIndices;
 
     // Clear existing labels
@@ -399,25 +394,25 @@ window.timeline.init = ({transactions, fields, timestamps, balances}) => {
   topArea.onmousemove = event => {
     if (event.target === topArea) {
       const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-      window.timeline.setHoveredTransaction(transactionIndex);
-      window.timeline.onTransactionHover(transactionIndex);
+      timeline.setHoveredTransaction(transactionIndex);
+      timeline.onTransactionHover(transactionIndex);
     } else if (event.target.tagName === 'LABEL') {
-      window.timeline.setHoveredTransaction(event.target.transactionIndex);
-      window.timeline.onTransactionHover(event.target.transactionIndex);
+      timeline.setHoveredTransaction(event.target.transactionIndex);
+      timeline.onTransactionHover(event.target.transactionIndex);
     }
   }
 
   topArea.onclick = event => {
     if (event.target === topArea) {
       const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-      window.timeline.onTransactionClicked(transactionIndex);
+      timeline.onTransactionClicked(transactionIndex);
     } else if (event.target.tagName === 'LABEL') {
-      window.timeline.onTransactionClicked(event.target.transactionIndex);
+      timeline.onTransactionClicked(event.target.transactionIndex);
     }
   }
 
   topArea.onmouseout = () => {
-    window.timeline.setHoveredTransaction(null);
-    window.timeline.onTransactionHover(null);
+    timeline.setHoveredTransaction(null);
+    timeline.onTransactionHover(null);
   }
 }

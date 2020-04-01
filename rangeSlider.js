@@ -1,13 +1,29 @@
 'use strict';
 
-function initRangeSlider(rangeSliderElement, callback) {
+document.body.querySelectorAll('.range-slider').forEach(initRangeSlider);
+
+function initRangeSlider(rangeSlider) {
 
   let rangeStart = 0;
   let rangeEnd   = 1;
   const minRange = 0.001;
-  const orientation = rangeSliderElement.dataset.orientation;
+  const orientation = rangeSlider.dataset.orientation;
 
-  const handlesElement = rangeSliderElement.querySelector('.handles');
+  rangeSlider.innerHTML = `
+    <div class="handles">
+      <span class="minimum"></span>
+      <span class="maximum"></span>
+    </div>
+  `;
+  const handlesElement = rangeSlider.querySelector('.handles');
+
+  rangeSlider.setRange = (rangeStart_, rangeEnd_) => {
+    rangeStart = rangeStart_;
+    rangeEnd   = rangeEnd_;
+    updateRange();
+  }
+
+  rangeSlider.onrangechanged = (start, end) => {};
 
   function updateRange() {
     const range = rangeEnd - rangeStart;
@@ -21,14 +37,14 @@ function initRangeSlider(rangeSliderElement, callback) {
   }
   updateRange();
 
-  rangeSliderElement.querySelector('.handles .minimum').onmousedown = onHandleMousedown;
-  rangeSliderElement.querySelector('.handles .maximum').onmousedown = onHandleMousedown;
+  rangeSlider.querySelector('.handles .minimum').onmousedown = onHandleMousedown;
+  rangeSlider.querySelector('.handles .maximum').onmousedown = onHandleMousedown;
   function onHandleMousedown(event) {
     event.preventDefault();
     event.stopPropagation();
     const handle = event.target;
     let lastCursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
-    const boundingRect = rangeSliderElement.getBoundingClientRect();
+    const boundingRect = rangeSlider.getBoundingClientRect();
     const rangeSliderSizePx = orientation === 'horizontal' ? boundingRect.width : boundingRect.height;
     function onMousemove(event) {
       const cursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
@@ -44,7 +60,7 @@ function initRangeSlider(rangeSliderElement, callback) {
         rangeStart = Math.min(rangeStart, rangeEnd - minRange);
       }
       updateRange();
-      callback(rangeStart, rangeEnd);
+      rangeSlider.onrangechanged(rangeStart, rangeEnd);
       lastCursorPosition = cursorPosition;
     }
     window.addEventListener('mousemove', onMousemove);
@@ -57,7 +73,7 @@ function initRangeSlider(rangeSliderElement, callback) {
     event.preventDefault();
     handlesElement.style.cursor = 'grabbing';
     let lastCursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
-    const boundingRect = rangeSliderElement.getBoundingClientRect();
+    const boundingRect = rangeSlider.getBoundingClientRect();
     const rangeSliderSizePx = orientation === 'horizontal' ? boundingRect.width : boundingRect.height;
     const rangeStartOnMousedown = rangeStart;
     const rangeEndOnMousedown   = rangeEnd;
@@ -73,7 +89,7 @@ function initRangeSlider(rangeSliderElement, callback) {
       rangeStart = Math.max(rangeStartOnMousedown + deltaTotal, 0);
       rangeEnd   = Math.min(rangeEndOnMousedown   + deltaTotal, 1);
       updateRange();
-      callback(rangeStart, rangeEnd);
+      rangeSlider.onrangechanged(rangeStart, rangeEnd);
       lastCursorPosition = cursorPosition;
     }
     window.addEventListener('mousemove', onMousemove);
@@ -82,17 +98,10 @@ function initRangeSlider(rangeSliderElement, callback) {
       handlesElement.style.cursor = '';
     }, {once: true});
   }
-  rangeSliderElement.ondblclick = event => {
+  rangeSlider.ondblclick = event => {
     rangeStart = 0;
     rangeEnd   = 1;
     updateRange();
-    callback(rangeStart, rangeEnd);
-  }
-  return {
-    setRange(rangeStart_, rangeEnd_) {
-      rangeStart = rangeStart_;
-      rangeEnd   = rangeEnd_;
-      updateRange();
-    }
+    rangeSlider.onrangechanged(rangeStart, rangeEnd);
   }
 }

@@ -1,16 +1,15 @@
 'use strict';
 
-window.table = {};
+const tableContainer = document.getElementById('table-container');
 
 // Callbacks
-window.table.onTransactionsFiltered = transactions => {};
-window.table.onTransactionHover = transactionIndex => {};
+tableContainer.onTransactionsFiltered = transactions => {};
+tableContainer.onTransactionHover = transactionIndex => {};
 
-const tableContainer = document.getElementById('table-container');
-const tbody = tableContainer.querySelector('tbody');
-const summary = tableContainer.querySelector('.summary');
+tableContainer.init = ({transactions, fields, timestamps, balances}) => {
 
-window.table.init = ({transactions, fields, timestamps, balances}) => {
+  const tbody   = tableContainer.querySelector('tbody');
+  const summary = tableContainer.querySelector('.summary');
 
   const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
   const dateFieldIndex   = fields.findIndex(field => field.name === 'Date');
@@ -79,7 +78,7 @@ window.table.init = ({transactions, fields, timestamps, balances}) => {
       return shouldShow;
     });
 
-    window.table.onTransactionsFiltered(filteredTransactionIndices);
+    tableContainer.onTransactionsFiltered(filteredTransactionIndices);
 
     const balance = filteredTransactions.reduce((balance, transaction) => balance + parseFloat(transaction[amountFieldIndex]), 0);
     summary.querySelector('.balance').textContent = `€${balance.toFixed(2)}`;
@@ -152,17 +151,17 @@ window.table.init = ({transactions, fields, timestamps, balances}) => {
     const trElement = event.target.closest('tr');
     if (trElement) {
       const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
-      window.table.onTransactionHover(transactionIndex);
+      tableContainer.onTransactionHover(transactionIndex);
     }
   }
   tbody.onmouseout = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
-      window.table.onTransactionHover(null);
+      tableContainer.onTransactionHover(null);
     }
   }
 
-  window.table.setHoveredTransaction = transactionIndex => {
+  tableContainer.setHoveredTransaction = transactionIndex => {
     const previouslyHoveredElement = tbody.querySelector('tr.hover');
     if (previouslyHoveredElement) {
       previouslyHoveredElement.classList.remove('hover');
@@ -172,7 +171,7 @@ window.table.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  window.table.scrollTransactionIntoView = transactionIndex => {
+  tableContainer.scrollTransactionIntoView = transactionIndex => {
     const tr = tbody.children[(transactions.length-1) - transactionIndex];
     let targetScrollTop = null;
     if (tr.offsetTop < (tableContainer.scrollTop + 100)) {

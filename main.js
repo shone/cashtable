@@ -163,14 +163,14 @@ function loadCsvString(csvString) {
 
   const transactionData = {transactions, fields, timestamps, balances, totalDuration, maxBalance};
 
-  window.timeline.init(transactionData);
-  window.table.init(transactionData);
+  timeline.init(transactionData);
+  tableContainer.init(transactionData);
 
-  window.timeline.onTransactionHover   = transactionIndex => window.table.setHoveredTransaction(transactionIndex);
-  window.timeline.onTransactionClicked = transactionIndex => window.table.scrollTransactionIntoView(transactionIndex);
+  timeline.onTransactionHover   = tableContainer.setHoveredTransaction;
+  timeline.onTransactionClicked = tableContainer.scrollTransactionIntoView;
 
-  window.table.onTransactionHover     = transactionIndex   => window.timeline.setHoveredTransaction(transactionIndex);
-  window.table.onTransactionsFiltered = transactionIndices => window.timeline.setFilteredTransactions(transactionIndices);
+  tableContainer.onTransactionHover     = timeline.setHoveredTransaction;
+  tableContainer.onTransactionsFiltered = timeline.setFilteredTransactions;
 }
 
 function dateStringToTimestampMs(string) {
@@ -181,7 +181,6 @@ function dateStringToTimestampMs(string) {
 document.getElementById('splitter').onmousedown = event => {
   event.preventDefault();
   let lastPageY = event.pageY;
-  const timeline = document.getElementById('timeline');
   function handleMousemove(event) {
     const delta = event.pageY - lastPageY;
     const currentHeight = parseInt(timeline.style.height || '250px');
