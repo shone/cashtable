@@ -111,8 +111,8 @@ section#preview {
   align-items:     center;
 }
 section#preview img[src="screenshot.png"] {
-  width: 80%;
-  margin: 20px;
+  width: 95%;
+  margin-bottom: 30px;
   box-shadow: 5px 8px 35px rgba(0, 0, 0, 0.4);
 }
 section#preview button {
@@ -228,6 +228,14 @@ section#disclaimer > * {
   }
   section#preview img[src="screenshot.png"] {
     width: 100%;
+  }
+}
+@media (max-width: 600px) {
+  section#intro .open-file-button {
+    width: 100%;
+  }
+  section#preview  {
+    align-items: stretch;
   }
 }
 
