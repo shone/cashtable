@@ -41,7 +41,7 @@
   background: var(--teal-highlight);
 }
 #landing-page h1 {
-  font-size: 25px;
+  font-size: 35px;
   margin-right: auto;
 }
 #landing-page h2 {
@@ -214,8 +214,8 @@ section#disclaimer > * {
     font-size: 0;
   }
   #landing-page header h1::before {
-    content: 'TE';
-    font-size: 25px;
+    content: 'ct';
+    font-size: 48px;
   }
   #landing-page header button {
     min-width: auto;
