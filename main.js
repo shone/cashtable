@@ -106,25 +106,25 @@ function loadCsvString(csvString) {
 
   const fieldNames = csvJson.splice(0, 1)[0];
 
-  const fieldTypes = {
-    'Date':                      'date',
-    'Payee':                     'string',
-    'Account number':            'account-number',
-    'Transaction type':          'string',
-    'Payment reference':         'string',
-    'Category':                  'string',
-    'Amount (EUR)':              'euro',
-    'Amount (Foreign Currency)': 'currency',
-    'Type Foreign Currency':     'currency-code',
-    'Exchange Rate':             'decimal',
+  const fieldInfo = {
+    'Date':                      {name: 'date',              type: 'date'          },
+    'Payee':                     {name: 'payee',             type: 'string'        },
+    'Account number':            {name: 'account-number',    type: 'account-number'},
+    'Transaction type':          {name: 'transaction-type',  type: 'string'        },
+    'Payment reference':         {name: 'payment-reference', type: 'string'        },
+    'Category':                  {name: 'category',          type: 'string'        },
+    'Amount (EUR)':              {name: 'amount-eur',        type: 'euro'          },
+    'Amount (Foreign Currency)': {name: 'amount-foreign',    type: 'currency'      },
+    'Type Foreign Currency':     {name: 'currency-code',     type: 'currency-code' },
+    'Exchange Rate':             {name: 'exchange-rate',     type: 'decimal'       },
   }
 
-  fields = fieldNames.map(name => ({name: name, type: fieldTypes[name]}));
-  fields.push({name: 'Balance', type: 'euro'});
+  fields = fieldNames.map(label => ({label, ...fieldInfo[label]}));
+  fields.push({label: 'Balance', name: 'balance', type: 'euro'});
 
-  const amountFieldIndex  = fields.findIndex(field => field.name === 'Amount (EUR)');
-  const dateFieldIndex    = fields.findIndex(field => field.name === 'Date');
-  const balanceFieldIndex = fields.findIndex(field => field.name === 'Balance');
+  const amountFieldIndex  = fields.findIndex(field => field.name === 'amount-eur');
+  const dateFieldIndex    = fields.findIndex(field => field.name === 'date');
+  const balanceFieldIndex = fields.findIndex(field => field.name === 'balance');
 
   let balance = 0;
   transactions = csvJson.map(line => {
@@ -164,13 +164,13 @@ function loadCsvString(csvString) {
   const transactionData = {transactions, fields, timestamps, balances, totalDuration, maxBalance};
 
   timeline.init(transactionData);
-  tableContainer.init(transactionData);
+  table.init(transactionData);
 
-  timeline.onTransactionHover   = tableContainer.setHoveredTransaction;
-  timeline.onTransactionClicked = tableContainer.scrollTransactionIntoView;
+  timeline.onTransactionHover   = table.setHoveredTransaction;
+  timeline.onTransactionClicked = table.scrollTransactionIntoView;
 
-  tableContainer.onTransactionHover     = timeline.setHoveredTransaction;
-  tableContainer.onTransactionsFiltered = timeline.setFilteredTransactions;
+  table.onTransactionHover     = timeline.setHoveredTransaction;
+  table.onTransactionsFiltered = timeline.setFilteredTransactions;
 }
 
 function dateStringToTimestampMs(string) {
@@ -184,7 +184,7 @@ document.getElementById('splitter').onmousedown = event => {
   function handleMousemove(event) {
     const delta = event.pageY - lastPageY;
     const currentHeight = parseInt(timeline.style.height || '250px');
-    timeline.style.height = (Math.min(currentHeight, window.innerHeight - 15) + delta) + 'px';
+    timeline.style.height = Math.min(currentHeight + delta, window.innerHeight - 75) + 'px';
     lastPageY = event.pageY;
   }
   window.addEventListener('mousemove', handleMousemove);

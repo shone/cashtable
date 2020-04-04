@@ -1,35 +1,40 @@
 'use strict';
 
-const tableContainer = document.getElementById('table-container');
+const table = document.getElementById('table');
 
 // Callbacks
-tableContainer.onTransactionsFiltered = transactions => {};
-tableContainer.onTransactionHover = transactionIndex => {};
+table.onTransactionsFiltered = transactions => {};
+table.onTransactionHover = transactionIndex => {};
 
-tableContainer.init = ({transactions, fields, timestamps, balances}) => {
+table.init = ({transactions, fields, timestamps, balances}) => {
 
-  const tbody   = tableContainer.querySelector('tbody');
-  const summary = tableContainer.querySelector('.summary');
+  const thead = table.querySelector('thead');
+  const tbody = table.querySelector('tbody');
+  const tfoot = table.querySelector('tfoot');
 
-  const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
-  const dateFieldIndex   = fields.findIndex(field => field.name === 'Date');
+  const amountFieldIndex = fields.findIndex(field => field.name === 'amount-eur');
+  const dateFieldIndex   = fields.findIndex(field => field.name === 'date');
 
-  tableContainer.querySelector('tr.field-names').innerHTML = fields.map(field => `<th class="${field.type}"></th>`).join('');
-  tableContainer.querySelectorAll('tr.field-names th').forEach((th, index) => th.textContent = fields[index].name);
+  const defaultHiddenColumns = new Set(['amount-foreign', 'currency-code', 'exchange-rate']);
+  table.classList.add(...[...defaultHiddenColumns].map(column => `hide-column-${column}`));
 
-  tableContainer.querySelector('tr.filters').innerHTML = fields.map(field => `
-    <th class="${field.type}">
+  table.querySelector('tr.field-names').insertAdjacentHTML('afterbegin', fields.map(field => `<th class="${field.type}" data-column="${field.name}"></th>`).join(''));
+  table.querySelectorAll('tr.field-names th').forEach((th, index) => th.textContent = fields[index].label);
+
+  table.querySelector('tr.filters').innerHTML = fields.map(field => `
+    <th class="${field.type}" data-column="${field.name}">
       <input>
       <button class="clear-button" title="Clear filter"></button>
     </th>
   `).join('');
-  const filterInputs = [...tableContainer.querySelectorAll('tr.filters input')];
+  const filterInputs = [...table.querySelectorAll('tr.filters input')];
 
   const trElements = transactions.map(transaction => {
     const trElement = document.createElement('tr');
     const tdElements = transaction.map((value, fieldIndex) => {
       const tdElement = document.createElement('td');
       tdElement.classList.add(fields[fieldIndex].type);
+      tdElement.dataset.column = fields[fieldIndex].name;
       tdElement.textContent = formatValueForTable(value, fieldIndex);
       if ((typeof value) === 'number' && value > 0) {
         tdElement.classList.add('positive-number');
@@ -42,13 +47,37 @@ tableContainer.init = ({transactions, fields, timestamps, balances}) => {
   trElements.reverse();
   tbody.append(...trElements);
 
+  const settingsMenu = thead.querySelector('.settings-menu');
+  settingsMenu.innerHTML = fields.map(field => `<div data-name="${field.name}" class="${defaultHiddenColumns.has(field.name) ? '' : 'show'}"></div>`).join('');
+  settingsMenu.querySelectorAll('div').forEach((div, index) => div.textContent = fields[index].label);
+  settingsMenu.onclick = event => {
+    if (event.target.tagName === 'DIV') {
+      event.target.classList.toggle('show');
+      table.classList.toggle(`hide-column-${event.target.dataset.name}`);
+    }
+  }
+
+  thead.querySelector('.settings-button').onclick = () => {
+    settingsMenu.classList.toggle('show');
+    if (settingsMenu.classList.contains('show')) {
+      window.addEventListener('mousedown', function callback(event) {
+        if (!event.target.closest('.settings-menu')) {
+          if (!event.target.classList.contains('settings-button')) {
+            settingsMenu.classList.remove('show');
+          }
+          window.removeEventListener('mousedown', callback);
+        }
+      });
+    }
+  }
+
   applyFilters();
 
   function formatValueForTable(value, fieldIndex) {
     switch (fields[fieldIndex].type) {
       case 'euro': case 'currency':
         if (isNaN(value)) return '';
-        if (fields[fieldIndex].name === 'Balance') return value.toFixed(2);
+        if (fields[fieldIndex].name === 'balance') return value.toFixed(2);
         const sign = value > 0 ? '+' : '';
         return `${sign}${value.toFixed(2)}`;
       default:
@@ -71,29 +100,29 @@ tableContainer.init = ({transactions, fields, timestamps, balances}) => {
         const formattedValue = formatValueForTable(transaction[fieldIndex], fieldIndex);
         return formattedValue.toLowerCase().includes(filter);
       });
-      trElements[(transactions.length-1) - transactionIndex].style.display = shouldShow ? 'table-row' : 'none';
+      trElements[(transactions.length-1) - transactionIndex].style.display = shouldShow ? null : 'none';
       if (!allFiltersEmpty && shouldShow) {
         filteredTransactionIndices.push(transactionIndex);
       }
       return shouldShow;
     });
 
-    tableContainer.onTransactionsFiltered(filteredTransactionIndices);
+    table.onTransactionsFiltered(filteredTransactionIndices);
 
     const balance = filteredTransactions.reduce((balance, transaction) => balance + parseFloat(transaction[amountFieldIndex]), 0);
-    summary.querySelector('.balance').textContent = `€${balance.toFixed(2)}`;
+    tfoot.querySelector('.balance').textContent = `€${balance.toFixed(2)}`;
 
     const positiveSum = filteredTransactions.reduce((sum, transaction) => {
       const amount = parseFloat(transaction[amountFieldIndex]);
       return amount > 0 ? sum + amount : sum;
     }, 0);
-    summary.querySelector('.positive-sum').textContent = `+${positiveSum.toFixed(2)}`;
+    tfoot.querySelector('.positive-sum').textContent = `+${positiveSum.toFixed(2)}`;
 
     const negativeSum = filteredTransactions.reduce((sum, transaction) => {
       const amount = parseFloat(transaction[amountFieldIndex]);
       return amount < 0 ? sum - amount : sum;
     }, 0);
-    summary.querySelector('.negative-sum').textContent = `-${negativeSum.toFixed(2)}`;
+    tfoot.querySelector('.negative-sum').textContent = `-${negativeSum.toFixed(2)}`;
 
     if (filteredTransactions.length >= 2) {
       const firstTransaction = filteredTransactions[0];
@@ -106,20 +135,20 @@ tableContainer.init = ({transactions, fields, timestamps, balances}) => {
       const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
       const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
       const years  = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30 * 12));
-      summary.querySelector('.duration').textContent = `${years}Y ${months}M ${days}D`;
+      tfoot.querySelector('.duration').textContent = `${years}Y ${months}M ${days}D`;
     } else {
-      summary.querySelector('.duration').textContent = '';
+      tfoot.querySelector('.duration').textContent = '';
     }
   }
 
-  tableContainer.querySelector('tr.filters').oninput = event => {
+  table.querySelector('tr.filters').oninput = event => {
     const input = event.target;
     const thElement = input.closest('th');
     thElement.classList.toggle('filter-active', input.value !== '');
     applyFilters();
   }
 
-  tableContainer.querySelector('tr.filters').onkeydown = event => {
+  table.querySelector('tr.filters').onkeydown = event => {
     if (event.key === 'Escape' && event.target.tagName === 'INPUT') {
       const input = event.target;
       input.value = '';
@@ -129,7 +158,7 @@ tableContainer.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  tableContainer.querySelector('tr.filters').onclick = event => {
+  table.querySelector('tr.filters').onclick = event => {
     if (event.target.classList.contains('clear-button')) {
       const thElement = event.target.closest('th');
       thElement.classList.remove('filter-active');
@@ -140,28 +169,25 @@ tableContainer.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  tbody.onclick = event => {
-    const trElement = event.target.closest('tr');
-    if (trElement) {
-      trElement.classList.toggle('selected');
-    }
-  }
+  tbody.addEventListener('scroll', event => {
+    thead.style.marginLeft = `${-tbody.scrollLeft}px`;
+  }, {passive: true});
 
   tbody.onmouseover = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
       const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
-      tableContainer.onTransactionHover(transactionIndex);
+      table.onTransactionHover(transactionIndex);
     }
   }
   tbody.onmouseout = event => {
     const trElement = event.target.closest('tr');
     if (trElement) {
-      tableContainer.onTransactionHover(null);
+      table.onTransactionHover(null);
     }
   }
 
-  tableContainer.setHoveredTransaction = transactionIndex => {
+  table.setHoveredTransaction = transactionIndex => {
     const previouslyHoveredElement = tbody.querySelector('tr.hover');
     if (previouslyHoveredElement) {
       previouslyHoveredElement.classList.remove('hover');
@@ -171,17 +197,17 @@ tableContainer.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  tableContainer.scrollTransactionIntoView = transactionIndex => {
+  table.scrollTransactionIntoView = transactionIndex => {
     const tr = tbody.children[(transactions.length-1) - transactionIndex];
     let targetScrollTop = null;
-    if (tr.offsetTop < (tableContainer.scrollTop + 100)) {
+    if (tr.offsetTop < (tbody.scrollTop + 100)) {
       targetScrollTop = tr.offsetTop - 100;
-    } else if (tr.offsetTop > (tableContainer.scrollTop + tableContainer.offsetHeight - 100)) {
-      targetScrollTop = (tr.offsetTop - tableContainer.offsetHeight) + 100;
+    } else if (tr.offsetTop > (tbody.scrollTop + tbody.offsetHeight - 100)) {
+      targetScrollTop = (tr.offsetTop - tbody.offsetHeight) + 100;
     }
     if (targetScrollTop !== null) {
-      const scrollDelta = targetScrollTop - tableContainer.scrollTop;
-      tableContainer.scrollTo({top: targetScrollTop, behavior: Math.abs(scrollDelta) < 2000 ? 'smooth' : 'auto'});
+      const scrollDelta = targetScrollTop - tbody.scrollTop;
+      tbody.scrollTo({top: targetScrollTop, behavior: Math.abs(scrollDelta) < 2000 ? 'smooth' : 'auto'});
     }
   }
 }

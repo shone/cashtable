@@ -130,21 +130,27 @@
 
       <div id="splitter"></div>
 
-      <div id="table-container">
-        <table>
-          <thead>
-            <tr class="field-names"></tr>
-            <tr class="filters"></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        <div class="summary">
-          <span class="duration"></span>
-          <span class="positive-sum"></span>
-          <span class="negative-sum"></span>
-          <span class="balance"></span>
-        </div>
-      </div>
+      <table id="table">
+        <thead>
+          <tr class="field-names">
+            <td class="settings-cell">
+              <button class="settings-button" title="Hide/show columns"></button>
+              <div class="settings-menu"></div>
+            </td>
+          </tr>
+          <tr class="filters"></tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td class="duration"></td>
+            <td class="positive-sum"></td>
+            <td class="negative-sum"></td>
+            <td class="balance"></td>
+          </tr>
+        </tfoot>
+      </table>
+
     </div>
   </body>
 

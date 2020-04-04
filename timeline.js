@@ -41,8 +41,8 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     updateRange();
   }
 
-  const amountFieldIndex = fields.findIndex(field => field.name === 'Amount (EUR)');
-  const dateFieldIndex   = fields.findIndex(field => field.name === 'Date');
+  const amountFieldIndex = fields.findIndex(field => field.name === 'amount-eur');
+  const dateFieldIndex   = fields.findIndex(field => field.name === 'date');
 
   // Balance path
   timeline.querySelector('path.balance').setAttribute('d', 'M0,0 ' + balances.map((balance, index) => {

@@ -71,10 +71,7 @@
   margin-bottom: 10px;
   padding-left:  30px;
   padding-right: 30px;
-  border-radius: 6px;
   font-size: 18px;
-  box-shadow: 2px 3px 8px #00000061;
-  position: relative;
 }
 #landing-page button:active {
   transform: translate(3px, 3px);

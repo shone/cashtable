@@ -14,6 +14,12 @@ body {
 button {
   cursor: pointer;
   border: none;
+  border-radius: 6px;
+  background-color: var(--teal);
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.4);
+  position: relative;
 }
 button::-moz-focus-inner {
   border: 0;
@@ -46,6 +52,7 @@ input[type='file'] {
   z-index: 1;
   top: 0;
   width: 100%;
+  box-sizing: border-box;
   height: var(--app-header-height);
   padding-left:  20px;
   padding-right: 20px;
@@ -56,9 +63,12 @@ input[type='file'] {
 #app header h1 {
   font-size: 20px;
   padding-left: 45px;
-  padding-right: 30px;
+  margin-right: 30px;
   line-height: 50px;
-  margin: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  flex-shrink: 1;
   background: no-repeat left / 35px url('data:image/svg+xml;utf8,<svg viewBox="0 0 16.9 16.9" xmlns="http://www.w3.org/2000/svg"><path d="M6.2.5L2.8 3.8V15c0 .9.7 1.6 1.6 1.6h8.1c1 0 1.6-.7 1.6-1.6V2c0-.8-.7-1.5-1.6-1.5H6.2z" fill="black"/><g fill="none" stroke="white" stroke-linecap="round" stroke-width="1.1"><path d="M5.5 6.4h6M5.5 8.7h6M5.5 10.9h6M5.5 13.2h6"/></g><path d="M6.2.3v3.2c0 .2-.1.3-.3.3H2.7v1h3.2c.8 0 1.4-.6 1.4-1.3V.3z" fill="white"/></svg>');
 }
 #app header .last-updated {
@@ -66,6 +76,7 @@ input[type='file'] {
   align-items: center;
   margin-left:  15px;
   margin-right: 15px;
+  flex-shrink: 0;
 }
 #app header .last-updated label {
   padding-right: 12px;
@@ -80,6 +91,17 @@ input[type='file'] {
 #app header .last-updated .time-since {
   text-align: center;
   font-size: 14px;
+}
+
+#app button {
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.6);
+}
+#app button:hover {
+  background-color: var(--teal-highlight);
+}
+#app button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 #splitter {
