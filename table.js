@@ -19,7 +19,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
   table.classList.add(...[...defaultHiddenColumns].map(column => `hide-column-${column}`));
 
   table.querySelector('tr.field-names').insertAdjacentHTML('afterbegin', fields.map(field => `<th class="${field.type}" data-column="${field.name}"></th>`).join(''));
-  table.querySelectorAll('tr.field-names th').forEach((th, index) => th.textContent = fields[index].label);
+  table.querySelectorAll('tr.field-names th[data-column]').forEach((th, index) => th.textContent = fields[index].label);
 
   table.querySelector('tr.filters').innerHTML = fields.map(field => `
     <th class="${field.type}" data-column="${field.name}">
