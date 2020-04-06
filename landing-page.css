@@ -109,6 +109,7 @@ section#preview {
   flex-direction: column;
   justify-content: center;
   align-items:     center;
+  min-height: 650px;
 }
 section#preview img[src="screenshot.png"] {
   width: 95%;
