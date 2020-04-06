@@ -57,7 +57,7 @@
 }
 #landing-page section {
   width: 500px;
-  min-height: 500px;
+  min-height: 650px;
   height: calc(100vh - 200px);
   padding: 30px;
   flex-grow: 1;
@@ -109,7 +109,6 @@ section#preview {
   flex-direction: column;
   justify-content: center;
   align-items:     center;
-  min-height: 650px;
 }
 section#preview img[src="screenshot.png"] {
   width: 95%;
