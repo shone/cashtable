@@ -110,7 +110,7 @@ section#preview {
   justify-content: center;
   align-items:     center;
 }
-section#preview img[src="screenshot.png"] {
+section#preview img[src="images/screenshot.png"] {
   width: 95%;
   margin-bottom: 30px;
   box-shadow: 5px 8px 35px rgba(0, 0, 0, 0.4);
@@ -226,7 +226,7 @@ section#disclaimer > * {
     height: auto;
     min-height: auto;
   }
-  section#preview img[src="screenshot.png"] {
+  section#preview img[src="images/screenshot.png"] {
     width: 100%;
   }
 }
