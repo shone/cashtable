@@ -13,6 +13,7 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
   const dateLabelsContainer        = timeline.querySelector('.date-labels');
   const monthLabelsContainer       = timeline.querySelector('.date-labels .months');
   const yearLabelsContainer        = timeline.querySelector('.date-labels .years');
+  const balanceLabelsContainer     = timeline.querySelector('.balance-labels');
   const topArea                    = timeline.querySelector('.top-area');
   const transactionLabelsContainer = timeline.querySelector('.transaction-labels');
   const hoveredTransactionLabel    = timeline.querySelector('.hovered-transaction-label');
@@ -27,14 +28,14 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
   let balanceRangeStart   = 0;
   let balanceRangeEnd     = 0;
 
-  const xAxisRangeSlider = timeline.querySelector('.x-axis-controls .range-slider');
+  const xAxisRangeSlider = timeline.querySelector('.x-axis .range-slider');
   xAxisRangeSlider.onrangechanged = (rangeStart, rangeEnd) => {
     timestampRangeStart = timestamps[0] + (totalDuration * rangeStart);
     timestampRangeEnd   = timestamps[0] + (totalDuration * rangeEnd);
     updateRange();
   }
 
-  const yAxisRangeSlider = timeline.querySelector('.y-axis-controls .range-slider');
+  const yAxisRangeSlider = timeline.querySelector('.y-axis .range-slider');
   yAxisRangeSlider.onrangechanged = (rangeStart, rangeEnd) => {
     balanceRangeStart = maxBalance * rangeStart;
     balanceRangeEnd   = maxBalance * rangeEnd;
@@ -108,6 +109,17 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     label.style.width = `${(years[index+1].positionRatio - years[index].positionRatio) * 100}%`;
   });
 
+  // Balance labels
+  const balances10k = [];
+  for (let i=0; i<=(maxBalance+10000); i+=10000) {
+    balances10k.push({label: i !== 0 ? `${i / 1000}k` : '', positionRatio: i / maxBalance});
+  }
+  balanceLabelsContainer.innerHTML = balances10k.slice(0, -1).map((balance, index) => `<label>${balance.label}</label>`).join('');
+  [...balanceLabelsContainer.children].forEach((label, index) => {
+    label.style.bottom = `${balances10k[index].positionRatio * 100}%`;
+    label.style.height = `${(balances10k[index+1].positionRatio - balances10k[index].positionRatio) * 100}%`;
+  });
+
   let filteredTransactionIndices = [];
   let transactionLabels = [];
   const labelCharacterWidth = 8;
@@ -143,6 +155,9 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
 
     yearLabelsContainer.style.width = labelContainerWidth;
     yearLabelsContainer.style.left = labelContainerLeft;
+
+    balanceLabelsContainer.style.height = `${(maxBalance / rangeBalance) * 100}%`;
+    balanceLabelsContainer.style.bottom = `${(-balanceRangeStart / rangeBalance) * 100}%`;
 
     // Range sliders
     xAxisRangeSlider.setRange(

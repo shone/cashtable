@@ -88,10 +88,19 @@
   pointer-events: none;
 }
 
+#timeline .axis-controls {
+  position: absolute;
+  background: white;
+}
+#timeline .axis-controls.x-axis { left: 0; bottom:  0;   right: 40px; height: 60px; }
+#timeline .axis-controls.y-axis {  top: 0; bottom: 60px; right:  0;   width:  50px; overflow: hidden; }
+#timeline .x-axis .range-slider { left: 4px; right: 0; bottom: 0; }
+#timeline .y-axis .range-slider { top:  4px; right: 0; bottom: 0; }
+
 #timeline .date-labels {
   position: absolute;
+  right:  0;
   left:   20px;
-  right:  40px;
   height: 40px;
   bottom: 20px;
 }
@@ -106,7 +115,7 @@
   background: #323232;
   color: white;
   text-align: center;
-  border-left:  1px solid white;
+  border-left: 1px solid white;
   box-sizing: border-box;
   user-select: none;
 }
@@ -116,31 +125,24 @@
 #timeline .date-labels .months[data-length="short"] label .short-name { display: block; }
 #timeline .date-labels .months[data-length="long"]  label .long-name  { display: block; }
 
-#timeline .x-axis-controls {
+#timeline .balance-labels {
   position: absolute;
   left:   0;
-  right:  0;
-  bottom: 0;
-  height: 60px;
-  background: white;
+  width: 30px;
 }
-#timeline .y-axis-controls {
+#timeline .balance-labels label {
   position: absolute;
-  right:  0;
-  top:    0;
-  bottom: 0;
-  width: 20px;
-  background: white;
-}
-#timeline .x-axis-controls .range-slider {
-  left:   3px;
-  right:  40px;
-  bottom: 0;
-}
-#timeline .y-axis-controls .range-slider {
-  top:    4px;
-  right:  0;
-  bottom: 65px;
+  left:  0;
+  right: 0;
+  background: #323232;
+  color: white;
+  text-align: right;
+  border-top: 1px solid white;
+  box-sizing: border-box;
+  user-select: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 #timeline .corner-controls {
@@ -151,7 +153,7 @@
   height: 60px;
   padding: 3px;
   background: white;
-  border-radius: 6px;
+  border-top-left-radius: 6px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
