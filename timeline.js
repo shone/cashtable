@@ -186,8 +186,8 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     timestampRangeStart = Math.max(timestampRangeStart + (timestampZoomAmount * cursorXRatio),     timestamps[0]);
     timestampRangeEnd   = Math.min(timestampRangeEnd   - (timestampZoomAmount * (1-cursorXRatio)), timestamps[timestamps.length-1]);
 
-    balanceRangeStart = Math.max(balanceRangeStart + (balanceZoomAmount * cursorXRatio), 0);
-    balanceRangeEnd   = Math.min(balanceRangeEnd   - (balanceZoomAmount * (1-cursorYRatio)), maxBalance);
+    balanceRangeStart = Math.max(balanceRangeStart + (balanceZoomAmount * (1-cursorYRatio)), 0);
+    balanceRangeEnd   = Math.min(balanceRangeEnd   - (balanceZoomAmount * cursorYRatio), maxBalance);
 
     updateRange();
   }
