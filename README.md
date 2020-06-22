@@ -18,7 +18,7 @@ To eliminate the posibility of a malicious transient third-party dependency (lik
 
 ### Restrictive content security policy
 
-The `<meta http-equiv='Content-Security-Policy'>` directive blocks all cross-origin requests and inline evaluation (except for data-url images for SVGs in CSS). This prevents any potential injection attack from sending personal information to an external server.
+The `<meta http-equiv='Content-Security-Policy'>` directive blocks all cross-origin requests and inline evaluation (except for data-url images for [SVGs in CSS](https://joshshone.com/articles/svg-in-css.html)). This prevents any potential injection attack from sending personal information to an external server.
 
 ### Load once
 
