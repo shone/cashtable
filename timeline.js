@@ -23,6 +23,9 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
   const firstTransaction = transactions[0];
   const lastTransaction  = transactions[transactions.length-1];
 
+  // TODO: don't use global maxBalance
+
+  // TODO: initialize ranges here
   let timestampRangeStart = 0;
   let timestampRangeEnd   = 0;
   let balanceRangeStart   = 0;
@@ -97,17 +100,17 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
       <div class="short-name">${monthNamesShort[month.number % 12]}</div>
     </label>
   `).join('');
-  [...monthLabelsContainer.children].forEach((label, index) => {
-    label.style.left = `${months[index].positionRatio * 100}%`;
-    label.style.width = `${(months[index+1].positionRatio - months[index].positionRatio) * 100}%`;
-  });
+  [...monthLabelsContainer.children].forEach((label, index) => label.style.cssText = `
+    left: ${months[index].positionRatio * 100}%;
+    width: ${(months[index+1].positionRatio - months[index].positionRatio) * 100}%;
+  `);
 
   // Year labels
   yearLabelsContainer.innerHTML = years.slice(0, -1).map((year, index) => `<label>${year.number}</label>`).join('');
-  [...yearLabelsContainer.children].forEach((label, index) => {
-    label.style.left = `${years[index].positionRatio * 100}%`;
-    label.style.width = `${(years[index+1].positionRatio - years[index].positionRatio) * 100}%`;
-  });
+  [...yearLabelsContainer.children].forEach((label, index) => label.style.cssText = `
+    left: ${years[index].positionRatio * 100}%;
+    width: ${(years[index+1].positionRatio - years[index].positionRatio) * 100}%;
+  `);
 
   // Balance labels
   const balances10k = [];
@@ -306,9 +309,11 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
       label.string = formatAmountForLabel(amount);
       label.x = (timestamps[transactionIndex] - timestamps[0]) / totalDuration;
       label.textContent = label.string;
-      label.style.left = (label.x * 100) + '%';
-      label.style.width = (label.string.length * labelCharacterWidth) + 'px';
-      label.style.marginLeft = (label.string.length * labelCharacterWidth * -0.5) + 'px';
+      label.style.cssText = `
+        left: ${label.x * 100}%;
+        width: ${label.string.length * labelCharacterWidth}px;
+        margin-left: ${label.string.length * labelCharacterWidth * -0.5}px;
+      `;
       label.transactionIndex = transactionIndex;
       return label;
     });
