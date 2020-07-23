@@ -1,6 +1,6 @@
 # cashtable
 
-A web-app for graphing, filtering and analyzing N26 bank transactions. Hosted at [joshshone.com/cashtable](https://joshshone.com/cashtable/)
+A web-app for graphing, filtering and analyzing N26 bank transactions. Hosted at [shone.dev/cashtable](https://shone.dev/cashtable/)
 
 ![Screenshot](images/screenshot.png)
 
@@ -18,7 +18,7 @@ To eliminate the posibility of a malicious transient third-party dependency (lik
 
 ### Restrictive content security policy
 
-The `<meta http-equiv='Content-Security-Policy'>` directive blocks all cross-origin requests and inline evaluation (except for data-url images for [SVGs in CSS](https://joshshone.com/articles/svg-in-css.html)). This prevents any potential injection attack from sending personal information to an external server.
+The `<meta http-equiv='Content-Security-Policy'>` directive blocks all cross-origin requests and inline evaluation (except for data-url images for [SVGs in CSS](https://shone.dev/articles/svg-in-css.html)). This prevents any potential injection attack from sending personal information to an external server.
 
 ### Load once
 
