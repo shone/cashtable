@@ -31,14 +31,14 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
   let balanceRangeStart   = 0;
   let balanceRangeEnd     = 0;
 
-  const xAxisRangeSlider = timeline.querySelector('.x-axis .range-slider');
+  const xAxisRangeSlider = timeline.querySelector('.x-axis range-slider');
   xAxisRangeSlider.onrangechanged = (rangeStart, rangeEnd) => {
     timestampRangeStart = timestamps[0] + (totalDuration * rangeStart);
     timestampRangeEnd   = timestamps[0] + (totalDuration * rangeEnd);
     updateRange();
   }
 
-  const yAxisRangeSlider = timeline.querySelector('.y-axis .range-slider');
+  const yAxisRangeSlider = timeline.querySelector('.y-axis range-slider');
   yAxisRangeSlider.onrangechanged = (rangeStart, rangeEnd) => {
     balanceRangeStart = maxBalance * rangeStart;
     balanceRangeEnd   = maxBalance * rangeEnd;

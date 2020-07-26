@@ -1,0 +1,31 @@
+range-slider {
+  position: absolute;
+  overflow: hidden;
+  background: white;
+}
+range-slider[data-orientation="vertical"]   { width:  20px; }
+range-slider[data-orientation="horizontal"] { height: 20px; }
+
+range-slider .handles {
+  position: absolute;
+  cursor: grab;
+  background: var(--teal);
+  border-radius: 6px;
+}
+range-slider[data-orientation="vertical"]   .handles { left: 3px; right:  3px; }
+range-slider[data-orientation="horizontal"] .handles { top:  3px; bottom: 3px; }
+range-slider .handles:hover {
+  background: var(--teal-highlight);
+}
+
+range-slider .handles > span {
+  position: absolute;
+  background: no-repeat center / 60% url('data:image/svg+xml;utf8,<svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M0.9,0 v1 L0.1,0.5" stroke-width="2.117"/></svg>');
+}
+range-slider[data-orientation="vertical"]   .handles > span { cursor: ns-resize; }
+range-slider[data-orientation="horizontal"] .handles > span { cursor: ew-resize; }
+
+range-slider[data-orientation="horizontal"] .handles > .minimum { left:  0; top: 0; bottom: 0; width: 16px; }
+range-slider[data-orientation="horizontal"] .handles > .maximum { right: 0; top: 0; bottom: 0; width: 16px; transform: rotate(180deg); }
+range-slider[data-orientation="vertical"]   .handles > .minimum { bottom: 0; left: 0; right: 0; height: 16px; transform: rotate(270deg); }
+range-slider[data-orientation="vertical"]   .handles > .maximum { top: 0; left: 0; right: 0; height: 16px; transform: rotate(90deg); }
