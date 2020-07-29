@@ -2,9 +2,11 @@ range-slider {
   position: absolute;
   overflow: hidden;
   background: white;
+  --thickness: 20px;
 }
-range-slider[data-orientation="vertical"]   { width:  20px; }
-range-slider[data-orientation="horizontal"] { height: 20px; }
+
+range-slider[data-orientation="vertical"]   { width:  var(--thickness); }
+range-slider[data-orientation="horizontal"] { height: var(--thickness); }
 
 range-slider .handles {
   position: absolute;
