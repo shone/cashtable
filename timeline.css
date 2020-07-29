@@ -14,6 +14,7 @@
   width:  calc(100% - 60px);
   height: calc(100% - 85px);
   overflow: visible;
+  touch-action: none; /* Prevent built-in browser touch action */
 }
 #timeline svg g {
   pointer-events: none;

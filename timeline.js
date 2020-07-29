@@ -202,11 +202,14 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
 
   let isDraggingTimeline = false;
 
-  svg.onmousedown = event => {
+  svg.onpointerdown = event => {
     event.preventDefault();
+    const pointerId = event.pointerId;
+    svg.setPointerCapture(pointerId);
     let lastEvent = {pageX: event.pageX, pageY: event.pageY};
-    function handleMousemove(event) {
+    function onPointermove(event) {
       if (event.buttons !== 1) return;
+      if (event.pointerId !== pointerId) return;
       isDraggingTimeline = true;
       svg.style.cursor = 'grab';
       const boundingRect = svg.getBoundingClientRect();
@@ -225,13 +228,16 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
       updateRange();
       lastEvent = {pageX: event.pageX, pageY: event.pageY};
     }
-    window.addEventListener('mousemove', handleMousemove);
-    window.addEventListener('mouseup', event => {
+    function onDragFinish() {
       event.preventDefault();
-      window.removeEventListener('mousemove', handleMousemove);
+      svg.removeEventListener('pointermove', onPointermove);
+      svg.releasePointerCapture(pointerId);
       isDraggingTimeline = false;
       svg.style.cursor = '';
-    }, {once: true});
+    }
+    svg.addEventListener('pointermove', onPointermove);
+    svg.addEventListener('pointerup', onDragFinish, {once: true});
+    svg.addEventListener('pointercancel', onDragFinish, {once: true});
   }
 
   function getTransactionIndexAtTimelinePixelsX(x) {
@@ -250,13 +256,12 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  svg.onmouseup = event => {
+  svg.onpointerup = event => {
     if (isDraggingTimeline) {
       return;
     }
     const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
     timeline.onTransactionClicked(transactionIndex);
-
   }
 
   svg.onmousemove = event => {
