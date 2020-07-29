@@ -178,17 +178,26 @@ function dateStringToTimestampMs(string) {
   return new Date(parseInt(year), parseInt(month)-1, parseInt(day)).getTime();
 }
 
-document.getElementById('splitter').onmousedown = event => {
+const splitter = document.getElementById('splitter');
+splitter.onpointerdown = event => {
   event.preventDefault();
+  const pointerId = event.pointerId;
+  splitter.setPointerCapture(pointerId);
   let lastPageY = event.pageY;
-  function handleMousemove(event) {
+  function onPointermove(event) {
+    if (event.pointerId !== pointerId) {
+      return;
+    }
     const delta = event.pageY - lastPageY;
     const currentHeight = parseInt(timeline.style.height || '250px');
     timeline.style.height = Math.min(currentHeight + delta, window.innerHeight - 75) + 'px';
     lastPageY = event.pageY;
   }
-  window.addEventListener('mousemove', handleMousemove);
-  window.addEventListener('mouseup', () => {
-    window.removeEventListener('mousemove', handleMousemove);
-  }, {once: true});
+  function onDragFinish() {
+    splitter.releasePointerCapture(pointerId);
+    splitter.removeEventListener('pointermove', onPointermove);
+  }
+  splitter.addEventListener('pointermove', onPointermove);
+  splitter.addEventListener('pointerup', onDragFinish, {once: true});
+  splitter.addEventListener('pointercancel', onDragFinish, {once: true});
 }
