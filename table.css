@@ -211,7 +211,14 @@
   width: 25px;
   top:    2px;
   bottom: 2px;
-  background: no-repeat center / 70% url('data:image/svg+xml;utf8,<svg viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="black" stroke-linecap="round" stroke-width="1.5"><circle cx="5.897" cy="6" r="4.46"/><path d="m9.388 9.3 6 6"/></g></svg>');
+  background: no-repeat center / 70% url('data:image/svg+xml,\
+    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+      <g fill="none" stroke="black" stroke-linecap="round" stroke-width="1.5">\
+        <circle cx="5.9" cy="6" r="4.46"/>\
+	<path d="m9.388 9.3 6 6"/>\
+      </g>\
+    </svg>\
+  ');
   pointer-events: none;
 }
 
@@ -229,14 +236,28 @@
   border-bottom-left-radius:  0;
   border-top-right-radius:    4px;
   border-bottom-right-radius: 4px;
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="%2336a18b" stroke-linecap="round" stroke-width="3"><path d="m1.729 281.8 13.47 13.49"/><path d="m1.721 295.3 13.49-13.47"/></g></svg>');
+  background-image: url('data:image/svg+xml,\
+    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+      <g fill="none" stroke="%2336a18b" stroke-linecap="round" stroke-width="3">\
+        <path d="m1.729 1.7 13.47 13.49"/>\
+	<path d="m1.721 15.2 13.49-13.47"/>\
+      </g>\
+    </svg>\
+  ');
   background-size: 60%;
   background-color: transparent;
   box-shadow: none;
 }
 #table .filters th.filter-active .clear-button:hover {
   background-color: var(--teal);
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 16.93 16.93" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0 -280.1)" fill="none" stroke="white" stroke-linecap="round" stroke-width="3"><path d="m1.729 281.8 13.47 13.49"/><path d="m1.721 295.3 13.49-13.47"/></g></svg>');
+  background-image: url('data:image/svg+xml,\
+    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+      <g fill="none" stroke="white" stroke-linecap="round" stroke-width="3">\
+        <path d="m1.729 1.7 13.47 13.49"/>\
+	<path d="m1.721 15.2 13.49-13.47"/>\
+      </g>\
+    </svg>\
+  ');
 }
 #table .filters th.filter-active .clear-button:active {
   transform: none;
@@ -253,7 +274,7 @@
   font-weight: bold;
   color: white;
   z-index: 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 10px rgba(0, 0, 0, .4);
 }
 #table tfoot td {
   margin-left: 20px;
@@ -261,7 +282,11 @@
   line-height: 45px;
 }
 #table tfoot > *:first-child {
-  background: no-repeat left center / 25px 25px url('data:image/svg+xml;utf8,<svg width="400" height="500" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M6 5v15l189 235L4 482v14l369-2c4-46 13-93 22-138l-12-3c-11 25-19 52-43 69-26 18-61 16-91 16H79l173-209L96 33h91c58 0 141-14 164 56 4 12 7 24 8 37h13L362 5H6z"/></svg>');
+  background: no-repeat left center / 25px 25px url('data:image/svg+xml,\
+    <svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">\
+      <path fill="white" d="M6 5v15l189 235L4 482v14l369-2c4-46 13-93 22-138l-12-3c-11 25-19 52-43 69-26 18-61 16-91 16H79l173-209L96 33h91c58 0 141-14 164 56 4 12 7 24 8 37h13L362 5H6z"/>\
+    </svg>\
+  ');
   padding-left: 45px;
 }
 #table tfoot .positive-sum,
