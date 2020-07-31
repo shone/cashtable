@@ -96,8 +96,8 @@
 }
 #timeline .axis-controls.x-axis { left: 0; bottom:  0;   right: 40px; height: 60px; }
 #timeline .axis-controls.y-axis {  top: 0; bottom: 60px; right:  0;   width:  50px; overflow: hidden; }
-#timeline .x-axis range-slider { left: 4px; right: 0; bottom: 0; }
-#timeline .y-axis range-slider { top:  4px; right: 0; bottom: 0; }
+#timeline .x-axis range-slider { left: 0; right: 0; bottom: 0; }
+#timeline .y-axis range-slider { top:  0; right: 0; bottom: 0; }
 
 #timeline .date-labels {
   position: absolute;

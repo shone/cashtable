@@ -10,24 +10,26 @@ class RangeSlider extends HTMLElement {
     this.orientation = this.dataset.orientation;
 
     this.innerHTML = `
-      <div class="handles">
-        <span class="minimum"></span>
-        <span class="maximum"></span>
+      <div class="thumb-container">
+        <div class="thumb">
+          <span class="min"></span>
+          <span class="max"></span>
+        </div>
       </div>
     `;
 
-    this.handlesElement = this.querySelector('.handles');
+    this.thumb = this.querySelector('.thumb');
 
     this.onrangechanged = (start, end) => {};
 
     this.updateRange();
 
-    this.handlesElement.onpointerdown = this.onPointerdown.bind(this);
+    this.thumb.onpointerdown = this.onPointerdown.bind(this);
 
     this.ondblclick = this.onDlbclick.bind(this);
 
-    this.querySelector('.handles .minimum').onpointerdown = this.onHandlePointerdown.bind(this);
-    this.querySelector('.handles .maximum').onpointerdown = this.onHandlePointerdown.bind(this);
+    this.querySelector('.thumb .min').onpointerdown = this.onHandlePointerdown.bind(this);
+    this.querySelector('.thumb .max').onpointerdown = this.onHandlePointerdown.bind(this);
   }
 
   setRange(rangeStart_, rangeEnd_) {
@@ -39,11 +41,11 @@ class RangeSlider extends HTMLElement {
   updateRange() {
     const range = this.rangeEnd - this.rangeStart;
     if (this.orientation === 'horizontal') {
-      this.handlesElement.style.width = (range           * 100) + '%';
-      this.handlesElement.style.left  = (this.rangeStart * 100) + '%';
+      this.thumb.style.width = (range           * 100) + '%';
+      this.thumb.style.left  = (this.rangeStart * 100) + '%';
     } else if (this.orientation === 'vertical') {
-      this.handlesElement.style.height = (range           * 100) + '%';
-      this.handlesElement.style.bottom = (this.rangeStart * 100) + '%';
+      this.thumb.style.height = (range           * 100) + '%';
+      this.thumb.style.bottom = (this.rangeStart * 100) + '%';
     }
   }
 
@@ -73,11 +75,11 @@ class RangeSlider extends HTMLElement {
       if (self.orientation === 'vertical') {
         delta = -delta;
       }
-      if (handle.classList.contains('minimum')) {
+      if (handle.classList.contains('min')) {
         self.rangeStart = Math.max(self.rangeStart + delta, 0);
         self.rangeStart = Math.min(self.rangeStart, 1 - self.minRange);
         self.rangeEnd = Math.max(self.rangeEnd, self.rangeStart + self.minRange);
-      } else if (handle.classList.contains('maximum')) {
+      } else if (handle.classList.contains('max')) {
         self.rangeEnd = Math.min(self.rangeEnd + delta, 1);
         self.rangeEnd = Math.max(self.rangeEnd, self.minRange);
         self.rangeStart = Math.min(self.rangeStart, self.rangeEnd - self.minRange);
@@ -104,8 +106,8 @@ class RangeSlider extends HTMLElement {
     event.preventDefault();
     const self = this;
     const pointerId = event.pointerId;
-    this.handlesElement.setPointerCapture(pointerId);
-    this.handlesElement.style.cursor = 'grabbing';
+    this.thumb.setPointerCapture(pointerId);
+    this.thumb.style.cursor = 'grabbing';
     let lastCursorPosition = this.orientation === 'horizontal' ? event.pageX : event.pageY;
     const lengthPx = this.getLengthPx();
     const rangeStartOnMousedown = this.rangeStart;
@@ -132,15 +134,15 @@ class RangeSlider extends HTMLElement {
       if (event.pointerId !== pointerId) {
         return;
       }
-      self.handlesElement.releasePointerCapture(pointerId);
-      self.handlesElement.removeEventListener('pointermove', onPointermove);
-      self.handlesElement.removeEventListener('pointerup', onPointerEnd);
-      self.handlesElement.removeEventListener('pointercancel', onPointerEnd);
-      self.handlesElement.style.cursor = '';
+      self.thumb.releasePointerCapture(pointerId);
+      self.thumb.removeEventListener('pointermove', onPointermove);
+      self.thumb.removeEventListener('pointerup', onPointerEnd);
+      self.thumb.removeEventListener('pointercancel', onPointerEnd);
+      self.thumb.style.cursor = '';
     }
-    this.handlesElement.addEventListener('pointermove', onPointermove);
-    this.handlesElement.addEventListener('pointerup', onPointerEnd);
-    this.handlesElement.addEventListener('pointercancel', onPointerEnd);
+    this.thumb.addEventListener('pointermove', onPointermove);
+    this.thumb.addEventListener('pointerup', onPointerEnd);
+    this.thumb.addEventListener('pointercancel', onPointerEnd);
   }
 
   onDlbclick(event) {

@@ -9,32 +9,48 @@ range-slider {
 range-slider[data-orientation="vertical"]   { width:  var(--thickness); }
 range-slider[data-orientation="horizontal"] { height: var(--thickness); }
 
-range-slider .handles {
+range-slider .thumb-container {
+  position: absolute;
+}
+range-slider[data-orientation="vertical"] .thumb-container {
+  top:    var(--thickness);
+  bottom: var(--thickness);
+  left:  0;
+  right: 0;
+}
+range-slider[data-orientation="horizontal"] .thumb-container {
+  left:  var(--thickness);
+  right: var(--thickness);
+  top:    0;
+  bottom: 0;
+}
+range-slider .thumb {
   position: absolute;
   cursor: grab;
-  touch-action: none; /* Prevent built-in browser touch action */
+  touch-action: none; /* Prevent built-in action overriding pointer event handlers*/
   background: var(--teal);
-  border-radius: 6px;
 }
-range-slider[data-orientation="vertical"]   .handles { left: 3px; right:  3px; }
-range-slider[data-orientation="horizontal"] .handles { top:  3px; bottom: 3px; }
-range-slider .handles:hover {
+range-slider[data-orientation="vertical"]   .thumb { left: 3px; right:  3px; }
+range-slider[data-orientation="horizontal"] .thumb { top:  3px; bottom: 3px; }
+range-slider .thumb:hover {
   background: var(--teal-highlight);
 }
 
-range-slider .handles > span {
+range-slider .thumb > span {
   position: absolute;
-  touch-action: none; /* Prevent built-in browser touch action */
-  background: no-repeat center / 60% url('data:image/svg+xml,\
+  touch-action: none; /* Prevent built-in action overriding pointer event handler*/
+  background: no-repeat center / 60% var(--teal) url('data:image/svg+xml,\
     <svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg">\
       <path fill="white" d="M0.9,0 v1 L0.1,0.5"/>\
     </svg>\
   ');
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
-range-slider[data-orientation="vertical"]   .handles > span { cursor: ns-resize; }
-range-slider[data-orientation="horizontal"] .handles > span { cursor: ew-resize; }
+range-slider[data-orientation="vertical"]   .thumb > span { cursor: ns-resize; }
+range-slider[data-orientation="horizontal"] .thumb > span { cursor: ew-resize; }
 
-range-slider[data-orientation="horizontal"] .handles > .minimum { left:  0; top: 0; bottom: 0; width: 16px; }
-range-slider[data-orientation="horizontal"] .handles > .maximum { right: 0; top: 0; bottom: 0; width: 16px; transform: rotate(180deg); }
-range-slider[data-orientation="vertical"]   .handles > .minimum { bottom: 0; left: 0; right: 0; height: 16px; transform: rotate(270deg); }
-range-slider[data-orientation="vertical"]   .handles > .maximum { top: 0; left: 0; right: 0; height: 16px; transform: rotate(90deg); }
+range-slider[data-orientation="horizontal"] .thumb > .min { left: -15px; top: 0; bottom: 0; width: 16px; }
+range-slider[data-orientation="horizontal"] .thumb > .max { right: -15px; top: 0; bottom: 0; width: 16px; transform: rotate(180deg); }
+range-slider[data-orientation="vertical"]   .thumb > .min { bottom: -13px; left: 0; right: 0; height: 14px; transform: rotate(270deg); }
+range-slider[data-orientation="vertical"]   .thumb > .max { top: -13px; left: 0; right: 0; height: 14px; transform: rotate(90deg); }
