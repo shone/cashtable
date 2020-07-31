@@ -193,11 +193,16 @@ splitter.onpointerdown = event => {
     timeline.style.height = Math.min(currentHeight + delta, window.innerHeight - 75) + 'px';
     lastPageY = event.pageY;
   }
-  function onDragFinish() {
+  function onPointerEnd(event) {
+    if (event.pointerId !== pointerId) {
+      return;
+    }
     splitter.releasePointerCapture(pointerId);
     splitter.removeEventListener('pointermove', onPointermove);
+    splitter.removeEventListener('pointerup', onPointerEnd);
+    splitter.removeEventListener('pointercancel', onPointerEnd);
   }
   splitter.addEventListener('pointermove', onPointermove);
-  splitter.addEventListener('pointerup', onDragFinish, {once: true});
-  splitter.addEventListener('pointercancel', onDragFinish, {once: true});
+  splitter.addEventListener('pointerup', onPointerEnd);
+  splitter.addEventListener('pointercancel', onPointerEnd);
 }

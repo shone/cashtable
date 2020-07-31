@@ -47,6 +47,14 @@ class RangeSlider extends HTMLElement {
     }
   }
 
+  getLengthPx() {
+    const boundingRect = this.getBoundingClientRect();
+    switch (this.orientation) {
+      case 'horizontal': return boundingRect.width;
+      case 'vertical':   return boundingRect.height;
+    }
+  }
+
   onHandlePointerdown(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -55,14 +63,13 @@ class RangeSlider extends HTMLElement {
     const handle = event.target;
     handle.setPointerCapture(pointerId);
     let lastCursorPosition = this.orientation === 'horizontal' ? event.pageX : event.pageY;
-    const boundingRect = this.getBoundingClientRect();
-    const rangeSliderSizePx = this.orientation === 'horizontal' ? boundingRect.width : boundingRect.height;
+    const lengthPx = this.getLengthPx();
     function onPointermove(event) {
       if (event.pointerId !== pointerId) {
         return;
       }
       const cursorPosition = self.orientation === 'horizontal' ? event.pageX : event.pageY;
-      let delta = (cursorPosition - lastCursorPosition) / rangeSliderSizePx;
+      let delta = (cursorPosition - lastCursorPosition) / lengthPx;
       if (self.orientation === 'vertical') {
         delta = -delta;
       }
@@ -79,13 +86,18 @@ class RangeSlider extends HTMLElement {
       self.onrangechanged(self.rangeStart, self.rangeEnd);
       lastCursorPosition = cursorPosition;
     }
-    function onDragFinish() {
+    function onPointerEnd(event) {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
       handle.releasePointerCapture(pointerId);
       handle.removeEventListener('pointermove', onPointermove);
+      handle.removeEventListener('pointerup', onPointerEnd);
+      handle.removeEventListener('pointercancel', onPointerEnd);
     }
     handle.addEventListener('pointermove', onPointermove);
-    handle.addEventListener('pointerup', onDragFinish, {once: true});
-    handle.addEventListener('pointercancel', onDragFinish, {once: true});
+    handle.addEventListener('pointerup', onPointerEnd);
+    handle.addEventListener('pointercancel', onPointerEnd);
   }
 
   onPointerdown(event) {
@@ -95,8 +107,7 @@ class RangeSlider extends HTMLElement {
     this.handlesElement.setPointerCapture(pointerId);
     this.handlesElement.style.cursor = 'grabbing';
     let lastCursorPosition = this.orientation === 'horizontal' ? event.pageX : event.pageY;
-    const boundingRect = this.getBoundingClientRect();
-    const rangeSliderSizePx = this.orientation === 'horizontal' ? boundingRect.width : boundingRect.height;
+    const lengthPx = this.getLengthPx();
     const rangeStartOnMousedown = this.rangeStart;
     const rangeEndOnMousedown   = this.rangeEnd;
     let deltaTotal = 0;
@@ -106,7 +117,7 @@ class RangeSlider extends HTMLElement {
       }
       const cursorPosition = self.orientation === 'horizontal' ? event.pageX : event.pageY;
       const deltaPx = cursorPosition - lastCursorPosition;
-      let delta = deltaPx / rangeSliderSizePx;
+      let delta = deltaPx / lengthPx;
       if (self.orientation === 'vertical') {
         delta = -delta;
       }
@@ -117,14 +128,19 @@ class RangeSlider extends HTMLElement {
       self.onrangechanged(self.rangeStart, self.rangeEnd);
       lastCursorPosition = cursorPosition;
     }
-    function onDragFinish() {
+    function onPointerEnd(event) {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
       self.handlesElement.releasePointerCapture(pointerId);
       self.handlesElement.removeEventListener('pointermove', onPointermove);
+      self.handlesElement.removeEventListener('pointerup', onPointerEnd);
+      self.handlesElement.removeEventListener('pointercancel', onPointerEnd);
       self.handlesElement.style.cursor = '';
     }
     this.handlesElement.addEventListener('pointermove', onPointermove);
-    this.handlesElement.addEventListener('pointerup', onDragFinish, {once: true});
-    this.handlesElement.addEventListener('pointercancel', onDragFinish, {once: true});
+    this.handlesElement.addEventListener('pointerup', onPointerEnd);
+    this.handlesElement.addEventListener('pointercancel', onPointerEnd);
   }
 
   onDlbclick(event) {

@@ -228,16 +228,21 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
       updateRange();
       lastEvent = {pageX: event.pageX, pageY: event.pageY};
     }
-    function onDragFinish() {
+    function onPointerEnd(event) {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
       event.preventDefault();
-      svg.removeEventListener('pointermove', onPointermove);
       svg.releasePointerCapture(pointerId);
+      svg.removeEventListener('pointermove', onPointermove);
+      svg.removeEventListener('pointerup', onPointerEnd);
+      svg.removeEventListener('pointercancel', onPointerEnd);
       isDraggingTimeline = false;
       svg.style.cursor = '';
     }
     svg.addEventListener('pointermove', onPointermove);
-    svg.addEventListener('pointerup', onDragFinish, {once: true});
-    svg.addEventListener('pointercancel', onDragFinish, {once: true});
+    svg.addEventListener('pointerup', onPointerEnd);
+    svg.addEventListener('pointercancel', onPointerEnd);
   }
 
   function getTransactionIndexAtTimelinePixelsX(x) {
