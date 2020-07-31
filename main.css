@@ -40,6 +40,8 @@ input[type='file'] {
   bottom: 0;
   --app-header-height: 50px;
   padding-top: var(--app-header-height);
+  --split-ratio: .5;
+  --splitter-height: 20px;
   display: flex;
   flex-direction: column;
 }
@@ -69,7 +71,13 @@ input[type='file'] {
   text-overflow: ellipsis;
   overflow: hidden;
   flex-shrink: 1;
-  background: no-repeat left / 35px url('data:image/svg+xml;utf8,<svg viewBox="0 0 16.9 16.9" xmlns="http://www.w3.org/2000/svg"><path d="M6.2.5L2.8 3.8V15c0 .9.7 1.6 1.6 1.6h8.1c1 0 1.6-.7 1.6-1.6V2c0-.8-.7-1.5-1.6-1.5H6.2z" fill="black"/><g fill="none" stroke="white" stroke-linecap="round" stroke-width="1.1"><path d="M5.5 6.4h6M5.5 8.7h6M5.5 10.9h6M5.5 13.2h6"/></g><path d="M6.2.3v3.2c0 .2-.1.3-.3.3H2.7v1h3.2c.8 0 1.4-.6 1.4-1.3V.3z" fill="white"/></svg>');
+  background: no-repeat left / 35px url('data:image/svg+xml,\
+    <svg viewBox="0 0 16.9 16.9" xmlns="http://www.w3.org/2000/svg">\
+      <path fill="black" d="M6.2.5L2.8 3.8V15c0 .9.7 1.6 1.6 1.6h8.1c1 0 1.6-.7 1.6-1.6V2c0-.8-.7-1.5-1.6-1.5H6.2z"/>\
+      <path stroke="white" stroke-linecap="round" stroke-width="1.1" fill="none" d="M5.5 6.4h6M5.5 8.7h6M5.5 10.9h6M5.5 13.2h6"/>\
+      <path fill="white" d="M6.2.3v3.2c0 .2-.1.3-.3.3H2.7v1h3.2c.8 0 1.4-.6 1.4-1.3V.3z"/>\
+    </svg>\
+  ');
 }
 #app header .last-updated {
   display: flex;
@@ -93,6 +101,11 @@ input[type='file'] {
   font-size: 14px;
 }
 
+#app #timeline {
+  --max-timeline-height: calc(100vh - var(--app-header-height) - var(--splitter-height) - 5px);
+  height: calc(var(--max-timeline-height) * var(--split-ratio));
+}
+
 #app button {
   box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.6);
 }
@@ -105,14 +118,14 @@ input[type='file'] {
 }
 
 #splitter {
-  height: 20px;
+  height: var(--splitter-height);
   margin: 2px;
   margin-left:  4px;
   margin-right: 4px;
   flex-shrink: 0;
   flex-grow:   0;
   cursor: ns-resize;
-  touch-action: none; /* Prevent built-in browser touch action */
+  touch-action: none; /* Prevent built-in action from overriding pointer event handler */
   background: no-repeat center / 36px 7px url('data:image/svg+xml,\
     <svg viewBox="0 0 12 2" fill="%2336a18b" xmlns="http://www.w3.org/2000/svg">\
       <circle cx="3" cy="1" r="1"/>\
@@ -130,12 +143,18 @@ input[type='file'] {
   top:    7px;
   bottom: 7px;
   border-radius: 3px;
-  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, .3);
 }
 #splitter::before { left:  0; right: calc(50% + 16px); }
 #splitter::after  { right: 0; left:  calc(50% + 16px); }
 #splitter:hover {
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 12 2" xmlns="http://www.w3.org/2000/svg"><g fill="%2340bfa5"><circle cx="3" cy="1" r="1"/><circle cx="6" cy="1" r="1"/><circle cx="9" cy="1" r="1"/></g></svg>');
+  background-image: url('data:image/svg+xml,\
+    <svg viewBox="0 0 12 2" fill="%2340bfa5" xmlns="http://www.w3.org/2000/svg">\
+      <circle cx="3" cy="1" r="1"/>\
+      <circle cx="6" cy="1" r="1"/>\
+      <circle cx="9" cy="1" r="1"/>\
+    </svg>\
+  ');
 }
 #splitter:hover::before,
 #splitter:hover::after {

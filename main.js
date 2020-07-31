@@ -1,6 +1,7 @@
 'use strict';
 
 const landingPage = document.getElementById('landing-page');
+const app = document.getElementById('app');
 
 // Setup 'Open CSV file' buttons
 const fileInput = document.querySelector('input[type="file"]');
@@ -184,13 +185,16 @@ splitter.onpointerdown = event => {
   const pointerId = event.pointerId;
   splitter.setPointerCapture(pointerId);
   let lastPageY = event.pageY;
+  let splitRatio = parseFloat(app.style.getPropertyValue('--split-ratio') || '.5');
   function onPointermove(event) {
     if (event.pointerId !== pointerId) {
       return;
     }
     const delta = event.pageY - lastPageY;
-    const currentHeight = parseInt(timeline.style.height || '250px');
-    timeline.style.height = Math.min(currentHeight + delta, window.innerHeight - 75) + 'px';
+    splitRatio += delta / window.innerHeight;
+    splitRatio = Math.min(splitRatio, 1);
+    splitRatio = Math.max(splitRatio, 0);
+    app.style.setProperty('--split-ratio', splitRatio);
     lastPageY = event.pageY;
   }
   function onPointerEnd(event) {
