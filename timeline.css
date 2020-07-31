@@ -123,8 +123,9 @@
 #timeline .date-labels .months label div {
   display: none;
 }
-#timeline .date-labels .months[data-length="short"] label .short-name { display: block; }
-#timeline .date-labels .months[data-length="long"]  label .long-name  { display: block; }
+#timeline .date-labels .months[data-length="long"]   label .long   { display: block; }
+#timeline .date-labels .months[data-length="medium"] label .medium { display: block; }
+#timeline .date-labels .months[data-length="short"]  label .short  { display: block; }
 
 #timeline .balance-labels {
   position: absolute;

@@ -66,7 +66,7 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     years.push({number: year, timestamp: yearTimestamp, positionRatio: (yearTimestamp - timestamps[0]) / totalDuration});
     for (let month = 0; month < 12; month++) {
       const monthTimestamp = new Date(year, month, 1).getTime();
-      months.push({number: month, timestamp: monthTimestamp, positionRatio: (monthTimestamp - timestamps[0]) / totalDuration});
+      months.push({timestamp: monthTimestamp, positionRatio: (monthTimestamp - timestamps[0]) / totalDuration});
     }
   }
 
@@ -92,12 +92,24 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
   }).join(''));
 
   // Month labels
-  const monthNamesLong = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const monthNamesShort = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+  const monthLabels = {
+    long: [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July',
+      'August', 'September', 'October', 'November', 'December'
+    ],
+    medium: [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+      'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ],
+    short: [
+      'J','F','M','A','M','J','J','A','S','O','N','D'
+    ],
+  };
   monthLabelsContainer.innerHTML = months.slice(0, -1).map((month, index) => `
     <label>
-      <div class="long-name">${monthNamesLong[month.number % 12]}</div>
-      <div class="short-name">${monthNamesShort[month.number % 12]}</div>
+      <div class="long">   ${monthLabels.long[index % 12]}   </div>
+      <div class="medium"> ${monthLabels.medium[index % 12]} </div>
+      <div class="short">  ${monthLabels.short[index % 12]}  </div>
     </label>
   `).join('');
   [...monthLabelsContainer.children].forEach((label, index) => label.style.cssText = `
@@ -106,7 +118,9 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
   `);
 
   // Year labels
-  yearLabelsContainer.innerHTML = years.slice(0, -1).map((year, index) => `<label>${year.number}</label>`).join('');
+  yearLabelsContainer.innerHTML = years.slice(0, -1).map(year => `
+    <label>${year.number}</label>
+  `).join('');
   [...yearLabelsContainer.children].forEach((label, index) => label.style.cssText = `
     left: ${years[index].positionRatio * 100}%;
     width: ${(years[index+1].positionRatio - years[index].positionRatio) * 100}%;
@@ -396,8 +410,15 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     const labelContainerWidth = dateLabelsContainer.getBoundingClientRect().width;
     const rangeDuration = timestampRangeEnd - timestampRangeStart;
     const labelWidth = labelContainerWidth * (averageMonthMs / rangeDuration);
-    const longNameWidth = 40;
-    monthLabelsContainer.dataset.length = labelWidth < longNameWidth ? 'short' : 'long';
+    if (labelWidth > 100) {
+      monthLabelsContainer.dataset.length = 'long';
+    } else if (labelWidth > 40) {
+      monthLabelsContainer.dataset.length = 'medium';
+    } else if (labelWidth > 20) {
+      monthLabelsContainer.dataset.length = 'short';
+    } else {
+      monthLabelsContainer.dataset.length = 'none';
+    }
 
     years.slice(0, -1).forEach((year, index) => {
       const label = yearLabelsContainer.children[index];
