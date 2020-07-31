@@ -3,6 +3,7 @@ range-slider {
   overflow: hidden;
   background: white;
   --thickness: 20px;
+  user-select: none;
 }
 
 range-slider[data-orientation="vertical"]   { width:  var(--thickness); }

@@ -5,6 +5,7 @@
   overflow: hidden;
   flex-shrink: 0;
   position: relative;
+  user-select: none;
 }
 
 #timeline svg {
@@ -159,6 +160,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  user-select: none;
 }
 #timeline .corner-controls button {
   background-size: 50%;

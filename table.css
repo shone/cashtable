@@ -50,6 +50,7 @@
   padding-top: 5px;
   padding-bottom: 5px;
   border-radius: 6px;
+  user-select: none;
 }
 #table thead .settings-menu div {
   line-height: 30px;
@@ -182,6 +183,10 @@
 #table td.euro.positive-number {
   color: green;
   font-weight: bold;
+}
+
+#table .filters {
+  user-select: none;
 }
 
 #table .filters input {
