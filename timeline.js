@@ -211,8 +211,8 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
 
   svg.onwheel = event => zoom({amount: event.deltaY < 0 ? 0.1 : -0.1, origin: {x: event.offsetX, y: event.offsetY}});
 
-  timeline.querySelector('.corner-controls .zoom-in').onclick  = () => zoom({amount:  0.1});
-  timeline.querySelector('.corner-controls .zoom-out').onclick = () => zoom({amount: -0.1});
+  timeline.querySelector('.corner-controls .zoom-in').onpointerdown  = () => zoom({amount:  0.1});
+  timeline.querySelector('.corner-controls .zoom-out').onpointerdown = () => zoom({amount: -0.1});
 
   let isDraggingTimeline = false;
 

@@ -49,23 +49,21 @@ table.init = ({transactions, fields, timestamps, balances}) => {
 
   const settingsMenu = thead.querySelector('.settings-menu');
   settingsMenu.innerHTML = fields.map(field => `<div data-name="${field.name}" class="${defaultHiddenColumns.has(field.name) ? '' : 'show'}"></div>`).join('');
-  settingsMenu.querySelectorAll('div').forEach((div, index) => div.textContent = fields[index].label);
-  settingsMenu.onclick = event => {
-    if (event.target.tagName === 'DIV') {
-      event.target.classList.toggle('show');
-      table.classList.toggle(`hide-column-${event.target.dataset.name}`);
+  [...settingsMenu.children].forEach((div, index) => div.textContent = fields[index].label);
+  settingsMenu.onpointerdown = ({target}) => {
+    if (target.dataset.name) {
+      target.classList.toggle('show');
+      table.classList.toggle(`hide-column-${target.dataset.name}`);
     }
   }
 
-  thead.querySelector('.settings-button').onclick = () => {
-    settingsMenu.classList.toggle('show');
-    if (settingsMenu.classList.contains('show')) {
-      window.addEventListener('mousedown', function callback(event) {
-        if (!event.target.closest('.settings-menu')) {
-          if (!event.target.classList.contains('settings-button')) {
-            settingsMenu.classList.remove('show');
-          }
-          window.removeEventListener('mousedown', callback);
+  thead.querySelector('.settings-button').onpointerdown = () => {
+    if (settingsMenu.classList.toggle('show')) {
+      // Close the menu when the user clicks outside it
+      window.addEventListener('pointerdown', function callback({target}) {
+        if (!target.closest('.settings-menu, settings-button') && !target.classList.contains('settings-button')) {
+          settingsMenu.classList.remove('show');
+          window.removeEventListener('pointerdown', callback);
         }
       });
     }
