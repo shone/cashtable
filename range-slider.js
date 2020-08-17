@@ -4,10 +4,20 @@ class RangeSlider extends HTMLElement {
   constructor() {
     super();
 
-    this.rangeStart = 0;
-    this.rangeEnd   = 1;
-    this.minRange = 0.001;
-    this.orientation = this.dataset.orientation;
+    let rangeStart = 0;
+    let rangeEnd   = 1;
+
+    this.setRange = (rangeStart_, rangeEnd_) => {
+      rangeStart = rangeStart_;
+      rangeEnd   = rangeEnd_;
+      updateRange();
+    }
+
+    this.onrangechanged = (start, end) => {};
+
+    const minRange = 0.001;
+
+    const orientation = this.dataset.orientation;
 
     this.innerHTML = `
       <div class="thumb-container">
@@ -18,138 +28,127 @@ class RangeSlider extends HTMLElement {
       </div>
     `;
 
-    this.thumb = this.querySelector('.thumb');
+    const thumb = this.querySelector('.thumb');
+    const thumbMin = thumb.querySelector('.min');
+    const thumbMax = thumb.querySelector('.max');
 
-    this.onrangechanged = (start, end) => {};
-
-    this.updateRange();
-
-    this.thumb.onpointerdown = this.onPointerdown.bind(this);
-
-    this.ondblclick = this.onDlbclick.bind(this);
-
-    this.querySelector('.thumb .min').onpointerdown = this.onHandlePointerdown.bind(this);
-    this.querySelector('.thumb .max').onpointerdown = this.onHandlePointerdown.bind(this);
-  }
-
-  setRange(rangeStart_, rangeEnd_) {
-    this.rangeStart = rangeStart_;
-    this.rangeEnd   = rangeEnd_;
-    this.updateRange();
-  }
-
-  updateRange() {
-    const range = this.rangeEnd - this.rangeStart;
-    if (this.orientation === 'horizontal') {
-      this.thumb.style.width = (range           * 100) + '%';
-      this.thumb.style.left  = (this.rangeStart * 100) + '%';
-    } else if (this.orientation === 'vertical') {
-      this.thumb.style.height = (range           * 100) + '%';
-      this.thumb.style.bottom = (this.rangeStart * 100) + '%';
+    function updateRange() {
+      const range = rangeEnd - rangeStart;
+      if (orientation === 'horizontal') {
+        thumb.style.width = (range      * 100) + '%';
+        thumb.style.left  = (rangeStart * 100) + '%';
+      } else if (orientation === 'vertical') {
+        thumb.style.height = (range      * 100) + '%';
+        thumb.style.bottom = (rangeStart * 100) + '%';
+      }
     }
-  }
+    updateRange();
 
-  getLengthPx() {
-    const boundingRect = this.getBoundingClientRect();
-    switch (this.orientation) {
-      case 'horizontal': return boundingRect.width;
-      case 'vertical':   return boundingRect.height;
+    this.getLengthPx = () => {
+      const boundingRect = this.getBoundingClientRect();
+      switch (orientation) {
+        case 'horizontal': return boundingRect.width;
+        case 'vertical':   return boundingRect.height;
+      }
     }
-  }
 
-  onHandlePointerdown(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    const self = this;
-    const pointerId = event.pointerId;
-    const handle = event.target;
-    handle.setPointerCapture(pointerId);
-    let lastCursorPosition = this.orientation === 'horizontal' ? event.pageX : event.pageY;
-    const lengthPx = this.getLengthPx();
-    function onPointermove(event) {
-      if (event.pointerId !== pointerId) {
-        return;
-      }
-      const cursorPosition = self.orientation === 'horizontal' ? event.pageX : event.pageY;
-      let delta = (cursorPosition - lastCursorPosition) / lengthPx;
-      if (self.orientation === 'vertical') {
-        delta = -delta;
-      }
-      if (handle.classList.contains('min')) {
-        self.rangeStart = Math.max(self.rangeStart + delta, 0);
-        self.rangeStart = Math.min(self.rangeStart, 1 - self.minRange);
-        self.rangeEnd = Math.max(self.rangeEnd, self.rangeStart + self.minRange);
-      } else if (handle.classList.contains('max')) {
-        self.rangeEnd = Math.min(self.rangeEnd + delta, 1);
-        self.rangeEnd = Math.max(self.rangeEnd, self.minRange);
-        self.rangeStart = Math.min(self.rangeStart, self.rangeEnd - self.minRange);
-      }
-      self.updateRange();
-      self.onrangechanged(self.rangeStart, self.rangeEnd);
-      lastCursorPosition = cursorPosition;
-    }
-    function onPointerEnd(event) {
-      if (event.pointerId !== pointerId) {
-        return;
-      }
-      handle.releasePointerCapture(pointerId);
-      handle.removeEventListener('pointermove', onPointermove);
-      handle.removeEventListener('pointerup', onPointerEnd);
-      handle.removeEventListener('pointercancel', onPointerEnd);
-    }
-    handle.addEventListener('pointermove', onPointermove);
-    handle.addEventListener('pointerup', onPointerEnd);
-    handle.addEventListener('pointercancel', onPointerEnd);
-  }
+    thumb.onpointerdown = event => {
+      event.preventDefault();
 
-  onPointerdown(event) {
-    event.preventDefault();
-    const self = this;
-    const pointerId = event.pointerId;
-    this.thumb.setPointerCapture(pointerId);
-    this.thumb.style.cursor = 'grabbing';
-    let lastCursorPosition = this.orientation === 'horizontal' ? event.pageX : event.pageY;
-    const lengthPx = this.getLengthPx();
-    const rangeStartOnMousedown = this.rangeStart;
-    const rangeEndOnMousedown   = this.rangeEnd;
-    let deltaTotal = 0;
-    function onPointermove(event) {
-      if (event.pointerId !== pointerId) {
-        return;
-      }
-      const cursorPosition = self.orientation === 'horizontal' ? event.pageX : event.pageY;
-      const deltaPx = cursorPosition - lastCursorPosition;
-      let delta = deltaPx / lengthPx;
-      if (self.orientation === 'vertical') {
-        delta = -delta;
-      }
-      deltaTotal += delta;
-      self.rangeStart = Math.max(rangeStartOnMousedown + deltaTotal, 0);
-      self.rangeEnd   = Math.min(rangeEndOnMousedown   + deltaTotal, 1);
-      self.updateRange();
-      self.onrangechanged(self.rangeStart, self.rangeEnd);
-      lastCursorPosition = cursorPosition;
-    }
-    function onPointerEnd(event) {
-      if (event.pointerId !== pointerId) {
-        return;
-      }
-      self.thumb.releasePointerCapture(pointerId);
-      self.thumb.removeEventListener('pointermove', onPointermove);
-      self.thumb.removeEventListener('pointerup', onPointerEnd);
-      self.thumb.removeEventListener('pointercancel', onPointerEnd);
-      self.thumb.style.cursor = '';
-    }
-    this.thumb.addEventListener('pointermove', onPointermove);
-    this.thumb.addEventListener('pointerup', onPointerEnd);
-    this.thumb.addEventListener('pointercancel', onPointerEnd);
-  }
+      if (event.button && event.button > 0) return;
+      if (thumb.onpointermove || thumbMin.onpointermove || thumbMax.onpointermove) return;
 
-  onDlbclick(event) {
-    this.rangeStart = 0;
-    this.rangeEnd   = 1;
-    this.updateRange();
-    this.onrangechanged(this.rangeStart, this.rangeEnd);
+      const pointerId = event.pointerId;
+      thumb.setPointerCapture(pointerId);
+      thumb.style.cursor = 'grabbing';
+
+      const lengthPx = this.getLengthPx();
+      let lastCursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
+      const rangeStartOnMousedown = rangeStart;
+      const rangeEndOnMousedown   = rangeEnd;
+      let deltaTotal = 0;
+      thumb.onpointermove = event => {
+        if (event.pointerId !== pointerId) {
+          return;
+        }
+        const cursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
+        const deltaPx = cursorPosition - lastCursorPosition;
+        lastCursorPosition = cursorPosition;
+        let delta = deltaPx / lengthPx;
+        if (orientation === 'vertical') {
+          delta = -delta;
+        }
+        deltaTotal += delta;
+        rangeStart = Math.max(rangeStartOnMousedown + deltaTotal, 0);
+        rangeEnd   = Math.min(rangeEndOnMousedown   + deltaTotal, 1);
+        updateRange();
+        this.onrangechanged(rangeStart, rangeEnd);
+      }
+      thumb.onpointerup = thumb.onpointercancel = event => {
+        if (event.pointerId !== pointerId) {
+          return;
+        }
+        thumb.releasePointerCapture(pointerId);
+        thumb.style.cursor = null;
+        thumb.onpointermove = null;
+        thumb.onpointerup = null;
+        thumb.onpointercancel = null;
+      }
+    }
+
+    thumbMin.onpointerdown = thumbMax.onpointerdown = event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const handle = event.target;
+
+      if (event.button && event.button > 0) return;
+      if (handle.onpointermove || thumb.onpointermove) return;
+
+      const pointerId = event.pointerId;
+      handle.setPointerCapture(pointerId);
+
+      const lengthPx = this.getLengthPx();
+      const isMin = handle.classList.contains('min');
+      let lastCursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
+      handle.onpointermove = event => {
+        if (event.pointerId !== pointerId) {
+          return;
+        }
+        const cursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
+        let delta = (cursorPosition - lastCursorPosition) / lengthPx;
+        if (orientation === 'vertical') {
+          delta = -delta;
+        }
+        if (isMin) {
+          rangeStart = Math.max(rangeStart + delta, 0);
+          rangeStart = Math.min(rangeStart, 1 - minRange);
+          rangeEnd = Math.max(rangeEnd, rangeStart + minRange);
+        } else {
+          rangeEnd = Math.min(rangeEnd + delta, 1);
+          rangeEnd = Math.max(rangeEnd, minRange);
+          rangeStart = Math.min(rangeStart, rangeEnd - minRange);
+        }
+        updateRange();
+        this.onrangechanged(rangeStart, rangeEnd);
+        lastCursorPosition = cursorPosition;
+      }
+      handle.onpointerup = handle.onpointercancel = event => {
+        if (event.pointerId !== pointerId) {
+          return;
+        }
+        handle.releasePointerCapture(pointerId);
+        handle.onpointermove = null;
+        handle.onpointerup = null;
+        handle.onpointercancel = null;
+      }
+    }
+
+    this.ondblclick = event => {
+      rangeStart = 0;
+      rangeEnd   = 1;
+      updateRange();
+      this.onrangechanged(rangeStart, rangeEnd);
+    }
   }
 }
 
