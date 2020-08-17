@@ -187,31 +187,37 @@ function dateStringToTimestampMs(string) {
 const splitter = document.getElementById('splitter');
 splitter.onpointerdown = event => {
   event.preventDefault();
+
+  if (event.button && event.button > 0) return;
+  if (splitter.onpointermove) return;
+
   const pointerId = event.pointerId;
   splitter.setPointerCapture(pointerId);
+
   let lastPageY = event.pageY;
   let splitRatio = parseFloat(app.style.getPropertyValue('--split-ratio') || '.5');
-  function onPointermove(event) {
+
+  splitter.onpointermove = event => {
     if (event.pointerId !== pointerId) {
       return;
     }
+
     const delta = event.pageY - lastPageY;
+    lastPageY = event.pageY;
+
     splitRatio += delta / window.innerHeight;
     splitRatio = Math.min(splitRatio, 1);
     splitRatio = Math.max(splitRatio, 0);
     app.style.setProperty('--split-ratio', splitRatio);
-    lastPageY = event.pageY;
   }
-  function onPointerEnd(event) {
+
+  splitter.onpointerup = splitter.onpointercancel = event => {
     if (event.pointerId !== pointerId) {
       return;
     }
     splitter.releasePointerCapture(pointerId);
-    splitter.removeEventListener('pointermove', onPointermove);
-    splitter.removeEventListener('pointerup', onPointerEnd);
-    splitter.removeEventListener('pointercancel', onPointerEnd);
+    splitter.onpointermove = null;
+    splitter.onpointerup = null;
+    splitter.onpointercancel = null;
   }
-  splitter.addEventListener('pointermove', onPointermove);
-  splitter.addEventListener('pointerup', onPointerEnd);
-  splitter.addEventListener('pointercancel', onPointerEnd);
 }
