@@ -71,8 +71,9 @@ function generateSampleCsv() {
     const date = new Date(transaction[0]);
     transaction[0] = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   });
-  const lines = ['"Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"'];
-  lines.push(...transactions.map(transaction => transaction.map(value => `"${value ? value : ''}"`).join(',')));
-  lines.push('');
-  return lines.join('\n');
+  return [
+    '"Date","Payee","Account number","Transaction type","Payment reference","Category","Amount (EUR)","Amount (Foreign Currency)","Type Foreign Currency","Exchange Rate"',
+    ...transactions.map(transaction => transaction.map(value => `"${value ? value : ''}"`).join(',')),
+    ''
+  ].join('\n');
 }

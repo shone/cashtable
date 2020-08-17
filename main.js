@@ -1,5 +1,10 @@
 'use strict';
 
+if (navigator.serviceWorker) {
+  // Register service worker so app can be installed as a PWA
+  navigator.serviceWorker.register('service-worker.js', {scope: './'});
+}
+
 const landingPage = document.getElementById('landing-page');
 const app = document.getElementById('app');
 
