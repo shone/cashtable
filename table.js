@@ -19,7 +19,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
   table.classList.add(...[...defaultHiddenColumns].map(column => `hide-column-${column}`));
 
   table.querySelector('tr.field-names').insertAdjacentHTML('afterbegin', fields.map(field => `<th class="${field.type}" data-column="${field.name}"></th>`).join(''));
-  table.querySelectorAll('tr.field-names th[data-column]').forEach((th, index) => th.textContent = fields[index].label);
+  table.querySelectorAll('tr.field-names th[data-column]').forEach((th, index) => th.textContent = th.title = fields[index].label);
 
   table.querySelector('tr.filters').innerHTML = fields.map(field => `
     <th class="${field.type}" data-column="${field.name}">
@@ -47,13 +47,19 @@ table.init = ({transactions, fields, timestamps, balances}) => {
   trElements.reverse();
   tbody.append(...trElements);
 
+  const placeholderTr = document.createElement('tr');
+  placeholderTr.classList.add('placeholder');
+  placeholderTr.innerHTML = fields.map(field => `<td data-column="${field.name}"></td>`).join('');
+  tbody.append(placeholderTr);
+
   const settingsMenu = thead.querySelector('.settings-menu');
   settingsMenu.innerHTML = fields.map(field => `<div data-name="${field.name}" class="${defaultHiddenColumns.has(field.name) ? '' : 'show'}"></div>`).join('');
   [...settingsMenu.children].forEach((div, index) => div.textContent = fields[index].label);
-  settingsMenu.onpointerdown = ({target}) => {
-    if (target.dataset.name) {
-      target.classList.toggle('show');
-      table.classList.toggle(`hide-column-${target.dataset.name}`);
+  settingsMenu.onpointerdown = event => {
+    event.preventDefault();
+    if (event.target.dataset.name) {
+      event.target.classList.toggle('show');
+      table.classList.toggle(`hide-column-${event.target.dataset.name}`);
     }
   }
 
@@ -105,6 +111,8 @@ table.init = ({transactions, fields, timestamps, balances}) => {
       return shouldShow;
     });
 
+    table.classList.toggle('noresults', filteredTransactions.length === 0);
+
     table.onTransactionsFiltered(filteredTransactionIndices);
 
     const balance = filteredTransactions.reduce((balance, transaction) => balance + parseFloat(transaction[amountFieldIndex]), 0);
@@ -139,10 +147,10 @@ table.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  table.querySelector('tr.filters').oninput = event => {
-    const input = event.target;
-    const thElement = input.closest('th');
-    thElement.classList.toggle('filter-active', input.value !== '');
+  table.querySelector('tr.filters').oninput = ({target}) => {
+    table.scrollLeft = 0;
+    const thElement = target.closest('th');
+    thElement.classList.toggle('filter-active', target.value !== '');
     applyFilters();
   }
 
@@ -156,30 +164,48 @@ table.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  table.querySelector('tr.filters').onclick = event => {
-    if (event.target.classList.contains('clear-button')) {
-      const thElement = event.target.closest('th');
+  table.querySelector('tr.filters').onclick = ({target}) => {
+    if (target.classList.contains('clear-button')) {
+      const thElement = target.closest('th');
       thElement.classList.remove('filter-active');
       const input = thElement.querySelector('input');
       input.value = '';
       input.focus();
       applyFilters();
+      thead.style.marginLeft = `${-tbody.scrollLeft}px`;
     }
   }
 
-  tbody.addEventListener('scroll', event => {
+  table.querySelector('tr.filters').addEventListener('focusin', event => {
+    // Undo default browser behavior which scrolls parent to bring focused element into view.
+    // The parent table should not be scrolled, but instead the tbody/thead
+    table.scrollLeft = 0;
+
+    // Scroll the tbody/thead to bring the focused element into view
+    const th = event.target.closest('th');
+    const index = [...th.parentElement.children].indexOf(th);
+    const leftEdge = th.offsetLeft - 5;
+    const rightEdge = th.offsetLeft + th.offsetWidth + 35;
+    if (leftEdge < tbody.scrollLeft) {
+      tbody.scrollLeft = leftEdge;
+    } else if (rightEdge > (tbody.scrollLeft + table.offsetWidth)) {
+      tbody.scrollLeft = rightEdge - table.offsetWidth;
+    }
+  });
+
+  tbody.addEventListener('scroll', () => {
     thead.style.marginLeft = `${-tbody.scrollLeft}px`;
   }, {passive: true});
 
-  tbody.onmouseover = event => {
-    const trElement = event.target.closest('tr');
+  tbody.onmouseover = ({target}) => {
+    const trElement = target.closest('tr');
     if (trElement) {
       const transactionIndex = (transactions.length-1) - trElements.indexOf(trElement);
       table.onTransactionHover(transactionIndex);
     }
   }
-  tbody.onmouseout = event => {
-    const trElement = event.target.closest('tr');
+  tbody.onmouseout = ({target}) => {
+    const trElement = target.closest('tr');
     if (trElement) {
       table.onTransactionHover(null);
     }
