@@ -17,6 +17,7 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 #table thead th {
+  height: 100%;
   padding: 3px;
   flex-shrink: 0;
 }
@@ -56,6 +57,7 @@
   padding-bottom: 5px;
   border-radius: 6px;
   user-select: none;
+  contain: paint;
 }
 #table thead .settings-menu div {
   line-height: 30px;
@@ -100,6 +102,7 @@
   padding: 3px;
   background: #ddd;
   scrollbar-color: var(--teal) white;
+  contain: strict;
 }
 #table tbody::-webkit-scrollbar {
   width: var(--scrollbar-width);
@@ -157,6 +160,9 @@
   flex-basis: 1px;
 }
 
+#table tr.field-names {
+  height: 26px;
+}
 #table tr.field-names th {
   white-space: nowrap;
 }
@@ -214,7 +220,9 @@
 }
 
 #table .filters {
+  height: 30px;
   user-select: none;
+  contain: strict;
 }
 
 #table .filters input {
@@ -224,9 +232,14 @@
   border: 2px solid rgb(245, 245, 245);
   background: rgb(245, 245, 245);
   border-radius: 4px;
-  height: 24px;
-  padding-left:  4px;
-  padding-right: 4px;
+  height: 100%;
+  padding-left: 4px;
+  padding-right: 17px;
+  text-overflow: ellipsis;
+}
+#table .filters input:hover {
+  border-color: rgb(230, 230, 230);
+  background: rgb(230, 230, 230);
 }
 #table .filters input:focus {
   border-color: var(--teal);
@@ -235,7 +248,7 @@
 #table .filters th:not(.filter-active)::after {
   content: '';
   position: absolute;
-  right: 2px;
+  right: 3px;
   width: 25px;
   top:    2px;
   bottom: 2px;
@@ -248,6 +261,16 @@
     </svg>\
   ');
   pointer-events: none;
+}
+#table .filters th:not(.filter-active):focus-within::after {
+  background: no-repeat center / 70% url('data:image/svg+xml,\
+    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+      <g stroke="rgb(54 161 139)" stroke-linecap="round" stroke-width="2" fill="none">\
+        <circle cx="5.9" cy="6" r="4.46"/>\
+        <path d="m9.388 9.3 6 6"/>\
+      </g>\
+    </svg>\
+  ');
 }
 
 #table .filters .clear-button {
@@ -264,6 +287,7 @@
   border-bottom-left-radius:  0;
   border-top-right-radius:    4px;
   border-bottom-right-radius: 4px;
+  padding: 0;
   background-image: url('data:image/svg+xml,\
     <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
       <g stroke="%2336a18b" stroke-linecap="round" stroke-width="3" fill="none">\
@@ -293,6 +317,7 @@
 }
 
 #table tfoot {
+  height: 45px;
   flex-shrink: 0;
   flex-grow: 0;
   display: flex;
@@ -303,6 +328,7 @@
   color: white;
   z-index: 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, .4);
+  contain: strict;
 }
 #table tfoot td {
   margin-left: 20px;

@@ -5,6 +5,7 @@ range-slider {
   --thickness: 20px;
   user-select: none;
   touch-action: none;
+  contain: strict;
 }
 
 range-slider[data-orientation="vertical"]   { width:  var(--thickness); }

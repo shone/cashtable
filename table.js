@@ -8,9 +8,7 @@ table.onTransactionHover = transactionIndex => {};
 
 table.init = ({transactions, fields, timestamps, balances}) => {
 
-  const thead = table.querySelector('thead');
-  const tbody = table.querySelector('tbody');
-  const tfoot = table.querySelector('tfoot');
+  const tbody = table.tBodies[0];
 
   const amountFieldIndex = fields.findIndex(field => field.name === 'amount-eur');
   const dateFieldIndex   = fields.findIndex(field => field.name === 'date');
@@ -47,12 +45,11 @@ table.init = ({transactions, fields, timestamps, balances}) => {
   trElements.reverse();
   tbody.append(...trElements);
 
-  const placeholderTr = document.createElement('tr');
+  const placeholderTr = tbody.insertRow();
   placeholderTr.classList.add('placeholder');
   placeholderTr.innerHTML = fields.map(field => `<td data-column="${field.name}"></td>`).join('');
-  tbody.append(placeholderTr);
 
-  const settingsMenu = thead.querySelector('.settings-menu');
+  const settingsMenu = table.tHead.querySelector('.settings-menu');
   settingsMenu.innerHTML = fields.map(field => `<div data-name="${field.name}" class="${defaultHiddenColumns.has(field.name) ? '' : 'show'}"></div>`).join('');
   [...settingsMenu.children].forEach((div, index) => div.textContent = fields[index].label);
   settingsMenu.onpointerdown = event => {
@@ -63,7 +60,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
     }
   }
 
-  thead.querySelector('.settings-button').onpointerdown = () => {
+  table.tHead.querySelector('.settings-button').onpointerdown = () => {
     if (settingsMenu.classList.toggle('show')) {
       // Close the menu when the user clicks outside it
       window.addEventListener('pointerdown', function callback({target}) {
@@ -116,19 +113,19 @@ table.init = ({transactions, fields, timestamps, balances}) => {
     table.onTransactionsFiltered(filteredTransactionIndices);
 
     const balance = filteredTransactions.reduce((balance, transaction) => balance + parseFloat(transaction[amountFieldIndex]), 0);
-    tfoot.querySelector('.balance').textContent = `€${balance.toFixed(2)}`;
+    table.tFoot.querySelector('.balance').textContent = `€${balance.toFixed(2)}`;
 
     const positiveSum = filteredTransactions.reduce((sum, transaction) => {
       const amount = parseFloat(transaction[amountFieldIndex]);
       return amount > 0 ? sum + amount : sum;
     }, 0);
-    tfoot.querySelector('.positive-sum').textContent = `+${positiveSum.toFixed(2)}`;
+    table.tFoot.querySelector('.positive-sum').textContent = `+${positiveSum.toFixed(2)}`;
 
     const negativeSum = filteredTransactions.reduce((sum, transaction) => {
       const amount = parseFloat(transaction[amountFieldIndex]);
       return amount < 0 ? sum - amount : sum;
     }, 0);
-    tfoot.querySelector('.negative-sum').textContent = `-${negativeSum.toFixed(2)}`;
+    table.tFoot.querySelector('.negative-sum').textContent = `-${negativeSum.toFixed(2)}`;
 
     if (filteredTransactions.length >= 2) {
       const firstTransaction = filteredTransactions[0];
@@ -141,9 +138,9 @@ table.init = ({transactions, fields, timestamps, balances}) => {
       const days   = Math.floor(durationMs / (1000 * 60 * 60 * 24))           % 30;
       const months = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30))      % 12;
       const years  = Math.floor(durationMs / (1000 * 60 * 60 * 24 * 30 * 12));
-      tfoot.querySelector('.duration').textContent = `${years}Y ${months}M ${days}D`;
+      table.tFoot.querySelector('.duration').textContent = `${years}Y ${months}M ${days}D`;
     } else {
-      tfoot.querySelector('.duration').textContent = '';
+      table.tFoot.querySelector('.duration').textContent = '';
     }
   }
 
@@ -172,7 +169,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
       input.value = '';
       input.focus();
       applyFilters();
-      thead.style.marginLeft = `${-tbody.scrollLeft}px`;
+      table.tHead.style.marginLeft = `${-tbody.scrollLeft}px`;
     }
   }
 
@@ -194,7 +191,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
   });
 
   tbody.addEventListener('scroll', () => {
-    thead.style.marginLeft = `${-tbody.scrollLeft}px`;
+    table.tHead.style.marginLeft = `${-tbody.scrollLeft}px`;
   }, {passive: true});
 
   tbody.onmouseover = ({target}) => {

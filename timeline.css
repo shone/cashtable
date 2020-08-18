@@ -6,6 +6,7 @@
   flex-shrink: 0;
   position: relative;
   user-select: none;
+  contain: strict;
 }
 
 #timeline svg {
@@ -56,11 +57,13 @@
   top: 0;
   height: 20px;
   user-select: none;
+  contain: strict;
 }
 #timeline .top-area .transaction-labels {
   position: absolute;
   top:    0;
   bottom: 0;
+  height: 20px;
   pointer-events: none;
 }
 #timeline .top-area .transaction-labels label {
@@ -93,6 +96,7 @@
 #timeline .axis-controls {
   position: absolute;
   background: white;
+  contain: layout size;
 }
 #timeline .axis-controls.x-axis { left: 0; bottom:  0;   right: 40px; height: 60px; }
 #timeline .axis-controls.y-axis {  top: 0; bottom: 60px; right:  0;   width:  50px; overflow: hidden; }
