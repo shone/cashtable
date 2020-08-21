@@ -7,6 +7,7 @@
   position: relative;
   user-select: none;
   contain: strict;
+  touch-action: none; /* Prevent built-in browser touch action from overriding pointer event handler */
 }
 
 #timeline svg {
@@ -16,7 +17,6 @@
   width:  calc(100% - 60px);
   height: calc(100% - 85px);
   overflow: visible;
-  touch-action: none; /* Prevent built-in browser touch action from overriding pointer event handler */
 }
 #timeline svg g {
   pointer-events: none;
