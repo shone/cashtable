@@ -184,6 +184,12 @@ function dateStringToTimestampMs(string) {
   return new Date(parseInt(year), parseInt(month)-1, parseInt(day)).getTime();
 }
 
+function clamp(n, min, max) {
+  n = Math.max(n, min);
+  n = Math.min(n, max);
+  return n;
+}
+
 const splitter = document.getElementById('splitter');
 splitter.onpointerdown = event => {
   event.preventDefault();

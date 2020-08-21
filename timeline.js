@@ -156,8 +156,7 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     const scaleY = maxBalance    / rangeBalance;
     const translateX = -(timestampRangeStart - timestamps[0]) / totalDuration;
     const translateY = (balanceRangeEnd / maxBalance) - 1;
-    const transform = `scale(${scaleX},${scaleY}) translate(${translateX}px,${translateY}px)`;
-    svgGroup.style.transform = transform;
+    svgGroup.style.transform = `scale(${scaleX},${scaleY}) translate(${translateX}px,${translateY}px)`;
 
     const labelContainerWidth = `${(totalDuration / rangeDuration) * 100}%`;
     const labelContainerLeft  = `${((timestamps[0] - timestampRangeStart) / rangeDuration) * 100}%`;
@@ -195,9 +194,8 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
     let cursorXRatio = 0.5;
     let cursorYRatio = 0.5;
     if (origin) {
-      const boundingRect = svg.getBoundingClientRect();
-      cursorXRatio = origin.x / boundingRect.width;
-      cursorYRatio = origin.y / boundingRect.height;
+      cursorXRatio = origin.x / svg.clientWidth;
+      cursorYRatio = origin.y / svg.clientHeight;
     }
 
     timestampRangeStart = Math.max(timestampRangeStart + (timestampZoomAmount * cursorXRatio),     timestamps[0]);
@@ -211,52 +209,131 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
 
   svg.onwheel = event => zoom({amount: event.deltaY < 0 ? 0.1 : -0.1, origin: {x: event.offsetX, y: event.offsetY}});
 
-  timeline.querySelector('.corner-controls .zoom-in').onpointerdown  = () => zoom({amount:  0.1});
-  timeline.querySelector('.corner-controls .zoom-out').onpointerdown = () => zoom({amount: -0.1});
-
-  let isDraggingTimeline = false;
+  timeline.querySelector('.corner-controls .zoom-in').onclick  = () => zoom({amount:  0.1});
+  timeline.querySelector('.corner-controls .zoom-out').onclick = () => zoom({amount: -0.1});
 
   svg.onpointerdown = event => {
     event.preventDefault();
+    if (event.button && event.button > 1) return;
+    if (svg.onpointermove) return;
+
     const pointerId = event.pointerId;
     svg.setPointerCapture(pointerId);
+
+    const svgWidth = svg.clientWidth;
+    const svgHeight = svg.clientHeight;
+
     let lastEvent = {pageX: event.pageX, pageY: event.pageY};
-    function onPointermove(event) {
-      if (event.buttons !== 1) return;
+    let moveDistancePx = 0;
+    svg.onpointermove = event => {
       if (event.pointerId !== pointerId) return;
-      isDraggingTimeline = true;
       svg.style.cursor = 'grab';
-      const boundingRect = svg.getBoundingClientRect();
-      const deltaXRatio = (lastEvent.pageX - event.pageX) / boundingRect.width;
-      const deltaYRatio = (lastEvent.pageY - event.pageY) / boundingRect.height;
-      let deltaX = (timestampRangeEnd - timestampRangeStart) *  deltaXRatio;
-      let deltaY = (balanceRangeEnd   - balanceRangeStart  ) * -deltaYRatio;
-      deltaX = Math.min(deltaX, timestamps[timestamps.length-1] - timestampRangeEnd);
-      deltaX = Math.max(deltaX, timestamps[0] - timestampRangeStart);
-      deltaY = Math.min(deltaY, maxBalance - balanceRangeEnd);
-      deltaY = Math.max(deltaY, -balanceRangeStart);
-      timestampRangeStart += deltaX,
-      timestampRangeEnd   += deltaX
+      const deltaPx = {
+        x: lastEvent.pageX - event.pageX,
+        y: lastEvent.pageY - event.pageY,
+      }
+      moveDistancePx += Math.sqrt((deltaPx.x * deltaPx.x) + (deltaPx.y * deltaPx.y));
+      let deltaX = (timestampRangeEnd - timestampRangeStart) *  (deltaPx.x / svgWidth);
+      let deltaY = (balanceRangeEnd   - balanceRangeStart  ) * -(deltaPx.y / svgHeight);
+      deltaX = clamp(deltaX, timestamps[0] - timestampRangeStart, timestamps[timestamps.length-1] - timestampRangeEnd);
+      deltaY = clamp(deltaY, -balanceRangeStart, maxBalance - balanceRangeEnd);
+      timestampRangeStart += deltaX;
+      timestampRangeEnd   += deltaX;
       balanceRangeStart   += deltaY;
       balanceRangeEnd     += deltaY;
       updateRange();
       lastEvent = {pageX: event.pageX, pageY: event.pageY};
     }
-    function onPointerEnd(event) {
+    svg.onpointerup = svg.onpointercancel = event => {
       if (event.pointerId !== pointerId) {
         return;
       }
       event.preventDefault();
       svg.releasePointerCapture(pointerId);
-      svg.removeEventListener('pointermove', onPointermove);
-      svg.removeEventListener('pointerup', onPointerEnd);
-      svg.removeEventListener('pointercancel', onPointerEnd);
-      isDraggingTimeline = false;
+      svg.onpointermove   = null;
+      svg.onpointerup     = null;
+      svg.onpointercancel = null;
       svg.style.cursor = '';
+
+      if (moveDistancePx < 5) {
+        const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
+        timeline.onTransactionClicked(transactionIndex);
+      }
     }
-    svg.addEventListener('pointermove', onPointermove);
-    svg.addEventListener('pointerup', onPointerEnd);
-    svg.addEventListener('pointercancel', onPointerEnd);
+  }
+
+  dateLabelsContainer.onpointerdown = event => {
+    event.preventDefault();
+    if (event.button && event.button > 1) return;
+    if (dateLabelsContainer.onpointermove) return;
+
+    const pointerId = event.pointerId;
+    dateLabelsContainer.setPointerCapture(pointerId);
+
+    const svgWidth = svg.clientWidth;
+
+    let lastPointerX = event.pageX;
+    dateLabelsContainer.onpointermove = event => {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
+      dateLabelsContainer.style.cursor = 'grab';
+
+      const deltaPx = lastPointerX - event.pageX;
+      let deltaMs = (timestampRangeEnd - timestampRangeStart) *  (deltaPx / svgWidth);
+      deltaMs = clamp(deltaMs, timestamps[0] - timestampRangeStart, timestamps[timestamps.length-1] - timestampRangeEnd);
+      timestampRangeStart += deltaMs;
+      timestampRangeEnd   += deltaMs;
+      updateRange();
+      lastPointerX = event.pageX;
+    }
+    dateLabelsContainer.onpointerup = dateLabelsContainer.onpointercancel = event => {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
+      dateLabelsContainer.releasePointerCapture(pointerId);
+      dateLabelsContainer.onpointermove   = null;
+      dateLabelsContainer.onpointerup     = null;
+      dateLabelsContainer.onpointercancel = null;
+      dateLabelsContainer.style.cursor = '';
+    }
+  }
+
+  balanceLabelsContainer.onpointerdown = event => {
+    event.preventDefault();
+    if (event.button && event.button > 1) return;
+    if (balanceLabelsContainer.onpointermove) return;
+
+    const pointerId = event.pointerId;
+    balanceLabelsContainer.setPointerCapture(pointerId);
+
+    const svgHeight = svg.clientHeight;
+
+    let lastPointerY = event.pageY;
+    balanceLabelsContainer.onpointermove = event => {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
+      balanceLabelsContainer.style.cursor = 'grab';
+
+      const deltaPx = lastPointerY - event.pageY;
+      let deltaBalance = (balanceRangeEnd   - balanceRangeStart) * -(deltaPx / svgHeight);
+      deltaBalance = clamp(deltaBalance, -balanceRangeStart, maxBalance - balanceRangeEnd);
+      balanceRangeStart += deltaBalance;
+      balanceRangeEnd   += deltaBalance;
+      updateRange();
+      lastPointerY = event.pageY;
+    }
+    balanceLabelsContainer.onpointerup = balanceLabelsContainer.onpointercancel = event => {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
+      balanceLabelsContainer.releasePointerCapture(pointerId);
+      balanceLabelsContainer.onpointermove   = null;
+      balanceLabelsContainer.onpointerup     = null;
+      balanceLabelsContainer.onpointercancel = null;
+      balanceLabelsContainer.style.cursor = '';
+    }
   }
 
   function getTransactionIndexAtTimelinePixelsX(x) {
@@ -273,14 +350,6 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
       if (!isNaN(deltaPrev) && (deltaPrev < delta) && (deltaPrev <  deltaNext)) { transactionIndex--; continue; }
       return transactionIndex;
     }
-  }
-
-  svg.onpointerup = event => {
-    if (isDraggingTimeline) {
-      return;
-    }
-    const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
-    timeline.onTransactionClicked(transactionIndex);
   }
 
   svg.onmousemove = event => {
