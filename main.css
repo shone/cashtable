@@ -1,11 +1,14 @@
 html {
   font-family: sans-serif;
+
   --teal: #36a18b;
   --teal-highlight: #40bfa5;
   --rhubarb: #cc7d7a;
   --sand: #cda15e;
   --ocean: #286778;
   --secondary-petrol: #c8d7e5;
+
+  --filter-color: var(--rhubarb);
 }
 body {
   margin: 0;

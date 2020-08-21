@@ -40,7 +40,7 @@
 }
 #timeline .filtered-transaction-markers {
   fill: none;
-  stroke: var(--teal);
+  stroke: var(--filter-color);
   stroke-width: 1px;
 }
 #timeline .hovered-transaction-marker {
@@ -57,7 +57,6 @@
   top: 0;
   height: 20px;
   user-select: none;
-  contain: strict;
 }
 #timeline .top-area .transaction-labels {
   position: absolute;
@@ -68,7 +67,7 @@
 }
 #timeline .top-area .transaction-labels label {
   font-family: monospace;
-  background: var(--teal);
+  background: var(--filter-color);
   color: white;
   position: absolute;
   top: 0;

@@ -24,6 +24,8 @@
 
 #table thead .settings-cell {
   height: 0;
+  flex-basis: 0;
+  padding: 0;
   position: static;
   text-align: left;
 }
@@ -154,7 +156,6 @@
 #table th {
   background: white;
   box-sizing: border-box;
-  text-overflow: ellipsis;
   overflow: hidden;
   position: relative;
   flex-basis: 1px;
@@ -165,6 +166,9 @@
 }
 #table tr.field-names th {
   white-space: nowrap;
+  text-overflow: ellipsis;
+  border-top-left-radius:  5px;
+  border-top-right-radius: 5px;
 }
 
 #table [data-column="date"]              { flex-basis: 100px; }
@@ -173,7 +177,7 @@
 #table [data-column="transaction-type"]  { flex-basis: 200px; }
 #table [data-column="payment-reference"] { min-width: 200px; flex-grow: 3; }
 #table [data-column="category"]          { flex-basis: 200px; }
-#table [data-column="amount-eur"]        { flex-basis: 100px; }
+#table [data-column="amount-eur"]        { flex-basis: 120px; }
 #table [data-column="amount-foreign"]    { flex-basis: 100px; }
 #table [data-column="currency-code"]     { flex-basis:  80px; }
 #table [data-column="exchange-rate"]     { flex-basis:  80px; }
@@ -191,8 +195,20 @@
 #table.hide-column-exchange-rate     [data-column="exchange-rate"]     { display: none; }
 #table.hide-column-balance           [data-column="balance"]           { display: none; }
 
+#table.filter-column-date              [data-column="date"]              { background-color: var(--filter-color); }
+#table.filter-column-payee             [data-column="payee"]             { background-color: var(--filter-color); }
+#table.filter-column-account-number    [data-column="account-number"]    { background-color: var(--filter-color); }
+#table.filter-column-transaction-type  [data-column="transaction-type"]  { background-color: var(--filter-color); }
+#table.filter-column-payment-reference [data-column="payment-reference"] { background-color: var(--filter-color); }
+#table.filter-column-category          [data-column="category"]          { background-color: var(--filter-color); }
+#table.filter-column-amount-eur        [data-column="amount-eur"]        { background-color: var(--filter-color); }
+#table.filter-column-amount-foreign    [data-column="amount-foreign"]    { background-color: var(--filter-color); }
+#table.filter-column-currency-code     [data-column="currency-code"]     { background-color: var(--filter-color); }
+#table.filter-column-exchange-rate     [data-column="exchange-rate"]     { background-color: var(--filter-color); }
+#table.filter-column-balance           [data-column="balance"]           { background-color: var(--filter-color); }
+
 #table tbody tr:hover td,
-#table tbody tr.hover td { background: var(--ocean); }
+#table tbody tr.hover td { background: var(--ocean) !important; }
 
 #table tbody tr:hover td,
 #table tbody tr.hover td  { color: white !important; }
@@ -230,20 +246,20 @@
   width: -moz-available;
   box-sizing: border-box;
   border: 2px solid rgb(245, 245, 245);
+  outline: none;
   background: rgb(245, 245, 245);
   border-radius: 4px;
   height: 100%;
   padding-left: 4px;
-  padding-right: 17px;
+  padding-right: 20px;
   text-overflow: ellipsis;
 }
 #table .filters input:hover {
   border-color: rgb(230, 230, 230);
   background: rgb(230, 230, 230);
 }
-#table .filters input:focus {
+#table .filters th:not(.filter-active) input:focus {
   border-color: var(--teal);
-  outline: none;
 }
 #table .filters th:not(.filter-active)::after {
   content: '';
@@ -279,7 +295,7 @@
 #table .filters th.filter-active .clear-button {
   display: block;
   position: absolute;
-  right: 4px;
+  right: 3px;
   width: 20px;
   top:    3px;
   bottom: 3px;
@@ -310,6 +326,10 @@
       </g>\
     </svg>\
   ');
+}
+#table .filters th.filter-active .clear-button:focus {
+  border: 1px dashed var(--teal);
+  background-size: 65%;
 }
 #table .filters th.filter-active .clear-button:active {
   transform: none;

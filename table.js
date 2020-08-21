@@ -145,9 +145,10 @@ table.init = ({transactions, fields, timestamps, balances}) => {
   }
 
   table.querySelector('tr.filters').oninput = ({target}) => {
-    table.scrollLeft = 0;
+    table.scrollLeft = 0; // Prevent default browser behavior (head/tbody should be scrolled instead)
     const thElement = target.closest('th');
     thElement.classList.toggle('filter-active', target.value !== '');
+    table.classList.toggle(`filter-column-${thElement.dataset.column}`, target.value !== '');
     applyFilters();
   }
 
@@ -157,6 +158,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
       input.value = '';
       const thElement = input.closest('th');
       thElement.classList.remove('filter-active');
+      table.classList.remove(`filter-column-${thElement.dataset.column}`);
       applyFilters();
     }
   }
@@ -165,6 +167,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
     if (target.classList.contains('clear-button')) {
       const thElement = target.closest('th');
       thElement.classList.remove('filter-active');
+      table.classList.remove(`filter-column-${thElement.dataset.column}`);
       const input = thElement.querySelector('input');
       input.value = '';
       input.focus();
@@ -181,8 +184,8 @@ table.init = ({transactions, fields, timestamps, balances}) => {
     // Scroll the tbody/thead to bring the focused element into view
     const th = event.target.closest('th');
     const index = [...th.parentElement.children].indexOf(th);
-    const leftEdge = th.offsetLeft - 5;
-    const rightEdge = th.offsetLeft + th.offsetWidth + 35;
+    const leftEdge = th.offsetLeft;
+    const rightEdge = th.offsetLeft + th.offsetWidth + 40;
     if (leftEdge < tbody.scrollLeft) {
       tbody.scrollLeft = leftEdge;
     } else if (rightEdge > (tbody.scrollLeft + table.offsetWidth)) {
