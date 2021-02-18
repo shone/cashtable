@@ -14,7 +14,7 @@
   position: absolute;
   top:  20px;
   left: 20px;
-  width:  calc(100% - 60px);
+  width:  calc(100% - 80px);
   height: calc(100% - 85px);
   overflow: visible;
 }
@@ -53,7 +53,7 @@
 #timeline .top-area {
   position: absolute;
   left:  20px;
-  right: 40px;
+  right: 60px;
   top: 0;
   height: 20px;
   user-select: none;
@@ -104,7 +104,7 @@
 
 #timeline .date-labels {
   position: absolute;
-  right:  0;
+  right:  20px;
   left:   20px;
   height: 40px;
   bottom: 20px;
