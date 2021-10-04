@@ -118,6 +118,13 @@
 #table tbody::-webkit-scrollbar-thumb:hover {
   background: var(--teal-highlight);
 }
+/* Firefox (as of version 92) doesn't support the ::-webkit-scrollbar selector or any other way to set the exact width of the scrollbar, so instead set some padding to make up the difference compared to Firefox's default scrollbar width. The "@-moz-document url-prefix()" query is used to target only Firefox. See https://stackoverflow.com/questions/952861/targeting-only-firefox-with-css/953491#953491 */
+@-moz-document url-prefix() {
+  #table tbody {
+    scrollbar-width: auto;
+    padding-right: 24px;
+  }
+}
 #table.noresults tbody {
   background: no-repeat center 30px / 180px #ddd url('data:image/svg+xml,\
     <svg viewBox="0 0 128 38" xmlns="http://www.w3.org/2000/svg">\
