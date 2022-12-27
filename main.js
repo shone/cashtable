@@ -108,7 +108,7 @@ async function loadCsvFile(csvFile) {
 function loadCsvString(csvString) {
   const lines = csvString.split('\n');
   lines.splice(-1, 1); // Delete last line, which is empty
-  const csvJson = JSON.parse('[' + lines.map(line => '[' + line + ']').join(',') + ']');
+  const csvJson = JSON.parse('[' + lines.map(line => '[' + line.replace('\\','\\\\') + ']').join(',\n') + ']');
 
   const fieldNames = csvJson.splice(0, 1)[0];
 
