@@ -110,23 +110,26 @@ function loadCsvString(csvString) {
   lines.splice(-1, 1); // Delete last line, which is empty
   const csvJson = JSON.parse('[' + lines.map(line => '[' + line.replace('\\','\\\\') + ']').join(',\n') + ']');
 
-  const fieldNames = csvJson.splice(0, 1)[0];
+  const csvFieldLabels = csvJson.splice(0, 1)[0];
 
-  const fieldInfo = {
-    'Date':                      {name: 'date',              type: 'date'          },
-    'Payee':                     {name: 'payee',             type: 'string'        },
-    'Account number':            {name: 'account-number',    type: 'account-number'},
-    'Transaction type':          {name: 'transaction-type',  type: 'string'        },
-    'Payment reference':         {name: 'payment-reference', type: 'string'        },
-    'Category':                  {name: 'category',          type: 'string'        },
-    'Amount (EUR)':              {name: 'amount-eur',        type: 'euro'          },
-    'Amount (Foreign Currency)': {name: 'amount-foreign',    type: 'currency'      },
-    'Type Foreign Currency':     {name: 'currency-code',     type: 'currency-code' },
-    'Exchange Rate':             {name: 'exchange-rate',     type: 'decimal'       },
-  }
+  const fieldInfo = [
+  // Name                 Type              Label (EN)                   Label (DE)               Label (FR)                          Label (ES)                      Label (IT)
+    ['date',              'date',           'Date',                      'Datum',                 'Date',                             'Fecha',                        'Data'                    ],
+    ['payee',             'string',         'Payee',                     'Empfänger',             'Bénéficiaire',                     'Beneficiario',                 'Beneficiario'            ],
+    ['account-number',    'account-number', 'Account number',            'Kontonummer',           'Numéro de compte',                 'Número de cuenta',             'Numero di conto'         ],
+    ['transaction-type',  'string',         'Transaction type',          'Transaktionstyp',       'Type de transaction',              'Tipo de transacción',          'Tipo di transazione'     ],
+    ['payment-reference', 'string',         'Payment reference',         'Verwendungszweck',      'Référence de paiement',            'Referencia de pago',           'Riferimento pagamento'   ],
+    ['amount-eur',        'euro',           'Amount (EUR)',              'Betrag (EUR)',          'Montant (EUR)',                    'Cantidad (EUR)',               'Importo (EURO)'          ],
+    ['amount-foreign',    'currency',       'Amount (Foreign Currency)', 'Betrag (Fremdwährung)', 'Montant (Devise étrangère)',       'Cantidad (Divisa extranjera)', 'Importo (Valuta estera)' ],
+    ['currency-code',     'currency-code',  'Type Foreign Currency',     'Fremdwährung',          'Sélectionnez la devise étrangère', 'Tipo de divisa extranjera',    'Tipo di valuta straniera'],
+    ['exchange-rate',     'decimal',        'Exchange Rate',             'Wechselkurs',           'Taux de conversion',               'Tipo de cambio',               'Tasso di cambio'         ],
+  ]
+  const fieldInfoMap = fieldInfo.map(array => ({name: array[0], type: array[1], label: {en: array[2], de: array[3], fr: array[4], es: array[5], it: array[6]}}));
 
-  fields = fieldNames.map(label => ({label, ...fieldInfo[label]}));
-  fields.push({label: 'Balance', name: 'balance', type: 'euro'});
+  fields = csvFieldLabels.map(label =>
+    fieldInfoMap.find(field => Object.values(field.label).includes(label))
+  ).filter(field => field !== undefined);
+  fields.push({name: 'balance', type: 'euro', label: {en: 'Balance'}});
 
   const amountFieldIndex  = fields.findIndex(field => field.name === 'amount-eur');
   const dateFieldIndex    = fields.findIndex(field => field.name === 'date');

@@ -17,7 +17,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
   table.classList.add(...[...defaultHiddenColumns].map(column => `hide-column-${column}`));
 
   table.querySelector('tr.field-names').insertAdjacentHTML('afterbegin', fields.map(field => `<th class="${field.type}" data-column="${field.name}"></th>`).join(''));
-  table.querySelectorAll('tr.field-names th[data-column]').forEach((th, index) => th.textContent = th.title = fields[index].label);
+  table.querySelectorAll('tr.field-names th[data-column]').forEach((th, index) => th.textContent = th.title = fields[index].label.en);
 
   table.querySelector('tr.filters').innerHTML = fields.map(field => `
     <th class="${field.type}" data-column="${field.name}">
@@ -51,7 +51,7 @@ table.init = ({transactions, fields, timestamps, balances}) => {
 
   const settingsMenu = table.tHead.querySelector('.settings-menu');
   settingsMenu.innerHTML = fields.map(field => `<div data-name="${field.name}" class="${defaultHiddenColumns.has(field.name) ? '' : 'show'}"></div>`).join('');
-  [...settingsMenu.children].forEach((div, index) => div.textContent = fields[index].label);
+  [...settingsMenu.children].forEach((div, index) => div.textContent = fields[index].label.en);
   settingsMenu.onpointerdown = event => {
     event.preventDefault();
     if (event.target.dataset.name) {
