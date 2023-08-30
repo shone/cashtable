@@ -108,7 +108,12 @@ async function loadCsvFile(csvFile) {
 function loadCsvString(csvString) {
   const lines = csvString.split('\n');
   lines.splice(-1, 1); // Delete last line, which is empty
-  const csvJson = JSON.parse('[' + lines.map(line => '[' + line.replace('\\','\\\\') + ']').join(',\n') + ']');
+  const csvJson = lines.map(line => {
+    line.replace('\\','\\\\');
+    const entries = line.split('",').map(entry => entry.slice(1));
+    entries[entries.length-1] = entries[entries.length-1].slice(0, -1);
+    return entries;
+  });
 
   const csvFieldLabels = csvJson.splice(0, 1)[0];
 
