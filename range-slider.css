@@ -1,53 +1,53 @@
 range-slider {
-  position: absolute;
-  overflow: hidden;
-  background: white;
-  --thickness: 20px;
-  user-select: none;
-  touch-action: none;
-  contain: strict;
+	position: absolute;
+	overflow: hidden;
+	background: white;
+	--thickness: 20px;
+	user-select: none;
+	touch-action: none;
+	contain: strict;
 }
 
 range-slider[data-orientation="vertical"]   { width:  var(--thickness); }
 range-slider[data-orientation="horizontal"] { height: var(--thickness); }
 
 range-slider .thumb-container {
-  position: absolute;
+	position: absolute;
 }
 range-slider[data-orientation="vertical"] .thumb-container {
-  top:    var(--thickness);
-  bottom: var(--thickness);
-  left:  0;
-  right: 0;
+	top:    var(--thickness);
+	bottom: var(--thickness);
+	left:  0;
+	right: 0;
 }
 range-slider[data-orientation="horizontal"] .thumb-container {
-  left:  var(--thickness);
-  right: var(--thickness);
-  top:    0;
-  bottom: 0;
+	left:  var(--thickness);
+	right: var(--thickness);
+	top:    0;
+	bottom: 0;
 }
 range-slider .thumb {
-  position: absolute;
-  cursor: grab;
-  touch-action: none; /* Prevent built-in action overriding pointer event handlers*/
-  background: var(--teal);
+	position: absolute;
+	cursor: grab;
+	touch-action: none; /* Prevent built-in action overriding pointer event handlers*/
+	background: var(--teal);
 }
 range-slider[data-orientation="vertical"]   .thumb { left: 3px; right:  3px; }
 range-slider[data-orientation="horizontal"] .thumb { top:  3px; bottom: 3px; }
 range-slider .thumb:hover {
-  background: var(--teal-highlight);
+	background: var(--teal-highlight);
 }
 
 range-slider .thumb > span {
-  position: absolute;
-  touch-action: none; /* Prevent built-in action overriding pointer event handler*/
-  background: no-repeat center / 60% var(--teal) url('data:image/svg+xml,\
-    <svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg">\
-      <path fill="white" d="M0.9,0 v1 L0.1,0.5"/>\
-    </svg>\
-  ');
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+	position: absolute;
+	touch-action: none; /* Prevent built-in action overriding pointer event handler*/
+	background: no-repeat center / 60% var(--teal) url('data:image/svg+xml,\
+		<svg viewBox="0 0 1 1" xmlns="http://www.w3.org/2000/svg">\
+			<path fill="white" d="M0.9,0 v1 L0.1,0.5"/>\
+		</svg>\
+	');
+	border-top-left-radius: 6px;
+	border-bottom-left-radius: 6px;
 }
 range-slider[data-orientation="vertical"]   .thumb > span { cursor: ns-resize; }
 range-slider[data-orientation="horizontal"] .thumb > span { cursor: ew-resize; }

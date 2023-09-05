@@ -1,181 +1,181 @@
 #table {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  overflow: hidden;
-  --scrollbar-width: 34px;
-  position: relative;
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow: hidden;
+	--scrollbar-width: 34px;
+	position: relative;
 }
 
 #table thead {
-  flex-shrink: 0;
-  flex-grow: 0;
-  position: relative;
-  z-index: 1;
-  padding: 3px;
-  padding-right: calc(var(--scrollbar-width) + 3px);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+	flex-shrink: 0;
+	flex-grow: 0;
+	position: relative;
+	z-index: 1;
+	padding: 3px;
+	padding-right: calc(var(--scrollbar-width) + 3px);
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
 #table thead th {
-  height: 100%;
-  padding: 3px;
-  flex-shrink: 0;
+	height: 100%;
+	padding: 3px;
+	flex-shrink: 0;
 }
 
 #table thead .settings-cell {
-  height: 0;
-  flex-basis: 0;
-  padding: 0;
-  position: static;
-  text-align: left;
+	height: 0;
+	flex-basis: 0;
+	padding: 0;
+	position: static;
+	text-align: left;
 }
 #table thead .settings-button {
-  position: absolute;
-  right: 3px;
-  top: 27px;
-  z-index: 1;
-  width:  calc(var(--scrollbar-width) - 4px);
-  height: calc(var(--scrollbar-width) - 4px);
-  background-image: url('data:image/svg+xml,\
-    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">\
-      <path fill="white" stroke="none"\
-        d="M32.27 2.18c-1.36-.02-2.77.05-4.24.28-.56.08-1 .52-1.08 1.07l-1.07 6.91c-1.54.43-3.1 1.04-4.67 1.88L15.62 8.2a1.3 1.3 0 00-1.48-.04 22.67 22.67 0 00-5.9 5.77 1.3 1.3 0 000 1.5l4.11 5.74A30.7 30.7 0 0010.33 26l-6.68.96a1.3 1.3 0 00-1.1 1.09c-.42 2.9-.3 5.64 0 8.25a1.3 1.3 0 001.1 1.13l6.72.96a35.4 35.4 0 002.04 4.73l-4.19 5.55a1.3 1.3 0 00.02 1.58A31.97 31.97 0 0014 56.08c.46.35 1.1.35 1.55 0l5.66-4.22c1.48.87 3.07 1.53 4.75 2.01l1.23 7c.1.53.52.95 1.06 1.05 2.77.48 5.43.38 7.98 0 .56-.08 1-.51 1.1-1.07l1.11-6.91c1.62-.53 3.17-1.2 4.68-1.98l5.73 4.1a1.3 1.3 0 001.52 0c2.23-1.66 4.1-3.6 5.68-5.71a1.3 1.3 0 000-1.54l-4.15-5.68c.8-1.5 1.52-3.09 2.1-4.79l6.64-1.05c.56-.08 1-.53 1.07-1.1.38-2.7.4-5.38.03-8.02a1.3 1.3 0 00-1.08-1.1L53.98 26a27.08 27.08 0 00-2.07-4.82l4.15-5.59a1.3 1.3 0 000-1.54 32.37 32.37 0 00-5.66-5.77 1.3 1.3 0 00-1.58-.04l-5.65 4.14a22.65 22.65 0 00-4.65-1.93l-1.17-6.94c-.1-.57-.57-1.01-1.14-1.07a43.18 43.18 0 00-3.94-.27zm-.37 19.18A10.94 10.94 0 0142.84 32.3 10.94 10.94 0 0131.9 43.24 10.94 10.94 0 0120.96 32.3 10.94 10.94 0 0131.9 21.36z"/>\
-    </svg>\
-  ');
-  background-size: 75%;
+	position: absolute;
+	right: 3px;
+	top: 27px;
+	z-index: 1;
+	width:  calc(var(--scrollbar-width) - 4px);
+	height: calc(var(--scrollbar-width) - 4px);
+	background-image: url('data:image/svg+xml,\
+		<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">\
+			<path fill="white" stroke="none"\
+				d="M32.27 2.18c-1.36-.02-2.77.05-4.24.28-.56.08-1 .52-1.08 1.07l-1.07 6.91c-1.54.43-3.1 1.04-4.67 1.88L15.62 8.2a1.3 1.3 0 00-1.48-.04 22.67 22.67 0 00-5.9 5.77 1.3 1.3 0 000 1.5l4.11 5.74A30.7 30.7 0 0010.33 26l-6.68.96a1.3 1.3 0 00-1.1 1.09c-.42 2.9-.3 5.64 0 8.25a1.3 1.3 0 001.1 1.13l6.72.96a35.4 35.4 0 002.04 4.73l-4.19 5.55a1.3 1.3 0 00.02 1.58A31.97 31.97 0 0014 56.08c.46.35 1.1.35 1.55 0l5.66-4.22c1.48.87 3.07 1.53 4.75 2.01l1.23 7c.1.53.52.95 1.06 1.05 2.77.48 5.43.38 7.98 0 .56-.08 1-.51 1.1-1.07l1.11-6.91c1.62-.53 3.17-1.2 4.68-1.98l5.73 4.1a1.3 1.3 0 001.52 0c2.23-1.66 4.1-3.6 5.68-5.71a1.3 1.3 0 000-1.54l-4.15-5.68c.8-1.5 1.52-3.09 2.1-4.79l6.64-1.05c.56-.08 1-.53 1.07-1.1.38-2.7.4-5.38.03-8.02a1.3 1.3 0 00-1.08-1.1L53.98 26a27.08 27.08 0 00-2.07-4.82l4.15-5.59a1.3 1.3 0 000-1.54 32.37 32.37 0 00-5.66-5.77 1.3 1.3 0 00-1.58-.04l-5.65 4.14a22.65 22.65 0 00-4.65-1.93l-1.17-6.94c-.1-.57-.57-1.01-1.14-1.07a43.18 43.18 0 00-3.94-.27zm-.37 19.18A10.94 10.94 0 0142.84 32.3 10.94 10.94 0 0131.9 43.24 10.94 10.94 0 0120.96 32.3 10.94 10.94 0 0131.9 21.36z"/>\
+		</svg>\
+	');
+	background-size: 75%;
 }
 
 #table thead .settings-menu:not(.show) {
-  display: none;
+	display: none;
 }
 #table thead .settings-menu {
-  position: fixed;
-  right: 5px;
-  margin-top: 55px;
-  z-index: 1;
-  background: white;
-  box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.6);
-  padding-top: 5px;
-  padding-bottom: 5px;
-  border-radius: 6px;
-  user-select: none;
-  contain: paint;
+	position: fixed;
+	right: 5px;
+	margin-top: 55px;
+	z-index: 1;
+	background: white;
+	box-shadow: 1px 3px 8px rgba(0, 0, 0, 0.6);
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-radius: 6px;
+	user-select: none;
+	contain: paint;
 }
 #table thead .settings-menu div {
-  line-height: 30px;
-  padding-left: 40px;
-  padding-right: 10px;
-  position: relative;
-  cursor: pointer;
-  user-select: none;
+	line-height: 30px;
+	padding-left: 40px;
+	padding-right: 10px;
+	position: relative;
+	cursor: pointer;
+	user-select: none;
 }
 #table thead .settings-menu div::before {
-  content: '';
-  position: absolute;
-  left: 8px;
-  top: 4px;
-  bottom: 4px;
-  width: 18px;
-  border: 2px solid var(--teal);;
-  border-radius: 6px;
-  pointer-events: none;
+	content: '';
+	position: absolute;
+	left: 8px;
+	top: 4px;
+	bottom: 4px;
+	width: 18px;
+	border: 2px solid var(--teal);;
+	border-radius: 6px;
+	pointer-events: none;
 }
 #table thead .settings-menu div.show::after {
-  content: '';
-  position: absolute;
-  left: 12px;
-  top: 8px;
-  bottom: 8px;
-  width: 14px;
-  background: var(--teal);;
-  border-radius: 3px;
-  pointer-events: none;
+	content: '';
+	position: absolute;
+	left: 12px;
+	top: 8px;
+	bottom: 8px;
+	width: 14px;
+	background: var(--teal);;
+	border-radius: 3px;
+	pointer-events: none;
 }
 #table thead .settings-menu div:hover {
-  background: var(--secondary-petrol);
+	background: var(--secondary-petrol);
 }
 
 #table tbody {
-  flex-shrink: 1;
-  flex-grow: 1;
-  overflow-y: scroll;
-  overflow-x: auto;
-  transform: translateZ(0); /* Prevent repaint on scroll */
-  padding: 3px;
-  background: #ddd;
-  scrollbar-color: var(--teal) white;
-  contain: strict;
+	flex-shrink: 1;
+	flex-grow: 1;
+	overflow-y: scroll;
+	overflow-x: auto;
+	transform: translateZ(0); /* Prevent repaint on scroll */
+	padding: 3px;
+	background: #ddd;
+	scrollbar-color: var(--teal) white;
+	contain: strict;
 }
 #table tbody::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-  background: white;
+	width: var(--scrollbar-width);
+	background: white;
 }
 #table tbody::-webkit-scrollbar-thumb {
-  background: var(--teal);
-  border: 2px solid white;
-  border-radius: 8px;
+	background: var(--teal);
+	border: 2px solid white;
+	border-radius: 8px;
 }
 #table tbody::-webkit-scrollbar-thumb:hover {
-  background: var(--teal-highlight);
+	background: var(--teal-highlight);
 }
 /* Firefox (as of version 92) doesn't support the ::-webkit-scrollbar selector or any other way to set the exact width of the scrollbar, so instead set some padding to make up the difference compared to Firefox's default scrollbar width. The "@-moz-document url-prefix()" query is used to target only Firefox. See https://stackoverflow.com/questions/952861/targeting-only-firefox-with-css/953491#953491 */
 @-moz-document url-prefix() {
-  #table tbody {
-    scrollbar-width: auto;
-    padding-right: 24px;
-  }
+	#table tbody {
+		scrollbar-width: auto;
+		padding-right: 24px;
+	}
 }
 #table.noresults tbody {
-  background: no-repeat center 30px / 180px #ddd url('data:image/svg+xml,\
-    <svg viewBox="0 0 128 38" xmlns="http://www.w3.org/2000/svg">\
-      <circle cx="17.19" cy="13.94" r="9.487" fill="none" stroke="%238b8b8b" stroke-width="3"/>\
-      <path d="m24.23 21.63 11.41 11.28" fill="none" stroke="%238b8b8b" stroke-linecap="round" stroke-width="4"/>\
-      <g fill="%238b8b8b">\
-        <circle cx="13.01" cy="12.71" r="1.585"/>\
-        <circle cx="21.31" cy="12.71" r="1.585"/>\
-        <path d="m20.2 19.03h-6.219c-0.2119 0-0.5599-0.05403-0.5599-0.5298 0-1.051 1.665-1.749 3.786-1.749 2.121 0 3.716 0.7922 3.716 1.793 0 0.4381-0.4447 0.4865-0.7231 0.4865z"/>\
-        <text x="45" y="21" font-family="sans-serif" font-size="17.19px">\
-          <tspan x="45" y="21" fill="%238b8b8b">no results</tspan>\
-        </text>\
-      </g>\
-    </svg>\
-  ');
+	background: no-repeat center 30px / 180px #ddd url('data:image/svg+xml,\
+		<svg viewBox="0 0 128 38" xmlns="http://www.w3.org/2000/svg">\
+			<circle cx="17.19" cy="13.94" r="9.487" fill="none" stroke="%238b8b8b" stroke-width="3"/>\
+			<path d="m24.23 21.63 11.41 11.28" fill="none" stroke="%238b8b8b" stroke-linecap="round" stroke-width="4"/>\
+			<g fill="%238b8b8b">\
+				<circle cx="13.01" cy="12.71" r="1.585"/>\
+				<circle cx="21.31" cy="12.71" r="1.585"/>\
+				<path d="m20.2 19.03h-6.219c-0.2119 0-0.5599-0.05403-0.5599-0.5298 0-1.051 1.665-1.749 3.786-1.749 2.121 0 3.716 0.7922 3.716 1.793 0 0.4381-0.4447 0.4865-0.7231 0.4865z"/>\
+				<text x="45" y="21" font-family="sans-serif" font-size="17.19px">\
+					<tspan x="45" y="21" fill="%238b8b8b">no results</tspan>\
+				</text>\
+			</g>\
+		</svg>\
+	');
 }
 
 #table tbody tr {
-  border-left: 1px solid white;
+	border-left: 1px solid white;
 }
 #table tbody td {
-  border-right: 1px solid white;
-  border-bottom: 1px solid white;
-  flex-shrink: 0;
+	border-right: 1px solid white;
+	border-bottom: 1px solid white;
+	flex-shrink: 0;
 }
 
 #table tbody tr.placeholder {
-  pointer-events: none;
-  visibility: hidden;
+	pointer-events: none;
+	visibility: hidden;
 }
 
 #table tr {
-  display: flex;
+	display: flex;
 }
 
 #table th {
-  background: white;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
-  flex-basis: 1px;
+	background: white;
+	box-sizing: border-box;
+	overflow: hidden;
+	position: relative;
+	flex-basis: 1px;
 }
 
 #table tr.field-names {
-  height: 26px;
+	height: 26px;
 }
 #table tr.field-names th {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  border-top-left-radius:  5px;
-  border-top-right-radius: 5px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	border-top-left-radius:  5px;
+	border-top-right-radius: 5px;
 }
 
 #table [data-column="date"]              { flex-basis: 100px; }
@@ -221,9 +221,9 @@
 #table tbody tr.hover td  { color: white !important; }
 
 #table td {
-  box-sizing: border-box;
-  overflow-wrap: break-word;
-  flex-basis: 1px;
+	box-sizing: border-box;
+	overflow-wrap: break-word;
+	flex-basis: 1px;
 }
 
 #table td.date           { font-family: monospace; font-size: 1.2em; }
@@ -233,153 +233,153 @@
 
 #table td.euro,
 #table td.currency {
-  text-align: right;
-  font-family: monospace;
-  font-size: 1.2em;
+	text-align: right;
+	font-family: monospace;
+	font-size: 1.2em;
 }
 #table td.euro.positive-number {
-  color: green;
-  font-weight: bold;
+	color: green;
+	font-weight: bold;
 }
 
 #table .filters {
-  height: 30px;
-  user-select: none;
-  contain: strict;
+	height: 30px;
+	user-select: none;
+	contain: strict;
 }
 
 #table .filters input {
-  width: -webkit-fill-available;
-  width: -moz-available;
-  box-sizing: border-box;
-  border: 2px solid rgb(245, 245, 245);
-  outline: none;
-  background: rgb(245, 245, 245);
-  border-radius: 4px;
-  height: 100%;
-  padding-left: 4px;
-  padding-right: 20px;
-  text-overflow: ellipsis;
+	width: -webkit-fill-available;
+	width: -moz-available;
+	box-sizing: border-box;
+	border: 2px solid rgb(245, 245, 245);
+	outline: none;
+	background: rgb(245, 245, 245);
+	border-radius: 4px;
+	height: 100%;
+	padding-left: 4px;
+	padding-right: 20px;
+	text-overflow: ellipsis;
 }
 #table .filters input:hover {
-  border-color: rgb(230, 230, 230);
-  background: rgb(230, 230, 230);
+	border-color: rgb(230, 230, 230);
+	background: rgb(230, 230, 230);
 }
 #table .filters th:not(.filter-active) input:focus {
-  border-color: var(--teal);
+	border-color: var(--teal);
 }
 #table .filters th:not(.filter-active)::after {
-  content: '';
-  position: absolute;
-  right: 3px;
-  width: 25px;
-  top:    2px;
-  bottom: 2px;
-  background: no-repeat center / 70% url('data:image/svg+xml,\
-    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
-      <g stroke="black" stroke-linecap="round" stroke-width="1.5" fill="none">\
-        <circle cx="5.9" cy="6" r="4.46"/>\
-        <path d="m9.388 9.3 6 6"/>\
-      </g>\
-    </svg>\
-  ');
-  pointer-events: none;
+	content: '';
+	position: absolute;
+	right: 3px;
+	width: 25px;
+	top:    2px;
+	bottom: 2px;
+	background: no-repeat center / 70% url('data:image/svg+xml,\
+		<svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+			<g stroke="black" stroke-linecap="round" stroke-width="1.5" fill="none">\
+				<circle cx="5.9" cy="6" r="4.46"/>\
+				<path d="m9.388 9.3 6 6"/>\
+			</g>\
+		</svg>\
+	');
+	pointer-events: none;
 }
 #table .filters th:not(.filter-active):focus-within::after {
-  background: no-repeat center / 70% url('data:image/svg+xml,\
-    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
-      <g stroke="rgb(54 161 139)" stroke-linecap="round" stroke-width="2" fill="none">\
-        <circle cx="5.9" cy="6" r="4.46"/>\
-        <path d="m9.388 9.3 6 6"/>\
-      </g>\
-    </svg>\
-  ');
+	background: no-repeat center / 70% url('data:image/svg+xml,\
+		<svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+			<g stroke="rgb(54 161 139)" stroke-linecap="round" stroke-width="2" fill="none">\
+				<circle cx="5.9" cy="6" r="4.46"/>\
+				<path d="m9.388 9.3 6 6"/>\
+			</g>\
+		</svg>\
+	');
 }
 
 #table .filters .clear-button {
-  display: none;
+	display: none;
 }
 #table .filters th.filter-active .clear-button {
-  display: block;
-  position: absolute;
-  right: 3px;
-  width: 20px;
-  top:    3px;
-  bottom: 3px;
-  border-top-left-radius:     0;
-  border-bottom-left-radius:  0;
-  border-top-right-radius:    4px;
-  border-bottom-right-radius: 4px;
-  padding: 0;
-  background-image: url('data:image/svg+xml,\
-    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
-      <g stroke="%2336a18b" stroke-linecap="round" stroke-width="3" fill="none">\
-        <path d="m1.729 1.7 13.47 13.49"/>\
-        <path d="m1.721 15.2 13.49-13.47"/>\
-      </g>\
-    </svg>\
-  ');
-  background-size: 60%;
-  background-color: transparent;
-  box-shadow: none;
+	display: block;
+	position: absolute;
+	right: 3px;
+	width: 20px;
+	top:    3px;
+	bottom: 3px;
+	border-top-left-radius:     0;
+	border-bottom-left-radius:  0;
+	border-top-right-radius:    4px;
+	border-bottom-right-radius: 4px;
+	padding: 0;
+	background-image: url('data:image/svg+xml,\
+		<svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+			<g stroke="%2336a18b" stroke-linecap="round" stroke-width="3" fill="none">\
+				<path d="m1.729 1.7 13.47 13.49"/>\
+				<path d="m1.721 15.2 13.49-13.47"/>\
+			</g>\
+		</svg>\
+	');
+	background-size: 60%;
+	background-color: transparent;
+	box-shadow: none;
 }
 #table .filters th.filter-active .clear-button:hover {
-  background-color: var(--teal);
-  background-image: url('data:image/svg+xml,\
-    <svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
-      <g stroke="white" stroke-linecap="round" stroke-width="3" fill="none">\
-        <path d="m1.729 1.7 13.47 13.49"/>\
-        <path d="m1.721 15.2 13.49-13.47"/>\
-      </g>\
-    </svg>\
-  ');
+	background-color: var(--teal);
+	background-image: url('data:image/svg+xml,\
+		<svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg">\
+			<g stroke="white" stroke-linecap="round" stroke-width="3" fill="none">\
+				<path d="m1.729 1.7 13.47 13.49"/>\
+				<path d="m1.721 15.2 13.49-13.47"/>\
+			</g>\
+		</svg>\
+	');
 }
 #table .filters th.filter-active .clear-button:focus {
-  border: 1px dashed var(--teal);
-  background-size: 65%;
+	border: 1px dashed var(--teal);
+	background-size: 65%;
 }
 #table .filters th.filter-active .clear-button:active {
-  transform: none;
-  background-position: left 60% top 60%;
+	transform: none;
+	background-position: left 60% top 60%;
 }
 
 #table tfoot {
-  height: 45px;
-  flex-shrink: 0;
-  flex-grow: 0;
-  display: flex;
-  justify-content: center;
-  background: var(--teal);
-  font-size: 18px;
-  font-weight: bold;
-  color: white;
-  z-index: 0;
-  box-shadow: 0 0 10px rgba(0, 0, 0, .4);
-  contain: strict;
+	height: 45px;
+	flex-shrink: 0;
+	flex-grow: 0;
+	display: flex;
+	justify-content: center;
+	background: var(--teal);
+	font-size: 18px;
+	font-weight: bold;
+	color: white;
+	z-index: 0;
+	box-shadow: 0 0 10px rgba(0, 0, 0, .4);
+	contain: strict;
 }
 #table tfoot td {
-  margin-left: 20px;
-  height: 45px;
-  line-height: 45px;
+	margin-left: 20px;
+	height: 45px;
+	line-height: 45px;
 }
 #table tfoot > *:first-child {
-  background: no-repeat left center / 25px 25px url('data:image/svg+xml,\
-    <svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">\
-      <path fill="white"\
-        d="M6 5v15l189 235L4 482v14l369-2c4-46 13-93 22-138l-12-3c-11 25-19 52-43 69-26 18-61 16-91 16H79l173-209L96 33h91c58 0 141-14 164 56 4 12 7 24 8 37h13L362 5H6z"/>\
-    </svg>\
-  ');
-  padding-left: 45px;
+	background: no-repeat left center / 25px 25px url('data:image/svg+xml,\
+		<svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">\
+			<path fill="white"\
+				d="M6 5v15l189 235L4 482v14l369-2c4-46 13-93 22-138l-12-3c-11 25-19 52-43 69-26 18-61 16-91 16H79l173-209L96 33h91c58 0 141-14 164 56 4 12 7 24 8 37h13L362 5H6z"/>\
+		</svg>\
+	');
+	padding-left: 45px;
 }
 #table tfoot .positive-sum,
 #table tfoot .negative-sum,
 #table tfoot .balance {
-  font-family: monospace;
+	font-family: monospace;
 }
 #table tfoot .negative-sum {
-  color: #ffafac;
+	color: #ffafac;
 }
 #table tfoot .balance {
-  font-weight: bold;
-  font-size: 22px;
+	font-weight: bold;
+	font-size: 22px;
 }

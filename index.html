@@ -1,174 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport"    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <meta name="description" content="Web-app for analyzing N26 bank transaction data.">
-    <meta name="keywords"    content="N26, banking">
-    <meta name="author"      content="Josh Shone">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport"    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+		<meta name="description" content="Web-app for analyzing N26 bank transaction data.">
+		<meta name="keywords"    content="N26, banking">
+		<meta name="author"      content="Josh Shone">
 
-    <!-- Block all cross-origin requests and unsafe inline evaluation except for data-url images for SVGs in CSS -->
-    <meta http-equiv='Content-Security-Policy' content="default-src 'self'; img-src 'self' data:;">
+		<!-- Block all cross-origin requests and unsafe inline evaluation except for data-url images for SVGs in CSS -->
+		<meta http-equiv='Content-Security-Policy' content="default-src 'self'; img-src 'self' data:;">
 
-    <title>cashtable</title>
+		<title>cashtable</title>
 
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="landing-page.css">
-    <link rel="stylesheet" href="timeline.css">
-    <link rel="stylesheet" href="table.css">
-    <link rel="stylesheet" href="range-slider.css">
+		<link rel="stylesheet" href="main.css">
+		<link rel="stylesheet" href="landing-page.css">
+		<link rel="stylesheet" href="timeline.css">
+		<link rel="stylesheet" href="table.css">
+		<link rel="stylesheet" href="range-slider.css">
 
-    <link rel="shortcut icon" href="images/favicon_64x64.png" type="image/png">
+		<link rel="shortcut icon" href="images/favicon_64x64.png" type="image/png">
 
-    <link rel="manifest" href="manifest.webmanifest">
-  </head>
+		<link rel="manifest" href="manifest.webmanifest">
+	</head>
 
-  <body>
+	<body>
 
-    <input type="file" accept=".csv">
+		<input type="file" accept=".csv">
 
-    <div id="landing-page">
+		<div id="landing-page">
 
-      <header>
-        <h1>cashtable</h1>
-        <a href="https://github.com/shone/cashtable">Source code</a>
-        <a href="https://shone.dev">Author</a>
-        <button class="open-file-button">Open CSV file</button>
-      </header>
+			<header>
+				<h1>cashtable</h1>
+				<a href="https://github.com/shone/cashtable">Source code</a>
+				<a href="https://shone.dev">Author</a>
+				<button class="open-file-button">Open CSV file</button>
+			</header>
 
-      <section id="intro">
-        <h2>A fan-made analysis app</h2>
-        <p>
-          Use this unofficial app to graph, filter and analyze your N26 bank account transactions.
-          All without your banking data leaving your computer.
-        </p>
-        <div>
-          <button class="open-file-button">Open CSV file</button>
-        </div>
-      </section>
+			<section id="intro">
+				<h2>A fan-made analysis app</h2>
+				<p>
+					Use this unofficial app to graph, filter and analyze your N26 bank account transactions.
+					All without your banking data leaving your computer.
+				</p>
+				<div>
+					<button class="open-file-button">Open CSV file</button>
+				</div>
+			</section>
 
-      <section id="preview">
-        <img src="images/screenshot.png">
-        <button id="view-sample-csv-button">View Sample Data</button>
-      </section>
+			<section id="preview">
+				<img src="images/screenshot.png">
+				<button id="view-sample-csv-button">View Sample Data</button>
+			</section>
 
-      <section id="csv-instructions">
-        <h2>Get your CSV file</h2>
-        <div>
-          <span> <img src="images/n26_online_banking_link.png" width="363" height="94"></img> </span>
-          <p>Go to the N26 website to access Online Banking.</p>
-        </div>
-        <div>
-          <span> <img src="images/n26_download_button.svg" width="132" height="132"></img> </span>
-          <p>Go to the downloads section.</p>
-        </div>
-        <div>
-          <span> <img src="images/n26_csv_date_selector.png" width="449" height="420"></img> </span>
-          <p>Select your entire transaction history.</p>
-        </div>
-        <div>
-          <span> <img src="images/n26_download_csv_button.png" width="200" height="80"></img> </span>
-          <p>Download your CSV file.</p>
-        </div>
-      </section>
+			<section id="csv-instructions">
+				<h2>Get your CSV file</h2>
+				<div>
+					<span> <img src="images/n26_online_banking_link.png" width="363" height="94"></img> </span>
+					<p>Go to the N26 website to access Online Banking.</p>
+				</div>
+				<div>
+					<span> <img src="images/n26_download_button.svg" width="132" height="132"></img> </span>
+					<p>Go to the downloads section.</p>
+				</div>
+				<div>
+					<span> <img src="images/n26_csv_date_selector.png" width="449" height="420"></img> </span>
+					<p>Select your entire transaction history.</p>
+				</div>
+				<div>
+					<span> <img src="images/n26_download_csv_button.png" width="200" height="80"></img> </span>
+					<p>Download your CSV file.</p>
+				</div>
+			</section>
 
-      <section id="security-information">
-        <h2>Security information</h2>
-        <p>Your CSV file contains personal information such as:</p>
-        <ul>
-          <li>Account numbers</li>
-          <li>Names</li>
-          <li>Transaction amounts</li>
-        </ul>
-        <p>Keep this file in a secure location, or delete it after use.</p>
-        <p>Note that this app processes CSV data locally, without sending it to an external server.</p>
-        <p>
-          <a href="https://github.com/shone/cashtable">View source on GitHub</a>
-        </p>
-      </section>
+			<section id="security-information">
+				<h2>Security information</h2>
+				<p>Your CSV file contains personal information such as:</p>
+				<ul>
+					<li>Account numbers</li>
+					<li>Names</li>
+					<li>Transaction amounts</li>
+				</ul>
+				<p>Keep this file in a secure location, or delete it after use.</p>
+				<p>Note that this app processes CSV data locally, without sending it to an external server.</p>
+				<p>
+					<a href="https://github.com/shone/cashtable">View source on GitHub</a>
+				</p>
+			</section>
 
-      <section id="disclaimer">
-        <h2>Disclaimer</h2>
-        <p>This app and its author are not affiliated or endorsed by N26 GmbH or any other bank.</p>
-      </section>
+			<section id="disclaimer">
+				<h2>Disclaimer</h2>
+				<p>This app and its author are not affiliated or endorsed by N26 GmbH or any other bank.</p>
+			</section>
 
-    </div>
+		</div>
 
-    <div id="app">
-      <header>
-        <h1></h1>
-        <span class="spacer"></span>
-        <span class="last-updated">
-          <label>Last updated:</label>
-          <span>
-            <div class="date"></div>
-            <div class="time-since"></div>
-          </span>
-        </span>
-      </header>
+		<div id="app">
+			<header>
+				<h1></h1>
+				<span class="spacer"></span>
+				<span class="last-updated">
+					<label>Last updated:</label>
+					<span>
+						<div class="date"></div>
+						<div class="time-since"></div>
+					</span>
+				</span>
+			</header>
 
-      <div id="timeline">
-        <svg viewBox="0 0 1 1" preserveAspectRatio="none">
-          <g>
-            <path class="years"/>
-            <path class="months"/>
-            <path class="balance"/>
-            <path class="filtered-transaction-markers"/>
-            <path class="hovered-transaction-marker"/>
-          </g>
-        </svg>
-        <div class="top-area">
-          <div class="transaction-labels">
-            <label class="hovered-transaction-label"></label>
-          </div>
-        </div>
-        <div class="axis-controls x-axis">
-          <div class="date-labels">
-            <div class="months"></div>
-            <div class="years" ></div>
-          </div>
-          <range-slider data-orientation="horizontal"></range-slider>
-        </div>
-        <div class="axis-controls y-axis">
-          <div class="balance-labels"></div>
-          <range-slider data-orientation="vertical"></range-slider>
-        </div>
-        <div class="corner-controls">
-          <button class="zoom-in"  title="Zoom in" ></button>
-          <button class="zoom-out" title="Zoom out"></button>
-        </div>
-      </div>
+			<div id="timeline">
+				<svg viewBox="0 0 1 1" preserveAspectRatio="none">
+					<g>
+						<path class="years"/>
+						<path class="months"/>
+						<path class="balance"/>
+						<path class="filtered-transaction-markers"/>
+						<path class="hovered-transaction-marker"/>
+					</g>
+				</svg>
+				<div class="top-area">
+					<div class="transaction-labels">
+						<label class="hovered-transaction-label"></label>
+					</div>
+				</div>
+				<div class="axis-controls x-axis">
+					<div class="date-labels">
+						<div class="months"></div>
+						<div class="years" ></div>
+					</div>
+					<range-slider data-orientation="horizontal"></range-slider>
+				</div>
+				<div class="axis-controls y-axis">
+					<div class="balance-labels"></div>
+					<range-slider data-orientation="vertical"></range-slider>
+				</div>
+				<div class="corner-controls">
+					<button class="zoom-in"  title="Zoom in" ></button>
+					<button class="zoom-out" title="Zoom out"></button>
+				</div>
+			</div>
 
-      <div id="splitter"></div>
+			<div id="splitter"></div>
 
-      <table id="table">
-        <thead>
-          <tr class="field-names">
-            <th class="settings-cell">
-              <button class="settings-button" title="Hide/show columns"></button>
-              <div class="settings-menu"></div>
-            </th>
-          </tr>
-          <tr class="filters"></tr>
-        </thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr>
-            <td class="duration"></td>
-            <td class="positive-sum"></td>
-            <td class="negative-sum"></td>
-            <td class="balance"></td>
-          </tr>
-        </tfoot>
-      </table>
+			<table id="table">
+				<thead>
+					<tr class="field-names">
+						<th class="settings-cell">
+							<button class="settings-button" title="Hide/show columns"></button>
+							<div class="settings-menu"></div>
+						</th>
+					</tr>
+					<tr class="filters"></tr>
+				</thead>
+				<tbody></tbody>
+				<tfoot>
+					<tr>
+						<td class="duration"></td>
+						<td class="positive-sum"></td>
+						<td class="negative-sum"></td>
+						<td class="balance"></td>
+					</tr>
+				</tfoot>
+			</table>
 
-    </div>
-  </body>
+		</div>
+	</body>
 
-  <script src="main.js"        > </script>
-  <script src="range-slider.js"> </script>
-  <script src="timeline.js"    > </script>
-  <script src="table.js"       > </script>
-  <script src="sampleCsv.js"   > </script>
+	<script src="main.js"        > </script>
+	<script src="range-slider.js"> </script>
+	<script src="timeline.js"    > </script>
+	<script src="table.js"       > </script>
+	<script src="sampleCsv.js"   > </script>
 </html>
