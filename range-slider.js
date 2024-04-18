@@ -52,26 +52,29 @@ class RangeSlider extends HTMLElement {
 			}
 		}
 
-		thumb.onpointerdown = event => {
-			event.preventDefault();
+		thumb.onpointerdown = downEvent => {
+			downEvent.preventDefault();
 
-			if (event.button && event.button > 0) return;
-			if (thumb.onpointermove || thumbMin.onpointermove || thumbMax.onpointermove) return;
+			if (downEvent.button && downEvent.button > 0) {
+				return;
+			}
+			if (thumb.onpointermove || thumbMin.onpointermove || thumbMax.onpointermove) {
+				return;
+			}
 
-			const pointerId = event.pointerId;
-			thumb.setPointerCapture(pointerId);
+			thumb.setPointerCapture(downEvent.pointerId);
 			thumb.style.cursor = 'grabbing';
 
 			const lengthPx = this.getLengthPx();
-			let lastCursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
+			let lastCursorPosition = orientation === 'horizontal' ? downEvent.pageX : downEvent.pageY;
 			const rangeStartOnMousedown = rangeStart;
 			const rangeEndOnMousedown   = rangeEnd;
 			let deltaTotal = 0;
-			thumb.onpointermove = event => {
-				if (event.pointerId !== pointerId) {
+			thumb.onpointermove = moveEvent => {
+				if (moveEvent.pointerId !== downEvent.pointerId) {
 					return;
 				}
-				const cursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
+				const cursorPosition = orientation === 'horizontal' ? moveEvent.pageX : moveEvent.pageY;
 				const deltaPx = cursorPosition - lastCursorPosition;
 				lastCursorPosition = cursorPosition;
 				let delta = deltaPx / lengthPx;
@@ -84,37 +87,38 @@ class RangeSlider extends HTMLElement {
 				updateRange();
 				this.onrangechanged(rangeStart, rangeEnd);
 			}
-			thumb.onpointerup = thumb.onpointercancel = event => {
-				if (event.pointerId !== pointerId) {
+			thumb.onlostpointercapture = lostCaptureEvent => {
+				if (lostCaptureEvent.pointerId !== downEvent.pointerId) {
 					return;
 				}
-				thumb.releasePointerCapture(pointerId);
-				thumb.style.cursor = null;
 				thumb.onpointermove = null;
-				thumb.onpointerup = null;
-				thumb.onpointercancel = null;
+				thumb.onlostpointercapture = null;
+				thumb.style.cursor = null;
 			}
 		}
 
-		thumbMin.onpointerdown = thumbMax.onpointerdown = event => {
-			event.preventDefault();
-			event.stopPropagation();
-			const handle = event.target;
+		thumbMin.onpointerdown = thumbMax.onpointerdown = downEvent => {
+			downEvent.preventDefault();
+			downEvent.stopPropagation();
+			const handle = downEvent.target;
 
-			if (event.button && event.button > 0) return;
-			if (handle.onpointermove || thumb.onpointermove) return;
+			if (downEvent.button && downEvent.button > 0) {
+				return;
+			}
+			if (handle.onpointermove || thumb.onpointermove) {
+				return;
+			}
 
-			const pointerId = event.pointerId;
-			handle.setPointerCapture(pointerId);
+			handle.setPointerCapture(downEvent.pointerId);
 
 			const lengthPx = this.getLengthPx();
 			const isMin = handle.classList.contains('min');
-			let lastCursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
-			handle.onpointermove = event => {
-				if (event.pointerId !== pointerId) {
+			let lastCursorPosition = orientation === 'horizontal' ? downEvent.pageX : downEvent.pageY;
+			handle.onpointermove = moveEvent => {
+				if (moveEvent.pointerId !== downEvent.pointerId) {
 					return;
 				}
-				const cursorPosition = orientation === 'horizontal' ? event.pageX : event.pageY;
+				const cursorPosition = orientation === 'horizontal' ? moveEvent.pageX : moveEvent.pageY;
 				let delta = (cursorPosition - lastCursorPosition) / lengthPx;
 				if (orientation === 'vertical') {
 					delta = -delta;
@@ -132,18 +136,16 @@ class RangeSlider extends HTMLElement {
 				this.onrangechanged(rangeStart, rangeEnd);
 				lastCursorPosition = cursorPosition;
 			}
-			handle.onpointerup = handle.onpointercancel = event => {
-				if (event.pointerId !== pointerId) {
+			handle.onlostpointercapture = lostCaptureEvent => {
+				if (lostCaptureEvent.pointerId !== downEvent.pointerId) {
 					return;
 				}
-				handle.releasePointerCapture(pointerId);
 				handle.onpointermove = null;
-				handle.onpointerup = null;
-				handle.onpointercancel = null;
+				handle.onlostpointercapture = null;
 			}
 		}
 
-		this.ondblclick = event => {
+		this.ondblclick = () => {
 			rangeStart = 0;
 			rangeEnd   = 1;
 			updateRange();

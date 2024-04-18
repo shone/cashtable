@@ -43,7 +43,7 @@ document.getElementById('view-sample-csv-button').onclick = async () => {
 	document.querySelector('#app .last-updated .time-since').textContent = '(up-to-date)';
 
 	const sampleCsv = generateSampleCsv();
-	await loadCsvString(sampleCsv);
+	loadCsvString(sampleCsv);
 	landingPage.remove();
 	document.getElementById('app').classList.add('loaded');
 }
@@ -102,7 +102,7 @@ async function loadCsvFile(csvFile) {
 		fileReader.readAsText(csvFile);
 		fileReader.onloadend = () => resolve(fileReader.result);
 	});
-	await loadCsvString(text);
+	loadCsvString(text);
 }
 
 function loadCsvString(csvString) {
@@ -199,25 +199,28 @@ function clamp(n, min, max) {
 }
 
 const splitter = document.getElementById('splitter');
-splitter.onpointerdown = event => {
-	event.preventDefault();
+splitter.onpointerdown = downEvent => {
+	downEvent.preventDefault();
 
-	if (event.button && event.button > 0) return;
-	if (splitter.onpointermove) return;
+	if (downEvent.button && downEvent.button > 0) {
+		return;
+	}
+	if (splitter.onpointermove) {
+		return;
+	}
 
-	const pointerId = event.pointerId;
-	splitter.setPointerCapture(pointerId);
+	splitter.setPointerCapture(downEvent.pointerId);
 
-	let lastPageY = event.pageY;
+	let lastPageY = downEvent.pageY;
 	let splitRatio = parseFloat(app.style.getPropertyValue('--split-ratio') || '.5');
 
-	splitter.onpointermove = event => {
-		if (event.pointerId !== pointerId) {
+	splitter.onpointermove = moveEvent => {
+		if (moveEvent.pointerId !== downEvent.pointerId) {
 			return;
 		}
 
-		const delta = event.pageY - lastPageY;
-		lastPageY = event.pageY;
+		const delta = moveEvent.pageY - lastPageY;
+		lastPageY = moveEvent.pageY;
 
 		splitRatio += delta / window.innerHeight;
 		splitRatio = Math.min(splitRatio, 1);
@@ -225,13 +228,11 @@ splitter.onpointerdown = event => {
 		app.style.setProperty('--split-ratio', splitRatio);
 	}
 
-	splitter.onpointerup = splitter.onpointercancel = event => {
-		if (event.pointerId !== pointerId) {
+	splitter.onlostpointercapture = lostCaptureEvent => {
+		if (lostCaptureEvent.pointerId !== downEvent.pointerId) {
 			return;
 		}
-		splitter.releasePointerCapture(pointerId);
 		splitter.onpointermove = null;
-		splitter.onpointerup = null;
-		splitter.onpointercancel = null;
+		splitter.onlostpointercapture = null;
 	}
 }

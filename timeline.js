@@ -212,25 +212,30 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
 	timeline.querySelector('.corner-controls .zoom-in').onclick  = () => zoom({amount:  0.1});
 	timeline.querySelector('.corner-controls .zoom-out').onclick = () => zoom({amount: -0.1});
 
-	svg.onpointerdown = event => {
-		event.preventDefault();
-		if (event.button && event.button > 1) return;
-		if (svg.onpointermove) return;
+	svg.onpointerdown = downEvent => {
+		downEvent.preventDefault();
+		if (downEvent.button && downEvent.button > 1) {
+			return;
+		}
+		if (svg.onpointermove) {
+			return;
+		}
 
-		const pointerId = event.pointerId;
-		svg.setPointerCapture(pointerId);
+		svg.setPointerCapture(downEvent.pointerId);
 
 		const svgWidth = svg.clientWidth;
 		const svgHeight = svg.clientHeight;
 
-		let lastEvent = {pageX: event.pageX, pageY: event.pageY};
+		let lastEvent = {pageX: downEvent.pageX, pageY: downEvent.pageY};
 		let moveDistancePx = 0;
-		svg.onpointermove = event => {
-			if (event.pointerId !== pointerId) return;
+		svg.onpointermove = moveEvent => {
+			if (moveEvent.pointerId !== downEvent.pointerId) {
+				return;
+			}
 			svg.style.cursor = 'grab';
 			const deltaPx = {
-				x: lastEvent.pageX - event.pageX,
-				y: lastEvent.pageY - event.pageY,
+				x: lastEvent.pageX - moveEvent.pageX,
+				y: lastEvent.pageY - moveEvent.pageY,
 			}
 			moveDistancePx += Math.sqrt((deltaPx.x * deltaPx.x) + (deltaPx.y * deltaPx.y));
 			let deltaX = (timestampRangeEnd - timestampRangeStart) *  (deltaPx.x / svgWidth);
@@ -242,96 +247,95 @@ timeline.init = ({transactions, fields, timestamps, balances}) => {
 			balanceRangeStart   += deltaY;
 			balanceRangeEnd     += deltaY;
 			updateRange();
-			lastEvent = {pageX: event.pageX, pageY: event.pageY};
+			lastEvent = {pageX: moveEvent.pageX, pageY: moveEvent.pageY};
 		}
-		svg.onpointerup = svg.onpointercancel = event => {
-			if (event.pointerId !== pointerId) {
+		svg.onlostpointercapture = lostCaptureEvent => {
+			if (lostCaptureEvent.pointerId !== downEvent.pointerId) {
 				return;
 			}
-			event.preventDefault();
-			svg.releasePointerCapture(pointerId);
-			svg.onpointermove   = null;
-			svg.onpointerup     = null;
-			svg.onpointercancel = null;
+			svg.onpointermove = null;
+			svg.onlostpointercapture = null;
 			svg.style.cursor = '';
 
 			if (moveDistancePx < 5) {
-				const transactionIndex = getTransactionIndexAtTimelinePixelsX(event.offsetX);
+				const transactionIndex = getTransactionIndexAtTimelinePixelsX(lostCaptureEvent.offsetX);
 				timeline.onTransactionClicked(transactionIndex);
 			}
 		}
 	}
 
-	dateLabelsContainer.onpointerdown = event => {
-		event.preventDefault();
-		if (event.button && event.button > 1) return;
-		if (dateLabelsContainer.onpointermove) return;
+	dateLabelsContainer.onpointerdown = downEvent => {
+		downEvent.preventDefault();
+		if (downEvent.button && downEvent.button > 1) {
+			return;
+		}
+		if (dateLabelsContainer.onpointermove) {
+			return;
+		}
 
-		const pointerId = event.pointerId;
-		dateLabelsContainer.setPointerCapture(pointerId);
+		dateLabelsContainer.setPointerCapture(downEvent.pointerId);
 
 		const svgWidth = svg.clientWidth;
 
-		let lastPointerX = event.pageX;
-		dateLabelsContainer.onpointermove = event => {
-			if (event.pointerId !== pointerId) {
+		let lastPointerX = downEvent.pageX;
+		dateLabelsContainer.onpointermove = moveEvent => {
+			if (moveEvent.pointerId !== downEvent.pointerId) {
 				return;
 			}
 			dateLabelsContainer.style.cursor = 'grab';
 
-			const deltaPx = lastPointerX - event.pageX;
+			const deltaPx = lastPointerX - moveEvent.pageX;
 			let deltaMs = (timestampRangeEnd - timestampRangeStart) *  (deltaPx / svgWidth);
 			deltaMs = clamp(deltaMs, timestamps[0] - timestampRangeStart, timestamps[timestamps.length-1] - timestampRangeEnd);
 			timestampRangeStart += deltaMs;
 			timestampRangeEnd   += deltaMs;
 			updateRange();
-			lastPointerX = event.pageX;
+			lastPointerX = moveEvent.pageX;
 		}
-		dateLabelsContainer.onpointerup = dateLabelsContainer.onpointercancel = event => {
-			if (event.pointerId !== pointerId) {
+		dateLabelsContainer.onlostpointercapture = lostCaptureEvent => {
+			if (lostCaptureEvent.pointerId !== downEvent.pointerId) {
 				return;
 			}
-			dateLabelsContainer.releasePointerCapture(pointerId);
-			dateLabelsContainer.onpointermove   = null;
-			dateLabelsContainer.onpointerup     = null;
-			dateLabelsContainer.onpointercancel = null;
+			dateLabelsContainer.onpointermove = null;
+			dateLabelsContainer.onlostpointercapture = null;
 			dateLabelsContainer.style.cursor = '';
 		}
 	}
 
-	balanceLabelsContainer.onpointerdown = event => {
-		event.preventDefault();
-		if (event.button && event.button > 1) return;
-		if (balanceLabelsContainer.onpointermove) return;
+	balanceLabelsContainer.onpointerdown = downEvent => {
+		downEvent.preventDefault();
+		if (downEvent.button && downEvent.button > 1) {
+			return;
+		}
+		if (balanceLabelsContainer.onpointermove) {
+			return;
+		}
 
-		const pointerId = event.pointerId;
-		balanceLabelsContainer.setPointerCapture(pointerId);
+		balanceLabelsContainer.setPointerCapture(downEvent.pointerId);
 
 		const svgHeight = svg.clientHeight;
 
-		let lastPointerY = event.pageY;
-		balanceLabelsContainer.onpointermove = event => {
-			if (event.pointerId !== pointerId) {
+		let lastPointerY = downEvent.pageY;
+		balanceLabelsContainer.onpointermove = moveEvent => {
+			if (moveEvent.pointerId !== downEvent.pointerId) {
 				return;
 			}
 			balanceLabelsContainer.style.cursor = 'grab';
 
-			const deltaPx = lastPointerY - event.pageY;
+			const deltaPx = lastPointerY - moveEvent.pageY;
 			let deltaBalance = (balanceRangeEnd   - balanceRangeStart) * -(deltaPx / svgHeight);
 			deltaBalance = clamp(deltaBalance, -balanceRangeStart, maxBalance - balanceRangeEnd);
 			balanceRangeStart += deltaBalance;
 			balanceRangeEnd   += deltaBalance;
 			updateRange();
-			lastPointerY = event.pageY;
+			lastPointerY = moveEvent.pageY;
 		}
-		balanceLabelsContainer.onpointerup = balanceLabelsContainer.onpointercancel = event => {
-			if (event.pointerId !== pointerId) {
+		balanceLabelsContainer.onlostpointercapture = lostCaptureEvent => {
+			if (lostCaptureEvent.pointerId !== downEvent.pointerId) {
 				return;
 			}
-			balanceLabelsContainer.releasePointerCapture(pointerId);
-			balanceLabelsContainer.onpointermove   = null;
-			balanceLabelsContainer.onpointerup     = null;
-			balanceLabelsContainer.onpointercancel = null;
+			balanceLabelsContainer.onpointermove = null;
+			balanceLabelsContainer.onlostpointercapture = null;
 			balanceLabelsContainer.style.cursor = '';
 		}
 	}
